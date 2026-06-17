@@ -1044,4 +1044,280 @@ jump.className='pjump';
 POULES.forEach(function(p){
   const b=document.createElement('div');
   b.className='pjbtn';
-  b.t
+  b.textContent=p.g.replace('Groupe ','');
+  b.onclick=function(){
+    document.getElementById('grp-'+p.g.replace('Groupe ','')).scrollIntoView({behavior:'smooth',block:'start'});
+  };
+  jump.appendChild(b);
+});
+
+poules.appendChild(jump);
+
+const pbody=document.createElement('div');
+pbody.className='pbody';
+
+POULES.forEach(function(p){
+  const s=document.createElement('div');
+  s.className='poule-section';
+  s.id='grp-'+p.g.replace('Groupe ','');
+  s.innerHTML='<div class="poule-title">'+p.g+'</div><div class="poule-teams-list">'+p.teams+'</div>';
+
+  p.m.forEach(function(m){
+    const d=document.createElement('div');
+    d.className='poule-match';
+    d.innerHTML='<div class="poule-teams">'+m.t+'</div>';
+    d.onclick=function(){showTab(1);go(m.q);};
+    s.appendChild(d);
+  });
+
+  pbody.appendChild(s);
+});
+
+poules.appendChild(pbody);
+
+function showTab(n){
+  document.getElementById('t1').className='tab'+(n===1?' on':'');
+  document.getElementById('t2').className='tab'+(n===2?' on':'');
+  document.getElementById('t3').className='tab'+(n===3?' on':'');
+  document.getElementById('mwrap').className='mwrap'+(n===2?' on':'');
+  document.getElementById('poules').className='poules'+(n===3?' on':'');
+  document.getElementById('chat').style.display=n===1?'flex':'none';
+  document.getElementById('inpbar').style.display=n===1?'block':'none';
+}
+
+const chat=document.getElementById('chat');
+const txt=document.getElementById('txt');
+const btn=document.getElementById('btn');
+let busy=false;
+
+txt.oninput=function(){
+  this.style.height='auto';
+  this.style.height=Math.min(this.scrollHeight,80)+'px';
+};
+
+txt.onkeydown=function(e){
+  if(e.key==='Enter'&&!e.shiftKey){
+    e.preventDefault();
+    go(txt.value);
+  }
+};
+
+btn.onclick=function(){
+  go(txt.value);
+};
+
+function col(v){
+  return v>=70?'#00FF87':v>=50?'#FFB800':'#FF4560';
+}
+
+function cc(v){
+  return v>=70?'gh':v>=50?'gm':'gl';
+}
+
+function bc(v){
+  const s=(v||'').toLowerCase();
+  if(s==='1'||s.includes('victoire'))return'bw';
+  if(s==='x'||s.includes('nul'))return'bd';
+  return'bl';
+}
+
+function msg(role,html){
+  const d=document.createElement('div');
+  d.className='msg'+(role==='user'?' user':'');
+  const av=document.createElement('div');
+  av.className='av'+(role==='bot'?' b':'');
+  av.textContent=role==='bot'?'🤖':'👤';
+  const b=document.createElement('div');
+  b.className='bub';
+  b.innerHTML=html;
+  d.appendChild(av);
+  d.appendChild(b);
+  chat.appendChild(d);
+  chat.scrollTop=chat.scrollHeight;
+}
+
+function showL(){
+  const d=document.createElement('div');
+  d.className='msg';
+  d.id='ld';
+  d.innerHTML='<div class="av b">🤖</div><div><div class="ld"><div class="spin"></div>Analyse en cours...</div><div class="dots"><span></span><span></span><span></span></div></div>';
+  chat.appendChild(d);
+  chat.scrollTop=chat.scrollHeight;
+}
+
+function rmL(){
+  const e=document.getElementById('ld');
+  if(e)e.remove();
+}
+
+function cell(lbl,val,conf,cote){
+  if(!val)return'';
+  return '<div class="pc"><div class="pl">'+lbl+'</div><div class="pv" style="color:'+col(conf)+'">'+val+'</div><div class="pf '+cc(conf)+'">'+conf+'%</div>'+(cote?'<div class="pk">~'+cote+'</div>':'')+'</div>';
+}
+
+function card(d){
+  const p=d.pronostics||{};
+  const a=d.analysis||{};
+  const cg=d.niveau_confiance_global||65;
+  const st=d.stats_techniques;
+  const aa=d.analyse_approfondie;
+  const pj=d.pari_du_jour;
+  const fc=col(cg);
+
+  let h='<div class="card"><div class="estimcard">⚠️ Estimations IA à but informatif uniquement.</div><div class="ch"><div><div class="cn">'+d.match+'</div><div class="cm">'+d.competition+' · '+d.date_info+'</div>'+(d.is_world_cup?'<div class="wct">🏆 CDM 2026'+(d.group?' · '+d.group:'')+'</div>':'')+'</div><div class="cb"><div class="cl">CONFIANCE</div><div class="cv" style="color:'+fc+'">'+cg+'%</div></div></div>';
+
+  if(pj){
+    h+='<div class="pj"><div class="pjt">⭐ Pari du jour — estimation</div><div class="pjv">'+pj.type+' — '+pj.valeur+'</div><div class="pjr">'+pj.raison+'</div><span class="pjc">Cote estimée ~'+pj.cote_estimee+'</span></div>';
+  }
+
+  if(st){
+    function dc(v){
+      return v<1?'#00FF87':v<1.5?'#FFB800':'#FF4560';
+    }
+
+    h+='<div class="sb"><div class="sbt">📊 Stats techniques — estimées</div><div class="sg">';
+
+    if(st.buts_marques_A){
+      h+='<div class="si"><div class="sl">⚽ BUTS/MATCH A</div><div class="sv" style="color:#38BFFF">'+st.buts_marques_A.valeur+'</div><div class="ss">'+st.buts_marques_A.detail+'</div></div>';
+    }
+
+    if(st.buts_encaisses_A){
+      h+='<div class="si"><div class="sl">🛡️ ENCAISSÉS/MATCH A</div><div class="sv" style="color:'+dc(st.buts_encaisses_A.valeur)+'">'+st.buts_encaisses_A.valeur+'</div><div class="ss">'+st.buts_encaisses_A.detail+'</div></div>';
+    }
+
+    if(st.buts_marques_B){
+      h+='<div class="si"><div class="sl">⚽ BUTS/MATCH B</div><div class="sv" style="color:#38BFFF">'+st.buts_marques_B.valeur+'</div><div class="ss">'+st.buts_marques_B.detail+'</div></div>';
+    }
+
+    if(st.buts_encaisses_B){
+      h+='<div class="si"><div class="sl">🛡️ ENCAISSÉS/MATCH B</div><div class="sv" style="color:'+dc(st.buts_encaisses_B.valeur)+'">'+st.buts_encaisses_B.valeur+'</div><div class="ss">'+st.buts_encaisses_B.detail+'</div></div>';
+    }
+
+    h+='</div>';
+
+    if(st.rapport_force){
+      h+='<div class="rp">⚔️ '+st.rapport_force.detail+'</div>';
+    }
+
+    h+='</div>';
+  }
+
+  h+='<div class="stl">💰 Paris & cotes estimées</div><div class="pg">'+
+  cell('1X2',p.resultat_1x2&&p.resultat_1x2.valeur,p.resultat_1x2&&p.resultat_1x2.confiance,p.resultat_1x2&&p.resultat_1x2.cote_estimee)+
+  cell('Over/Under',p.over_under&&p.over_under.valeur,p.over_under&&p.over_under.confiance,p.over_under&&p.over_under.cote_estimee)+
+  cell('BTTS',p.btts&&p.btts.valeur,p.btts&&p.btts.confiance,p.btts&&p.btts.cote_estimee)+
+  cell('Double Chance',p.double_chance&&p.double_chance.valeur,p.double_chance&&p.double_chance.confiance,p.double_chance&&p.double_chance.cote_estimee)+
+  cell('Handicap',p.handicap&&p.handicap.valeur,p.handicap&&p.handicap.confiance,p.handicap&&p.handicap.cote_estimee)+
+  cell('1er But',p.premier_but&&p.premier_but.valeur,p.premier_but&&p.premier_but.confiance,p.premier_but&&p.premier_but.cote_estimee)+
+  cell('MT/Fin',p.mi_temps_fin&&p.mi_temps_fin.valeur,p.mi_temps_fin&&p.mi_temps_fin.confiance,p.mi_temps_fin&&p.mi_temps_fin.cote_estimee)+
+  cell('Cage inviolée',p.cage_inviolee&&p.cage_inviolee.valeur,p.cage_inviolee&&p.cage_inviolee.confiance,p.cage_inviolee&&p.cage_inviolee.cote_estimee)+
+  cell('Score exact',p.score_exact&&p.score_exact.valeur,p.score_exact&&p.score_exact.confiance,p.score_exact&&p.score_exact.cote_estimee)+
+  '</div>';
+
+  h+='<div class="pg3"><div class="pc" style="border-top:1px solid #0F2030"><div class="pl">🏆 WINNER</div><div class="pv" style="color:#00FF87;font-size:13px">'+(p.winner&&p.winner.valeur||'')+'</div><div class="pf gh">'+(p.winner&&p.winner.confiance||0)+'%</div></div><div class="pc" style="border-top:1px solid #0F2030"><div class="pl">❌ PERDANT</div><div class="pv" style="color:#FF4560;font-size:13px">'+(p.perdant&&p.perdant.valeur||'')+'</div><div class="pf gl">'+(p.perdant&&p.perdant.confiance||0)+'%</div></div><div class="pc" style="border-top:1px solid #0F2030"><div class="pl">GLOBAL</div><div class="pv" style="color:'+fc+';font-size:15px">'+cg+'%</div></div></div>';
+
+  if(aa){
+    h+='<div class="aa"><div class="aat">🔍 Analyse approfondie</div><div class="ag">';
+
+    if(aa.forces_A){
+      h+='<div class="ai"><div class="ail">✅ FORCES A</div><div class="aiv">'+aa.forces_A+'</div></div>';
+    }
+
+    if(aa.faiblesses_A){
+      h+='<div class="ai"><div class="ail">⚠️ FAIBLESSES A</div><div class="aiv">'+aa.faiblesses_A+'</div></div>';
+    }
+
+    if(aa.forces_B){
+      h+='<div class="ai"><div class="ail">✅ FORCES B</div><div class="aiv">'+aa.forces_B+'</div></div>';
+    }
+
+    if(aa.faiblesses_B){
+      h+='<div class="ai"><div class="ail">⚠️ FAIBLESSES B</div><div class="aiv">'+aa.faiblesses_B+'</div></div>';
+    }
+
+    h+='</div>';
+
+    if(aa.facteur_cle){
+      h+='<div class="fk">🔑 '+aa.facteur_cle+'</div>';
+    }
+
+    h+='</div>';
+  }
+
+  const lb={
+    forme_domicile:['🏠','Domicile'],
+    forme_exterieur:['✈️','Extérieur'],
+    h2h:['⚔️','H2H'],
+    motivation:['🔥','Motivation'],
+    blessures:['🏥','Blessés']
+  };
+
+  const ar=Object.entries(a).map(function(e){
+    const k=e[0],v=e[1];
+    if(!v||!v.detail)return'';
+    const il=lb[k]||['•',k];
+    return '<div class="ar">'+il[0]+' <span style="flex:1;color:#3A6A8A;font-size:10px">'+il[1]+' — <span style="color:#A0C4E8">'+v.detail+'</span></span><div class="abar"><div class="af" style="width:'+(v.score||50)+'%"></div></div></div>';
+  }).join('');
+
+  h+='<div class="aa"><div class="aat">📡 Analyse combinée</div>'+ar+'</div>';
+
+  const sc=(d.buteurs_potentiels||[]).map(function(b){
+    return '<div class="chip">⚽ <strong>'+b.nom+'</strong> <span style="color:#3A6A8A;font-size:8px">('+b.equipe+')</span> <span class="sp">'+b.probabilite+'%</span>'+(b.cote_estimee?'<span class="sk"> ~'+b.cote_estimee+'</span>':'')+'</div>';
+  }).join('');
+
+  h+='<div class="sc"><div class="sct">⚽ Buteurs + cotes estimées</div>'+sc+'</div>';
+
+  const r1=p.resultat_1x2;
+
+  h+='<div class="vb"><div class="vg '+bc(r1&&r1.valeur)+'">'+((r1&&r1.label)||'ANALYSE').toUpperCase()+'</div><div style="flex:1;font-size:11px;color:#3A6A8A;line-height:1.5">'+d.verdict+'</div></div></div>';
+
+  return h;
+}
+
+async function go(q){
+  const t=(q||txt.value).trim();
+  if(!t||busy)return;
+
+  txt.value='';
+  txt.style.height='auto';
+  showTab(1);
+  msg('user',t);
+
+  busy=true;
+  btn.disabled=true;
+  showL();
+
+  try{
+    const r=await fetch('/api/chat',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({match:t})
+    });
+
+    const data=await r.json();
+
+    rmL();
+
+    if(data.error){
+      throw new Error(data.error);
+    }
+
+    const w=document.createElement('div');
+    w.className='msg';
+    w.innerHTML='<div class="av b">🤖</div><div style="flex:1;max-width:calc(100% - 38px)">'+card(data)+'</div>';
+
+    chat.appendChild(w);
+    chat.scrollTop=chat.scrollHeight;
+
+  }catch(e){
+    rmL();
+    msg('bot','❌ Erreur : '+e.message+'<br><br>Vérifie que ton API <strong>/api/chat</strong> est bien active sur Vercel.');
+  }
+
+  busy=false;
+  btn.disabled=false;
+}
+</script>
+
+</body>
+</html>
