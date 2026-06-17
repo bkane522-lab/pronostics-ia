@@ -1,5 +1,7 @@
 const API_BASE = "https://v3.football.api-sports.io";
 
+const VERSION = "FREE_FROM_TO_FIX_2026_06_18";
+
 const GROUPS = [
   { g:"Groupe A", teams:["Mexique","Corée du Sud","Tchéquie","Afrique du Sud"] },
   { g:"Groupe B", teams:["Suisse","Canada","Qatar","Bosnie"] },
@@ -106,8 +108,8 @@ function canonTeam(name){
     "usa":"USA",
     "etats unis":"USA",
     "afrique du sud":"Afrique du Sud",
-    "bosnie herzégovine":"Bosnie",
-    "bosnie herzegovine":"Bosnie"
+    "bosnie herzegovine":"Bosnie",
+    "bosnie herzégovine":"Bosnie"
   };
 
   return aliases[input] || String(name || "").trim();
@@ -190,9 +192,7 @@ async function apiFetch(path, params){
 async function getTeamId(team){
   const search = API_NAMES[team] || team;
 
-  const results = await apiFetch("/teams", {
-    search
-  });
+  const results = await apiFetch("/teams", { search });
 
   if(!results.length){
     throw new Error("Équipe introuvable : " + team);
@@ -205,30 +205,25 @@ async function getTeamId(team){
 }
 
 async function getStats(teamId){
-  /*
-    Correction pour le plan gratuit API-Football :
-    le plan gratuit bloque le paramètre "last".
-    Donc on utilise une période "from" / "to",
-    puis on garde les 5 derniers matchs terminés.
-  */
+  const today = new Date();
 
-  const to = new Date();
-  const from = new Date();
-  from.setFullYear(from.getFullYear() - 3);
+  const start = new Date();
+  start.setFullYear(start.getFullYear() - 3);
 
   const fixtures = await apiFetch("/fixtures", {
     team: teamId,
-    from: dateToYMD(from),
-    to: dateToYMD(to)
+    from: dateToYMD(start),
+    to: dateToYMD(today)
   });
 
   const finished = fixtures
     .filter(fx =>
+      fx &&
+      fx.fixture &&
+      fx.fixture.date &&
       fx.goals &&
       fx.goals.home !== null &&
-      fx.goals.away !== null &&
-      fx.fixture &&
-      fx.fixture.date
+      fx.goals.away !== null
     )
     .sort((a,b) => new Date(b.fixture.date) - new Date(a.fixture.date))
     .slice(0,5);
@@ -276,8 +271,17 @@ async function getStats(teamId){
 }
 
 function makePrediction(teamA, teamB, statsA, statsB){
-  const powerA = statsA.ppg * 12 + statsA.avgGF * 8 - statsA.avgGA * 6 + statsA.cleanSheets * 1.5;
-  const powerB = statsB.ppg * 12 + statsB.avgGF * 8 - statsB.avgGA * 6 + statsB.cleanSheets * 1.5;
+  const powerA =
+    statsA.ppg * 12 +
+    statsA.avgGF * 8 -
+    statsA.avgGA * 6 +
+    statsA.cleanSheets * 1.5;
+
+  const powerB =
+    statsB.ppg * 12 +
+    statsB.avgGF * 8 -
+    statsB.avgGA * 6 +
+    statsB.cleanSheets * 1.5;
 
   const diff = powerA - powerB;
 
@@ -313,9 +317,21 @@ function makePrediction(teamA, teamB, statsA, statsB){
   );
 
   const totalGoals = expectedA + expectedB;
+
   const over = totalGoals >= 2.4 ? "Over 2.5" : "Under 2.5";
-  const btts = statsA.avgGF >= 0.9 && statsB.avgGF >= 0.9 && statsA.avgGA >= 0.7 && statsB.avgGA >= 0.7 ? "Oui" : "Non";
-  const doubleChance = result === "1" ? "1X" : result === "2" ? "X2" : "1X / X2";
+
+  const btts =
+    statsA.avgGF >= 0.9 &&
+    statsB.avgGF >= 0.9 &&
+    statsA.avgGA >= 0.7 &&
+    statsB.avgGA >= 0.7
+      ? "Oui"
+      : "Non";
+
+  const doubleChance =
+    result === "1" ? "1X" :
+    result === "2" ? "X2" :
+    "1X / X2";
 
   let pariType = "Double chance";
   let pariValeur = doubleChance;
@@ -324,7 +340,7 @@ function makePrediction(teamA, teamB, statsA, statsB){
   if(totalGoals >= 2.7){
     pariType = "Over/Under";
     pariValeur = "Over 1.5";
-    pariRaison = "Les deux équipes ont des moyennes offensives intéressantes.";
+    pariRaison = "Les moyennes de buts récentes indiquent un match potentiellement ouvert.";
   }
 
   return {
@@ -379,14 +395,25 @@ function buildResponse(teamA, teamB, statsA, statsB){
         detail: statsB.goalsAgainst + " buts encaissés sur " + statsB.played + " matchs"
       },
       rapport_force: {
-        detail: teamA + " : " + statsA.wins + "V-" + statsA.draws + "N-" + statsA.losses + "D | " + teamB + " : " + statsB.wins + "V-" + statsB.draws + "N-" + statsB.losses + "D"
+        detail:
+          teamA + " : " +
+          statsA.wins + "V-" +
+          statsA.draws + "N-" +
+          statsA.losses + "D | " +
+          teamB + " : " +
+          statsB.wins + "V-" +
+          statsB.draws + "N-" +
+          statsB.losses + "D"
       }
     },
 
     pronostics: {
       resultat_1x2: {
         valeur: pred.result,
-        label: pred.result === "1" ? "Victoire de " + teamA : pred.result === "2" ? "Victoire de " + teamB : "Match nul possible",
+        label:
+          pred.result === "1" ? "Victoire de " + teamA :
+          pred.result === "2" ? "Victoire de " + teamB :
+          "Match nul possible",
         confiance: pred.confidence,
         cote_estimee: ""
       },
@@ -441,21 +468,34 @@ function buildResponse(teamA, teamB, statsA, statsB){
     },
 
     analyse_approfondie: {
-      forces_A: statsA.avgGF + " buts marqués/match, " + statsA.ppg + " point/match.",
-      faiblesses_A: statsA.avgGA + " buts encaissés/match.",
-      forces_B: statsB.avgGF + " buts marqués/match, " + statsB.ppg + " point/match.",
-      faiblesses_B: statsB.avgGA + " buts encaissés/match.",
-      facteur_cle: "Vérifie toujours les compositions officielles, blessures et suspensions avant de jouer."
+      forces_A:
+        statsA.avgGF + " buts marqués/match, " +
+        statsA.ppg + " point/match.",
+      faiblesses_A:
+        statsA.avgGA + " buts encaissés/match.",
+      forces_B:
+        statsB.avgGF + " buts marqués/match, " +
+        statsB.ppg + " point/match.",
+      faiblesses_B:
+        statsB.avgGA + " buts encaissés/match.",
+      facteur_cle:
+        "Vérifie toujours les compositions officielles, blessures et suspensions avant de jouer."
     },
 
     analysis: {
       forme_domicile: {
         score: clamp(Math.round(statsA.ppg * 33),10,100),
-        detail: statsA.wins + " victoires, " + statsA.draws + " nuls, " + statsA.losses + " défaites"
+        detail:
+          statsA.wins + " victoires, " +
+          statsA.draws + " nuls, " +
+          statsA.losses + " défaites"
       },
       forme_exterieur: {
         score: clamp(Math.round(statsB.ppg * 33),10,100),
-        detail: statsB.wins + " victoires, " + statsB.draws + " nuls, " + statsB.losses + " défaites"
+        detail:
+          statsB.wins + " victoires, " +
+          statsB.draws + " nuls, " +
+          statsB.losses + " défaites"
       },
       h2h: {
         score: 50,
@@ -473,7 +513,10 @@ function buildResponse(teamA, teamB, statsA, statsB){
 
     buteurs_potentiels: [],
 
-    verdict: pred.pariType + " : " + pred.pariValeur + ". Analyse basée sur données réelles disponibles, sans garantie."
+    verdict:
+      pred.pariType + " : " +
+      pred.pariValeur +
+      ". Analyse basée sur données réelles disponibles, sans garantie."
   };
 }
 
@@ -548,7 +591,9 @@ module.exports = async function handler(req,res){
 
   }catch(error){
     return res.status(500).json({
-      error:error.message || "Erreur serveur."
+      error:
+        "VERSION " + VERSION + " — " +
+        (error.message || "Erreur serveur.")
     });
   }
 };
