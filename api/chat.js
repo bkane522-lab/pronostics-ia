@@ -149,6 +149,10 @@ function clamp(n,min,max){
   return Math.max(min, Math.min(max, n));
 }
 
+function dateToYMD(date){
+  return date.toISOString().slice(0,10);
+}
+
 async function apiFetch(path, params){
   const key = process.env.API_FOOTBALL_KEY;
 
@@ -201,10 +205,33 @@ async function getTeamId(team){
 }
 
 async function getStats(teamId){
+  /*
+    Correction pour le plan gratuit API-Football :
+    le plan gratuit bloque le paramètre "last".
+    Donc on utilise une période "from" / "to",
+    puis on garde les 5 derniers matchs terminés.
+  */
+
+  const to = new Date();
+  const from = new Date();
+  from.setFullYear(from.getFullYear() - 3);
+
   const fixtures = await apiFetch("/fixtures", {
     team: teamId,
-    last: 5
+    from: dateToYMD(from),
+    to: dateToYMD(to)
   });
+
+  const finished = fixtures
+    .filter(fx =>
+      fx.goals &&
+      fx.goals.home !== null &&
+      fx.goals.away !== null &&
+      fx.fixture &&
+      fx.fixture.date
+    )
+    .sort((a,b) => new Date(b.fixture.date) - new Date(a.fixture.date))
+    .slice(0,5);
 
   let played = 0;
   let wins = 0;
@@ -214,9 +241,7 @@ async function getStats(teamId){
   let goalsAgainst = 0;
   let cleanSheets = 0;
 
-  fixtures.forEach(fx => {
-    if(fx.goals.home === null || fx.goals.away === null) return;
-
+  finished.forEach(fx => {
     const isHome = fx.teams.home.id === teamId;
     const gf = isHome ? fx.goals.home : fx.goals.away;
     const ga = isHome ? fx.goals.away : fx.goals.home;
