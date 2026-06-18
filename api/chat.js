@@ -1,6 +1,6 @@
 const API_BASE = "https://v3.football.api-sports.io";
 
-const VERSION = "FREE_FROM_TO_FIX_2026_06_18";
+const VERSION = "SEASON_FIX_2026_06_18";
 
 const GROUPS = [
   { g:"Groupe A", teams:["Mexique","Corée du Sud","Tchéquie","Afrique du Sud"] },
@@ -142,17 +142,15 @@ function findGroup(a,b){
   for(const group of GROUPS){
     const hasA = group.teams.some(t => clean(t) === clean(a));
     const hasB = group.teams.some(t => clean(t) === clean(b));
+
     if(hasA && hasB) return group.g;
   }
+
   return "";
 }
 
 function clamp(n,min,max){
   return Math.max(min, Math.min(max, n));
-}
-
-function dateToYMD(date){
-  return date.toISOString().slice(0,10);
 }
 
 async function apiFetch(path, params){
@@ -165,7 +163,7 @@ async function apiFetch(path, params){
   const url = new URL(API_BASE + path);
 
   Object.entries(params || {}).forEach(([k,v]) => {
-    if(v !== undefined && v !== null && v !== "") {
+    if(v !== undefined && v !== null && v !== ""){
       url.searchParams.set(k,v);
     }
   });
@@ -205,18 +203,27 @@ async function getTeamId(team){
 }
 
 async function getStats(teamId){
-  const today = new Date();
+  const currentYear = new Date().getFullYear();
 
-  const start = new Date();
-  start.setFullYear(start.getFullYear() - 3);
+  const seasons = [
+    currentYear,
+    currentYear - 1,
+    currentYear - 2,
+    currentYear - 3
+  ];
 
-  const fixtures = await apiFetch("/fixtures", {
-    team: teamId,
-    from: dateToYMD(start),
-    to: dateToYMD(today)
-  });
+  let allFixtures = [];
 
-  const finished = fixtures
+  for(const season of seasons){
+    const fixtures = await apiFetch("/fixtures", {
+      team: teamId,
+      season: season
+    });
+
+    allFixtures = allFixtures.concat(fixtures);
+  }
+
+  const finished = allFixtures
     .filter(fx =>
       fx &&
       fx.fixture &&
@@ -238,6 +245,7 @@ async function getStats(teamId){
 
   finished.forEach(fx => {
     const isHome = fx.teams.home.id === teamId;
+
     const gf = isHome ? fx.goals.home : fx.goals.away;
     const ga = isHome ? fx.goals.away : fx.goals.home;
 
@@ -317,7 +325,6 @@ function makePrediction(teamA, teamB, statsA, statsB){
   );
 
   const totalGoals = expectedA + expectedB;
-
   const over = totalGoals >= 2.4 ? "Over 2.5" : "Under 2.5";
 
   const btts =
