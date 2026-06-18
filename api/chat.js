@@ -1,6 +1,6 @@
 const API_BASE = "https://v3.football.api-sports.io";
 
-const VERSION = "SEASON_FIX_2026_06_18";
+const VERSION = "FREE_SEASONS_2022_2024_FIX";
 
 const GROUPS = [
   { g:"Groupe A", teams:["Mexique","Corée du Sud","Tchéquie","Afrique du Sud"] },
@@ -203,14 +203,13 @@ async function getTeamId(team){
 }
 
 async function getStats(teamId){
-  const currentYear = new Date().getFullYear();
+  /*
+    Correction API-Football plan gratuit :
+    d'après le message API reçu, le plan gratuit accepte les saisons 2022 à 2024.
+    On récupère ces saisons, puis on garde les 5 derniers matchs terminés.
+  */
 
-  const seasons = [
-    currentYear,
-    currentYear - 1,
-    currentYear - 2,
-    currentYear - 3
-  ];
+  const seasons = [2024, 2023, 2022];
 
   let allFixtures = [];
 
