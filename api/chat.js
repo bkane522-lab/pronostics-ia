@@ -1,6 +1,4 @@
-const API_BASE = "https://v3.football.api-sports.io";
-
-const VERSION = "V3_CDM2026_MATCH_TERMINE_PRUDENT";
+const VERSION = "STABLE_SANS_API_MATCHS_TERMINES";
 
 const GROUPS = [
   { g:"Groupe A", teams:["Mexique","Corée du Sud","Tchéquie","Afrique du Sud"] },
@@ -17,61 +15,6 @@ const GROUPS = [
   { g:"Groupe L", teams:["Angleterre","Croatie","Ghana","Panama"] }
 ];
 
-const API_NAMES = {
-  "France":"France",
-  "Sénégal":"Senegal",
-  "Allemagne":"Germany",
-  "Côte d’Ivoire":"Ivory Coast",
-  "Corée du Sud":"Korea Republic",
-  "Tchéquie":"Czech Republic",
-  "Écosse":"Scotland",
-  "Brésil":"Brazil",
-  "Haïti":"Haiti",
-  "Équateur":"Ecuador",
-  "Curaçao":"Curacao",
-  "Suède":"Sweden",
-  "Pays-Bas":"Netherlands",
-  "Nouvelle-Zélande":"New Zealand",
-  "Égypte":"Egypt",
-  "Cap-Vert":"Cape Verde",
-  "Norvège":"Norway",
-  "Algérie":"Algeria",
-  "RD Congo":"Congo DR",
-  "Ouzbékistan":"Uzbekistan",
-  "Angleterre":"England",
-  "Suisse":"Switzerland",
-  "Arabie Saoudite":"Saudi Arabia",
-  "Mexique":"Mexico",
-  "Canada":"Canada",
-  "Qatar":"Qatar",
-  "Bosnie":"Bosnia and Herzegovina",
-  "Maroc":"Morocco",
-  "USA":"USA",
-  "Australie":"Australia",
-  "Turquie":"Turkey",
-  "Paraguay":"Paraguay",
-  "Japon":"Japan",
-  "Tunisie":"Tunisia",
-  "Iran":"Iran",
-  "Belgique":"Belgium",
-  "Uruguay":"Uruguay",
-  "Espagne":"Spain",
-  "Irak":"Iraq",
-  "Argentine":"Argentina",
-  "Autriche":"Austria",
-  "Jordanie":"Jordan",
-  "Portugal":"Portugal",
-  "Colombie":"Colombia",
-  "Croatie":"Croatia",
-  "Ghana":"Ghana",
-  "Panama":"Panama",
-  "Afrique du Sud":"South Africa"
-};
-
-/*
-  Résultats CDM 2026 ajoutés manuellement.
-  Mets cette liste à jour après chaque match terminé.
-*/
 const WC_2026_RESULTS = [
   { date:"2026-06-11", group:"Groupe A", home:"Mexique", away:"Afrique du Sud", hg:2, ag:0 },
   { date:"2026-06-12", group:"Groupe A", home:"Corée du Sud", away:"Tchéquie", hg:2, ag:1 },
@@ -106,8 +49,8 @@ const WC_2026_RESULTS = [
   { date:"2026-06-18", group:"Groupe A", home:"Tchéquie", away:"Afrique du Sud", hg:1, ag:1 }
 ];
 
-function clean(s){
-  return String(s || "")
+function clean(value){
+  return String(value || "")
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g,"")
@@ -122,7 +65,9 @@ function canonTeam(name){
 
   for(const group of GROUPS){
     for(const team of group.teams){
-      if(clean(team) === input) return team;
+      if(clean(team) === input){
+        return team;
+      }
     }
   }
 
@@ -147,7 +92,10 @@ function canonTeam(name){
     "etats unis":"USA",
     "afrique du sud":"Afrique du Sud",
     "bosnie herzegovine":"Bosnie",
-    "bosnie herzégovine":"Bosnie"
+    "bosnie herzégovine":"Bosnie",
+    "tcheque":"Tchéquie",
+    "republique tcheque":"Tchéquie",
+    "curacao":"Curaçao"
   };
 
   return aliases[input] || String(name || "").trim();
@@ -164,11 +112,17 @@ function parseMatch(input){
 
   let parts = null;
 
-  if(raw.includes(" vs ")) parts = raw.split(/\s+vs\s+/i);
-  else if(raw.includes(" contre ")) parts = raw.split(/\s+contre\s+/i);
-  else if(raw.includes(" - ")) parts = raw.split(/\s+-\s+/);
+  if(/\s+vs\s+/i.test(raw)){
+    parts = raw.split(/\s+vs\s+/i);
+  } else if(/\s+contre\s+/i.test(raw)){
+    parts = raw.split(/\s+contre\s+/i);
+  } else if(/\s+-\s+/i.test(raw)){
+    parts = raw.split(/\s+-\s+/i);
+  }
 
-  if(!parts || parts.length < 2) return null;
+  if(!parts || parts.length < 2){
+    return null;
+  }
 
   return {
     teamA: canonTeam(parts[0]),
@@ -176,26 +130,28 @@ function parseMatch(input){
   };
 }
 
-function findGroup(a,b){
+function findGroup(teamA, teamB){
   for(const group of GROUPS){
-    const hasA = group.teams.some(t => clean(t) === clean(a));
-    const hasB = group.teams.some(t => clean(t) === clean(b));
+    const hasA = group.teams.some(t => clean(t) === clean(teamA));
+    const hasB = group.teams.some(t => clean(t) === clean(teamB));
 
-    if(hasA && hasB) return group.g;
+    if(hasA && hasB){
+      return group.g;
+    }
   }
 
   return "";
 }
 
 function findCompletedMatch(teamA, teamB){
-  return WC_2026_RESULTS.find(m => {
+  return WC_2026_RESULTS.find(match => {
     const sameOrder =
-      clean(m.home) === clean(teamA) &&
-      clean(m.away) === clean(teamB);
+      clean(match.home) === clean(teamA) &&
+      clean(match.away) === clean(teamB);
 
     const reverseOrder =
-      clean(m.home) === clean(teamB) &&
-      clean(m.away) === clean(teamA);
+      clean(match.home) === clean(teamB) &&
+      clean(match.away) === clean(teamA);
 
     return sameOrder || reverseOrder;
   });
@@ -234,182 +190,13 @@ function getLoser(match){
   return "Aucun";
 }
 
-function clamp(n,min,max){
-  return Math.max(min, Math.min(max, n));
-}
-
-async function apiFetch(path, params){
-  const key = process.env.API_FOOTBALL_KEY;
-
-  if(!key){
-    throw new Error("Clé API_FOOTBALL_KEY manquante dans Vercel.");
-  }
-
-  const url = new URL(API_BASE + path);
-
-  Object.entries(params || {}).forEach(([k,v]) => {
-    if(v !== undefined && v !== null && v !== ""){
-      url.searchParams.set(k,v);
-    }
-  });
-
-  const response = await fetch(url, {
-    headers: {
-      "x-apisports-key": key
-    }
-  });
-
-  const data = await response.json();
-
-  if(!response.ok){
-    throw new Error("Erreur API-Football.");
-  }
-
-  if(data.errors && Object.keys(data.errors).length > 0){
-    throw new Error("Erreur API-Football : " + JSON.stringify(data.errors));
-  }
-
-  return data.response || [];
-}
-
-async function getTeamId(team){
-  const search = API_NAMES[team] || team;
-
-  const results = await apiFetch("/teams", { search });
-
-  if(!results.length){
-    throw new Error("Équipe introuvable : " + team);
-  }
-
-  const national = results.find(x => x.team && x.team.national === true);
-  const selected = national || results[0];
-
-  return selected.team.id;
-}
-
-function getManualTeamGames(team){
-  return WC_2026_RESULTS
-    .filter(m => clean(m.home) === clean(team) || clean(m.away) === clean(team))
-    .map(m => {
-      const score = getScoreForTeam(m, team);
-
-      return {
-        date: m.date,
-        gf: score.gf,
-        ga: score.ga,
-        source: "CDM 2026 manuelle"
-      };
-    });
-}
-
-async function getApiTeamGames(teamId){
-  const seasons = [2024, 2023, 2022];
-  let games = [];
-
-  for(const season of seasons){
-    try{
-      const fixtures = await apiFetch("/fixtures", {
-        team: teamId,
-        season: season
-      });
-
-      const seasonGames = fixtures
-        .filter(fx =>
-          fx &&
-          fx.fixture &&
-          fx.fixture.date &&
-          fx.teams &&
-          fx.goals &&
-          fx.goals.home !== null &&
-          fx.goals.away !== null
-        )
-        .map(fx => {
-          const isHome = fx.teams.home.id === teamId;
-
-          return {
-            date: fx.fixture.date.slice(0,10),
-            gf: isHome ? fx.goals.home : fx.goals.away,
-            ga: isHome ? fx.goals.away : fx.goals.home,
-            source: "API-Football gratuit " + season
-          };
-        });
-
-      games = games.concat(seasonGames);
-    }catch(e){
-      // On continue même si une saison est vide ou bloquée.
-    }
-  }
-
-  return games;
-}
-
-function buildStatsFromGames(team, games){
-  const sorted = games
-    .sort((a,b) => new Date(b.date) - new Date(a.date))
-    .slice(0,5);
-
-  let played = 0;
-  let wins = 0;
-  let draws = 0;
-  let losses = 0;
-  let goalsFor = 0;
-  let goalsAgainst = 0;
-  let cleanSheets = 0;
-  let manualGames = 0;
-
-  sorted.forEach(g => {
-    played++;
-    goalsFor += g.gf;
-    goalsAgainst += g.ga;
-
-    if(g.ga === 0) cleanSheets++;
-
-    if(g.gf > g.ga) wins++;
-    else if(g.gf === g.ga) draws++;
-    else losses++;
-
-    if(g.source.includes("CDM 2026")) manualGames++;
-  });
-
-  if(played === 0){
-    return null;
-  }
-
-  return {
-    team,
-    played,
-    wins,
-    draws,
-    losses,
-    goalsFor,
-    goalsAgainst,
-    avgGF: Number((goalsFor / played).toFixed(2)),
-    avgGA: Number((goalsAgainst / played).toFixed(2)),
-    ppg: Number(((wins * 3 + draws) / played).toFixed(2)),
-    cleanSheets,
-    manualGames,
-    sources: [...new Set(sorted.map(g => g.source))]
-  };
-}
-
-async function getCombinedStats(team, teamId){
-  const manualGames = getManualTeamGames(team);
-  const apiGames = await getApiTeamGames(teamId);
-
-  const allGames = manualGames.concat(apiGames);
-
-  return buildStatsFromGames(team, allGames);
-}
-
 function buildCompletedMatchResponse(teamA, teamB, match){
   const scoreA = getScoreForTeam(match, teamA);
   const scoreB = getScoreForTeam(match, teamB);
 
+  const finalScore = match.home + " " + match.hg + "-" + match.ag + " " + match.away;
   const winner = getWinner(match);
   const loser = getLoser(match);
-
-  const finalScore =
-    match.home + " " + match.hg + "-" + match.ag + " " + match.away;
 
   return {
     match: teamA + " - " + teamB,
@@ -444,7 +231,7 @@ function buildCompletedMatchResponse(teamA, teamB, match){
         detail: teamB + " : " + scoreB.ga + " but(s) encaissé(s)"
       },
       rapport_force: {
-        detail: "Score final officiel ajouté manuellement : " + finalScore
+        detail: "Résultat final ajouté manuellement : " + finalScore
       }
     },
 
@@ -507,9 +294,9 @@ function buildCompletedMatchResponse(teamA, teamB, match){
 
     analyse_approfondie: {
       forces_A: "Match déjà joué. Analyse de pronostic désactivée.",
-      faiblesses_A: "Non applicable après le coup de sifflet final.",
+      faiblesses_A: "Non applicable après le match.",
       forces_B: "Match déjà joué. Analyse de pronostic désactivée.",
-      faiblesses_B: "Non applicable après le coup de sifflet final.",
+      faiblesses_B: "Non applicable après le match.",
       facteur_cle: "Résultat final : " + finalScore + ". Aucun pari conseillé, car le match est terminé."
     },
 
@@ -538,219 +325,220 @@ function buildCompletedMatchResponse(teamA, teamB, match){
 
     buteurs_potentiels: [],
 
-    verdict:
-      "Match terminé : " + finalScore + ". Aucun pari possible sur ce match."
+    verdict: "Match terminé : " + finalScore + ". Aucun pari possible sur ce match."
   };
 }
 
-function riskLevel(confidence, statsA, statsB){
-  const totalManual = (statsA.manualGames || 0) + (statsB.manualGames || 0);
-
-  if(confidence >= 70 && totalManual >= 2) return "Risque moyen";
-  if(confidence >= 62) return "Risque moyen/élevé";
-  return "Risque élevé";
-}
-
-function makePrediction(teamA, teamB, statsA, statsB){
-  const powerA =
-    statsA.ppg * 12 +
-    statsA.avgGF * 8 -
-    statsA.avgGA * 6 +
-    statsA.cleanSheets * 1.5 +
-    statsA.manualGames * 1.5;
-
-  const powerB =
-    statsB.ppg * 12 +
-    statsB.avgGF * 8 -
-    statsB.avgGA * 6 +
-    statsB.cleanSheets * 1.5 +
-    statsB.manualGames * 1.5;
-
-  const diff = powerA - powerB;
-
-  const expectedA = clamp((statsA.avgGF + statsB.avgGA) / 2, 0.2, 3.5);
-  const expectedB = clamp((statsB.avgGF + statsA.avgGA) / 2, 0.2, 3.5);
-
-  let scoreA = Math.round(expectedA);
-  let scoreB = Math.round(expectedB);
-
-  if(diff > 8 && scoreA <= scoreB) scoreA = scoreB + 1;
-  if(diff < -8 && scoreB <= scoreA) scoreB = scoreA + 1;
-
-  let result = "X";
-  let winner = "Match nul";
-  let loser = "Aucun";
-
-  if(diff > 5){
-    result = "1";
-    winner = teamA;
-    loser = teamB;
-  }
-
-  if(diff < -5){
-    result = "2";
-    winner = teamB;
-    loser = teamA;
-  }
-
-  const confidence = clamp(
-    Math.round(50 + Math.abs(diff) * 2 + Math.min(statsA.played, statsB.played) * 2),
-    45,
-    78
-  );
-
-  const totalGoals = expectedA + expectedB;
-  const over = totalGoals >= 2.4 ? "Over 2.5" : "Under 2.5";
-
-  const btts =
-    statsA.avgGF >= 0.9 &&
-    statsB.avgGF >= 0.9 &&
-    statsA.avgGA >= 0.7 &&
-    statsB.avgGA >= 0.7
-      ? "Oui"
-      : "Non";
-
-  const doubleChance =
-    result === "1" ? "1X" :
-    result === "2" ? "X2" :
-    "1X / X2";
-
-  const risk = riskLevel(confidence, statsA, statsB);
-
-  let pariType = "Pronostic prudent";
-  let pariValeur = "Double chance : " + doubleChance;
-  let pariRaison = "Choix plus prudent que le score exact. À vérifier avec les compositions officielles.";
-
-  if(risk === "Risque élevé"){
-    pariType = "Aucun pari fort conseillé";
-    pariValeur = "À surveiller";
-    pariRaison = "Données limitées ou écart statistique insuffisant.";
-  }
-
-  return {
-    result,
-    winner,
-    loser,
-    confidence,
-    scoreExact: scoreA + "-" + scoreB,
-    over,
-    btts,
-    doubleChance,
-    pariType,
-    pariValeur,
-    pariRaison,
-    risk
-  };
-}
-
-function buildPredictionResponse(teamA, teamB, statsA, statsB){
-  const pred = makePrediction(teamA, teamB, statsA, statsB);
+function buildUpcomingMatchResponse(teamA, teamB){
   const group = findGroup(teamA, teamB);
-
-  const sourcesText = [
-    "CDM 2026 manuelle si disponible",
-    "API-Football gratuit saisons 2022-2024"
-  ].join(" + ");
 
   return {
     match: teamA + " - " + teamB,
-    competition: "Données réelles : CDM 2026 + API-Football gratuit",
-    date_info: sourcesText,
+    competition: "Match non terminé / données insuffisantes",
+    date_info: group ? group : "Coupe du Monde 2026",
     is_world_cup: true,
     group,
-    niveau_confiance_global: pred.confidence,
+    niveau_confiance_global: 30,
 
     pari_du_jour: {
-      type: pred.pariType,
-      valeur: pred.pariValeur,
-      raison: pred.pariRaison + " Niveau : " + pred.risk + ".",
+      type: "Aucun pari conseillé",
+      valeur: "Données insuffisantes",
+      raison: "Version stable sans API-Football. Les vraies statistiques récentes ne sont pas encore connectées.",
       cote_estimee: "N/D"
     },
 
     stats_techniques: {
       buts_marques_A: {
-        valeur: statsA.avgGF,
-        detail: statsA.goalsFor + " buts sur " + statsA.played + " matchs"
+        valeur: 0,
+        detail: "Données non disponibles dans cette version stable"
       },
       buts_encaisses_A: {
-        valeur: statsA.avgGA,
-        detail: statsA.goalsAgainst + " buts encaissés sur " + statsA.played + " matchs"
+        valeur: 0,
+        detail: "Données non disponibles dans cette version stable"
       },
       buts_marques_B: {
-        valeur: statsB.avgGF,
-        detail: statsB.goalsFor + " buts sur " + statsB.played + " matchs"
+        valeur: 0,
+        detail: "Données non disponibles dans cette version stable"
       },
       buts_encaisses_B: {
-        valeur: statsB.avgGA,
-        detail: statsB.goalsAgainst + " buts encaissés sur " + statsB.played + " matchs"
+        valeur: 0,
+        detail: "Données non disponibles dans cette version stable"
       },
       rapport_force: {
-        detail:
-          teamA + " : " +
-          statsA.wins + "V-" +
-          statsA.draws + "N-" +
-          statsA.losses + "D | " +
-          teamB + " : " +
-          statsB.wins + "V-" +
-          statsB.draws + "N-" +
-          statsB.losses + "D"
+        detail: "Aucun pronostic fiable sans données récentes vérifiées."
       }
     },
 
     pronostics: {
       resultat_1x2: {
-        valeur: pred.result,
-        label:
-          pred.result === "1" ? "Avantage " + teamA :
-          pred.result === "2" ? "Avantage " + teamB :
-          "Match nul possible",
-        confiance: pred.confidence,
+        valeur: "À éviter",
+        label: "Données insuffisantes",
+        confiance: 30,
         cote_estimee: ""
       },
       over_under: {
-        valeur: pred.over,
-        confiance: clamp(pred.confidence - 8,35,72),
+        valeur: "À éviter",
+        confiance: 30,
         cote_estimee: ""
       },
       btts: {
-        valeur: pred.btts,
-        confiance: clamp(pred.confidence - 10,35,70),
+        valeur: "À éviter",
+        confiance: 30,
         cote_estimee: ""
       },
       double_chance: {
-        valeur: pred.doubleChance,
-        confiance: clamp(pred.confidence + 8,55,82),
+        valeur: "À éviter",
+        confiance: 30,
         cote_estimee: ""
       },
       handicap: {
         valeur: "À éviter",
-        confiance: 40,
+        confiance: 30,
         cote_estimee: ""
       },
       premier_but: {
         valeur: "À éviter",
-        confiance: 38,
+        confiance: 30,
         cote_estimee: ""
       },
       mi_temps_fin: {
         valeur: "À éviter",
-        confiance: 35,
+        confiance: 30,
         cote_estimee: ""
       },
       cage_inviolee: {
         valeur: "À éviter",
-        confiance: 35,
+        confiance: 30,
         cote_estimee: ""
       },
       score_exact: {
-        valeur: pred.scoreExact,
-        confiance: 20,
+        valeur: "À éviter",
+        confiance: 15,
         cote_estimee: ""
       },
       winner: {
-        valeur: pred.winner,
-        confiance: pred.confidence
+        valeur: "Données insuffisantes",
+        confiance: 30
       },
       perdant: {
-        valeur: pred.loser,
-        confiance: pred.result === "X" ? 0 : clamp(p
+        valeur: "Données insuffisantes",
+        confiance: 30
+      }
+    },
+
+    analyse_approfondie: {
+      forces_A: "Données insuffisantes.",
+      faiblesses_A: "Ne pas jouer sans statistiques fiables.",
+      forces_B: "Données insuffisantes.",
+      faiblesses_B: "Ne pas jouer sans statistiques fiables.",
+      facteur_cle: "Cette version stable sert à éviter les erreurs serveur. Elle n’invente pas de pronostic."
+    },
+
+    analysis: {
+      forme_domicile: {
+        score: 30,
+        detail: "Données non disponibles"
+      },
+      forme_exterieur: {
+        score: 30,
+        detail: "Données non disponibles"
+      },
+      h2h: {
+        score: 30,
+        detail: "Données non disponibles"
+      },
+      motivation: {
+        score: 30,
+        detail: "À vérifier"
+      },
+      blessures: {
+        score: 30,
+        detail: "À vérifier"
+      }
+    },
+
+    buteurs_potentiels: [],
+
+    verdict: "Aucun pari conseillé : données insuffisantes dans cette version stable."
+  };
+}
+
+module.exports = async function handler(req, res){
+  try{
+    if(req.method === "GET"){
+      return res.status(200).json({
+        ok: true,
+        version: VERSION,
+        message: "API active. Utilise POST avec { match: 'France vs Sénégal' }."
+      });
+    }
+
+    if(req.method !== "POST"){
+      return res.status(405).json({
+        error: "Méthode non autorisée."
+      });
+    }
+
+    const parsed = parseMatch(req.body && req.body.match);
+
+    if(!parsed){
+      return res.status(400).json({
+        error: "Écris un match complet, exemple : France vs Sénégal."
+      });
+    }
+
+    const { teamA, teamB } = parsed;
+
+    const completedMatch = findCompletedMatch(teamA, teamB);
+
+    if(completedMatch){
+      return res.status(200).json(
+        buildCompletedMatchResponse(teamA, teamB, completedMatch)
+      );
+    }
+
+    return res.status(200).json(
+      buildUpcomingMatchResponse(teamA, teamB)
+    );
+
+  }catch(error){
+    return res.status(200).json({
+      match: "Erreur contrôlée",
+      competition: "Version stable",
+      date_info: VERSION,
+      is_world_cup: false,
+      group: "",
+      niveau_confiance_global: 0,
+      pari_du_jour: {
+        type: "Erreur contrôlée",
+        valeur: "API stable",
+        raison: error.message || "Erreur inconnue",
+        cote_estimee: "N/D"
+      },
+      stats_techniques: null,
+      pronostics: {
+        resultat_1x2:{valeur:"Erreur",label:"Erreur contrôlée",confiance:0,cote_estimee:""},
+        over_under:{valeur:"Erreur",confiance:0,cote_estimee:""},
+        btts:{valeur:"Erreur",confiance:0,cote_estimee:""},
+        double_chance:{valeur:"Erreur",confiance:0,cote_estimee:""},
+        handicap:{valeur:"Erreur",confiance:0,cote_estimee:""},
+        premier_but:{valeur:"Erreur",confiance:0,cote_estimee:""},
+        mi_temps_fin:{valeur:"Erreur",confiance:0,cote_estimee:""},
+        cage_inviolee:{valeur:"Erreur",confiance:0,cote_estimee:""},
+        score_exact:{valeur:"Erreur",confiance:0,cote_estimee:""},
+        winner:{valeur:"Erreur",confiance:0},
+        perdant:{valeur:"Erreur",confiance:0}
+      },
+      analyse_approfondie: {
+        forces_A:"Erreur contrôlée.",
+        faiblesses_A:"Le serveur n’a pas crashé.",
+        forces_B:"Erreur contrôlée.",
+        faiblesses_B:"Corrigeable sans casser l’app.",
+        facteur_cle:"Message technique : " + (error.message || "Erreur inconnue")
+      },
+      analysis:{},
+      buteurs_potentiels:[],
+      verdict:"Erreur contrôlée : le serveur répond quand même en JSON."
+    });
+  }
+};
