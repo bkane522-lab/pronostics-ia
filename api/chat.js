@@ -1,6 +1,6 @@
 const API_BASE = "https://v3.football.api-sports.io";
 
-const VERSION = "V2_CDM2026_MANUEL_API_FREE_PRUDENT";
+const VERSION = "V3_CDM2026_MATCH_TERMINE_PRUDENT";
 
 const GROUPS = [
   { g:"Groupe A", teams:["Mexique","Corée du Sud","Tchéquie","Afrique du Sud"] },
@@ -70,31 +70,37 @@ const API_NAMES = {
 
 /*
   Résultats CDM 2026 ajoutés manuellement.
-  Important : mets cette liste à jour après chaque match.
+  Mets cette liste à jour après chaque match terminé.
 */
 const WC_2026_RESULTS = [
   { date:"2026-06-11", group:"Groupe A", home:"Mexique", away:"Afrique du Sud", hg:2, ag:0 },
   { date:"2026-06-12", group:"Groupe A", home:"Corée du Sud", away:"Tchéquie", hg:2, ag:1 },
   { date:"2026-06-12", group:"Groupe B", home:"Canada", away:"Bosnie", hg:1, ag:1 },
+
   { date:"2026-06-13", group:"Groupe D", home:"USA", away:"Paraguay", hg:4, ag:1 },
   { date:"2026-06-13", group:"Groupe B", home:"Qatar", away:"Suisse", hg:1, ag:1 },
+
   { date:"2026-06-14", group:"Groupe C", home:"Brésil", away:"Maroc", hg:1, ag:1 },
   { date:"2026-06-14", group:"Groupe C", home:"Haïti", away:"Écosse", hg:0, ag:1 },
   { date:"2026-06-14", group:"Groupe D", home:"Australie", away:"Turquie", hg:2, ag:0 },
   { date:"2026-06-14", group:"Groupe E", home:"Allemagne", away:"Curaçao", hg:7, ag:1 },
   { date:"2026-06-14", group:"Groupe F", home:"Pays-Bas", away:"Japon", hg:2, ag:2 },
+
   { date:"2026-06-15", group:"Groupe E", home:"Côte d’Ivoire", away:"Équateur", hg:1, ag:0 },
   { date:"2026-06-15", group:"Groupe F", home:"Suède", away:"Tunisie", hg:5, ag:1 },
   { date:"2026-06-15", group:"Groupe H", home:"Espagne", away:"Cap-Vert", hg:0, ag:0 },
   { date:"2026-06-15", group:"Groupe G", home:"Belgique", away:"Égypte", hg:1, ag:1 },
+
   { date:"2026-06-16", group:"Groupe H", home:"Arabie Saoudite", away:"Uruguay", hg:1, ag:1 },
   { date:"2026-06-16", group:"Groupe G", home:"Iran", away:"Nouvelle-Zélande", hg:2, ag:2 },
   { date:"2026-06-16", group:"Groupe I", home:"France", away:"Sénégal", hg:3, ag:1 },
+
   { date:"2026-06-17", group:"Groupe I", home:"Irak", away:"Norvège", hg:1, ag:4 },
   { date:"2026-06-17", group:"Groupe J", home:"Argentine", away:"Algérie", hg:3, ag:0 },
   { date:"2026-06-17", group:"Groupe J", home:"Autriche", away:"Jordanie", hg:3, ag:1 },
   { date:"2026-06-17", group:"Groupe K", home:"Portugal", away:"RD Congo", hg:1, ag:1 },
   { date:"2026-06-17", group:"Groupe L", home:"Angleterre", away:"Croatie", hg:4, ag:2 },
+
   { date:"2026-06-18", group:"Groupe L", home:"Ghana", away:"Panama", hg:1, ag:0 },
   { date:"2026-06-18", group:"Groupe K", home:"Ouzbékistan", away:"Colombie", hg:1, ag:3 },
   { date:"2026-06-18", group:"Groupe A", home:"Tchéquie", away:"Afrique du Sud", hg:1, ag:1 }
@@ -174,9 +180,58 @@ function findGroup(a,b){
   for(const group of GROUPS){
     const hasA = group.teams.some(t => clean(t) === clean(a));
     const hasB = group.teams.some(t => clean(t) === clean(b));
+
     if(hasA && hasB) return group.g;
   }
+
   return "";
+}
+
+function findCompletedMatch(teamA, teamB){
+  return WC_2026_RESULTS.find(m => {
+    const sameOrder =
+      clean(m.home) === clean(teamA) &&
+      clean(m.away) === clean(teamB);
+
+    const reverseOrder =
+      clean(m.home) === clean(teamB) &&
+      clean(m.away) === clean(teamA);
+
+    return sameOrder || reverseOrder;
+  });
+}
+
+function getScoreForTeam(match, team){
+  if(clean(match.home) === clean(team)){
+    return {
+      gf: match.hg,
+      ga: match.ag
+    };
+  }
+
+  if(clean(match.away) === clean(team)){
+    return {
+      gf: match.ag,
+      ga: match.hg
+    };
+  }
+
+  return {
+    gf: 0,
+    ga: 0
+  };
+}
+
+function getWinner(match){
+  if(match.hg > match.ag) return match.home;
+  if(match.ag > match.hg) return match.away;
+  return "Match nul";
+}
+
+function getLoser(match){
+  if(match.hg > match.ag) return match.away;
+  if(match.ag > match.hg) return match.home;
+  return "Aucun";
 }
 
 function clamp(n,min,max){
@@ -236,11 +291,12 @@ function getManualTeamGames(team){
   return WC_2026_RESULTS
     .filter(m => clean(m.home) === clean(team) || clean(m.away) === clean(team))
     .map(m => {
-      const isHome = clean(m.home) === clean(team);
+      const score = getScoreForTeam(m, team);
+
       return {
         date: m.date,
-        gf: isHome ? m.hg : m.ag,
-        ga: isHome ? m.ag : m.hg,
+        gf: score.gf,
+        ga: score.ga,
         source: "CDM 2026 manuelle"
       };
     });
@@ -269,6 +325,7 @@ async function getApiTeamGames(teamId){
         )
         .map(fx => {
           const isHome = fx.teams.home.id === teamId;
+
           return {
             date: fx.fixture.date.slice(0,10),
             gf: isHome ? fx.goals.home : fx.goals.away,
@@ -279,7 +336,7 @@ async function getApiTeamGames(teamId){
 
       games = games.concat(seasonGames);
     }catch(e){
-      // On continue même si une saison est bloquée ou vide.
+      // On continue même si une saison est vide ou bloquée.
     }
   }
 
@@ -306,6 +363,7 @@ function buildStatsFromGames(team, games){
     goalsAgainst += g.ga;
 
     if(g.ga === 0) cleanSheets++;
+
     if(g.gf > g.ga) wins++;
     else if(g.gf === g.ga) draws++;
     else losses++;
@@ -341,6 +399,148 @@ async function getCombinedStats(team, teamId){
   const allGames = manualGames.concat(apiGames);
 
   return buildStatsFromGames(team, allGames);
+}
+
+function buildCompletedMatchResponse(teamA, teamB, match){
+  const scoreA = getScoreForTeam(match, teamA);
+  const scoreB = getScoreForTeam(match, teamB);
+
+  const winner = getWinner(match);
+  const loser = getLoser(match);
+
+  const finalScore =
+    match.home + " " + match.hg + "-" + match.ag + " " + match.away;
+
+  return {
+    match: teamA + " - " + teamB,
+    competition: "Match terminé — Coupe du Monde 2026",
+    date_info: match.date + " · " + match.group,
+    is_world_cup: true,
+    group: match.group,
+    niveau_confiance_global: 100,
+
+    pari_du_jour: {
+      type: "Match terminé",
+      valeur: finalScore,
+      raison: "Ce match est déjà joué. Aucun pari possible sur ce match.",
+      cote_estimee: "N/D"
+    },
+
+    stats_techniques: {
+      buts_marques_A: {
+        valeur: scoreA.gf,
+        detail: teamA + " : " + scoreA.gf + " but(s)"
+      },
+      buts_encaisses_A: {
+        valeur: scoreA.ga,
+        detail: teamA + " : " + scoreA.ga + " but(s) encaissé(s)"
+      },
+      buts_marques_B: {
+        valeur: scoreB.gf,
+        detail: teamB + " : " + scoreB.gf + " but(s)"
+      },
+      buts_encaisses_B: {
+        valeur: scoreB.ga,
+        detail: teamB + " : " + scoreB.ga + " but(s) encaissé(s)"
+      },
+      rapport_force: {
+        detail: "Score final officiel ajouté manuellement : " + finalScore
+      }
+    },
+
+    pronostics: {
+      resultat_1x2: {
+        valeur: "Terminé",
+        label: "Match terminé",
+        confiance: 100,
+        cote_estimee: ""
+      },
+      over_under: {
+        valeur: "Non applicable",
+        confiance: 100,
+        cote_estimee: ""
+      },
+      btts: {
+        valeur: match.hg > 0 && match.ag > 0 ? "Oui" : "Non",
+        confiance: 100,
+        cote_estimee: ""
+      },
+      double_chance: {
+        valeur: "Non applicable",
+        confiance: 100,
+        cote_estimee: ""
+      },
+      handicap: {
+        valeur: "Non applicable",
+        confiance: 100,
+        cote_estimee: ""
+      },
+      premier_but: {
+        valeur: "Non disponible",
+        confiance: 0,
+        cote_estimee: ""
+      },
+      mi_temps_fin: {
+        valeur: "Non disponible",
+        confiance: 0,
+        cote_estimee: ""
+      },
+      cage_inviolee: {
+        valeur: match.hg === 0 || match.ag === 0 ? "Oui" : "Non",
+        confiance: 100,
+        cote_estimee: ""
+      },
+      score_exact: {
+        valeur: match.hg + "-" + match.ag,
+        confiance: 100,
+        cote_estimee: ""
+      },
+      winner: {
+        valeur: winner,
+        confiance: 100
+      },
+      perdant: {
+        valeur: loser,
+        confiance: loser === "Aucun" ? 0 : 100
+      }
+    },
+
+    analyse_approfondie: {
+      forces_A: "Match déjà joué. Analyse de pronostic désactivée.",
+      faiblesses_A: "Non applicable après le coup de sifflet final.",
+      forces_B: "Match déjà joué. Analyse de pronostic désactivée.",
+      faiblesses_B: "Non applicable après le coup de sifflet final.",
+      facteur_cle: "Résultat final : " + finalScore + ". Aucun pari conseillé, car le match est terminé."
+    },
+
+    analysis: {
+      forme_domicile: {
+        score: 100,
+        detail: "Résultat final connu"
+      },
+      forme_exterieur: {
+        score: 100,
+        detail: "Résultat final connu"
+      },
+      h2h: {
+        score: 100,
+        detail: "Match terminé"
+      },
+      motivation: {
+        score: 100,
+        detail: "Non applicable"
+      },
+      blessures: {
+        score: 100,
+        detail: "Non applicable"
+      }
+    },
+
+    buteurs_potentiels: [],
+
+    verdict:
+      "Match terminé : " + finalScore + ". Aucun pari possible sur ce match."
+  };
 }
 
 function riskLevel(confidence, statsA, statsB){
@@ -424,7 +624,7 @@ function makePrediction(teamA, teamB, statsA, statsB){
   if(risk === "Risque élevé"){
     pariType = "Aucun pari fort conseillé";
     pariValeur = "À surveiller";
-    pariRaison = "Données trop limitées ou écart statistique insuffisant.";
+    pariRaison = "Données limitées ou écart statistique insuffisant.";
   }
 
   return {
@@ -443,7 +643,7 @@ function makePrediction(teamA, teamB, statsA, statsB){
   };
 }
 
-function buildResponse(teamA, teamB, statsA, statsB){
+function buildPredictionResponse(teamA, teamB, statsA, statsB){
   const pred = makePrediction(teamA, teamB, statsA, statsB);
   const group = findGroup(teamA, teamB);
 
@@ -553,139 +753,4 @@ function buildResponse(teamA, teamB, statsA, statsB){
       },
       perdant: {
         valeur: pred.loser,
-        confiance: pred.result === "X" ? 0 : clamp(pred.confidence - 8,35,70)
-      }
-    },
-
-    analyse_approfondie: {
-      forces_A:
-        statsA.avgGF + " buts marqués/match, " +
-        statsA.ppg + " point/match. Sources : " + statsA.sources.join(", "),
-      faiblesses_A:
-        statsA.avgGA + " buts encaissés/match.",
-      forces_B:
-        statsB.avgGF + " buts marqués/match, " +
-        statsB.ppg + " point/match. Sources : " + statsB.sources.join(", "),
-      faiblesses_B:
-        statsB.avgGA + " buts encaissés/match.",
-      facteur_cle:
-        "Ne pas jouer uniquement sur cette analyse. Vérifie les compositions officielles, blessures, suspensions et contexte du match."
-    },
-
-    analysis: {
-      forme_domicile: {
-        score: clamp(Math.round(statsA.ppg * 33),10,100),
-        detail:
-          statsA.wins + " victoires, " +
-          statsA.draws + " nuls, " +
-          statsA.losses + " défaites"
-      },
-      forme_exterieur: {
-        score: clamp(Math.round(statsB.ppg * 33),10,100),
-        detail:
-          statsB.wins + " victoires, " +
-          statsB.draws + " nuls, " +
-          statsB.losses + " défaites"
-      },
-      h2h: {
-        score: 50,
-        detail: "Face-à-face non utilisé dans cette version."
-      },
-      motivation: {
-        score: 55,
-        detail: "Motivation à confirmer selon classement réel du groupe."
-      },
-      blessures: {
-        score: 50,
-        detail: "Blessures et suspensions à vérifier avant le match."
-      }
-    },
-
-    buteurs_potentiels: [],
-
-    verdict:
-      pred.pariType + " — " +
-      pred.pariValeur +
-      ". Niveau : " +
-      pred.risk +
-      ". Pas de garantie de résultat."
-  };
-}
-
-module.exports = async function handler(req,res){
-  if(req.method !== "POST"){
-    return res.status(405).json({ error:"Méthode non autorisée." });
-  }
-
-  try{
-    const parsed = parseMatch(req.body && req.body.match);
-
-    if(!parsed){
-      return res.status(400).json({
-        error:"Écris un match complet, exemple : France vs Sénégal."
-      });
-    }
-
-    const { teamA, teamB } = parsed;
-
-    const [idA, idB] = await Promise.all([
-      getTeamId(teamA),
-      getTeamId(teamB)
-    ]);
-
-    const [statsA, statsB] = await Promise.all([
-      getCombinedStats(teamA, idA),
-      getCombinedStats(teamB, idB)
-    ]);
-
-    if(!statsA || !statsB || statsA.played < 2 || statsB.played < 2){
-      return res.status(200).json({
-        match: teamA + " - " + teamB,
-        competition: "Données insuffisantes",
-        date_info: "CDM 2026 + API-Football gratuit",
-        is_world_cup: true,
-        group: findGroup(teamA, teamB),
-        niveau_confiance_global: 30,
-        pari_du_jour: {
-          type: "Aucun pari conseillé",
-          valeur: "Données insuffisantes",
-          raison: "Moins de 2 matchs exploitables. Ne pas jouer.",
-          cote_estimee: "N/D"
-        },
-        stats_techniques: null,
-        pronostics: {
-          resultat_1x2:{valeur:"À éviter",label:"Données insuffisantes",confiance:30,cote_estimee:""},
-          over_under:{valeur:"À éviter",confiance:30,cote_estimee:""},
-          btts:{valeur:"À éviter",confiance:30,cote_estimee:""},
-          double_chance:{valeur:"À éviter",confiance:30,cote_estimee:""},
-          handicap:{valeur:"À éviter",confiance:30,cote_estimee:""},
-          premier_but:{valeur:"À éviter",confiance:30,cote_estimee:""},
-          mi_temps_fin:{valeur:"À éviter",confiance:30,cote_estimee:""},
-          cage_inviolee:{valeur:"À éviter",confiance:30,cote_estimee:""},
-          score_exact:{valeur:"À éviter",confiance:15,cote_estimee:""},
-          winner:{valeur:"Données insuffisantes",confiance:30},
-          perdant:{valeur:"Données insuffisantes",confiance:30}
-        },
-        analyse_approfondie: {
-          forces_A:"Données insuffisantes.",
-          faiblesses_A:"Ne pas jouer sans données fiables.",
-          forces_B:"Données insuffisantes.",
-          faiblesses_B:"Ne pas jouer sans données fiables.",
-          facteur_cle:"L’app refuse de fabriquer un pronostic fort quand les données sont trop faibles."
-        },
-        analysis:{},
-        buteurs_potentiels:[],
-        verdict:"Aucun pari conseillé : données insuffisantes."
-      });
-    }
-
-    return res.status(200).json(buildResponse(teamA, teamB, statsA, statsB));
-
-  }catch(error){
-    return res.status(500).json({
-      error:
-        "VERSION " + VERSION + " — " +
-        (error.message || "Erreur serveur.")
-    });
-  }
-};
+        confiance: pred.result === "X" ? 0 : clamp(p
