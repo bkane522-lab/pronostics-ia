@@ -1,4 +1,4 @@
-const VERSION = "STABLE_SANS_API_MATCHS_TERMINES";
+const VERSION = "STABLE_MATCHS_TERMINES_MAJ_2026_06_20";
 
 const GROUPS = [
   { g:"Groupe A", teams:["Mexique","Corée du Sud","Tchéquie","Afrique du Sud"] },
@@ -46,7 +46,16 @@ const WC_2026_RESULTS = [
 
   { date:"2026-06-18", group:"Groupe L", home:"Ghana", away:"Panama", hg:1, ag:0 },
   { date:"2026-06-18", group:"Groupe K", home:"Ouzbékistan", away:"Colombie", hg:1, ag:3 },
-  { date:"2026-06-18", group:"Groupe A", home:"Tchéquie", away:"Afrique du Sud", hg:1, ag:1 }
+  { date:"2026-06-18", group:"Groupe A", home:"Tchéquie", away:"Afrique du Sud", hg:1, ag:1 },
+  { date:"2026-06-18", group:"Groupe B", home:"Suisse", away:"Bosnie", hg:4, ag:1 },
+
+  { date:"2026-06-19", group:"Groupe B", home:"Canada", away:"Qatar", hg:6, ag:0 },
+  { date:"2026-06-19", group:"Groupe A", home:"Mexique", away:"Corée du Sud", hg:1, ag:0 },
+  { date:"2026-06-19", group:"Groupe D", home:"USA", away:"Australie", hg:2, ag:0 },
+
+  { date:"2026-06-20", group:"Groupe C", home:"Écosse", away:"Maroc", hg:0, ag:1 },
+  { date:"2026-06-20", group:"Groupe C", home:"Brésil", away:"Haïti", hg:3, ag:0 },
+  { date:"2026-06-20", group:"Groupe D", home:"Turquie", away:"Paraguay", hg:0, ag:1 }
 ];
 
 function clean(value){
