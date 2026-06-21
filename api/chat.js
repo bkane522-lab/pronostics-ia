@@ -1,18 +1,18 @@
-const VERSION = "V7_3_BUTEURS_CONFIANCE_VARIABLE";
+const VERSION = "V7_3_MINI_STABLE_BUTEURS";
 
 const GROUPS = [
-  { g:"Groupe A", teams:["Mexique","Corée du Sud","Tchéquie","Afrique du Sud"] },
-  { g:"Groupe B", teams:["Suisse","Canada","Qatar","Bosnie"] },
-  { g:"Groupe C", teams:["Écosse","Maroc","Brésil","Haïti"] },
-  { g:"Groupe D", teams:["USA","Australie","Turquie","Paraguay"] },
-  { g:"Groupe E", teams:["Allemagne","Côte d’Ivoire","Équateur","Curaçao"] },
-  { g:"Groupe F", teams:["Suède","Japon","Pays-Bas","Tunisie"] },
-  { g:"Groupe G", teams:["Nouvelle-Zélande","Iran","Belgique","Égypte"] },
-  { g:"Groupe H", teams:["Uruguay","Arabie Saoudite","Espagne","Cap-Vert"] },
-  { g:"Groupe I", teams:["Norvège","France","Sénégal","Irak"] },
-  { g:"Groupe J", teams:["Argentine","Autriche","Jordanie","Algérie"] },
-  { g:"Groupe K", teams:["Portugal","RD Congo","Ouzbékistan","Colombie"] },
-  { g:"Groupe L", teams:["Angleterre","Croatie","Ghana","Panama"] }
+  ["Groupe A",["Mexique","Corée du Sud","Tchéquie","Afrique du Sud"]],
+  ["Groupe B",["Suisse","Canada","Qatar","Bosnie"]],
+  ["Groupe C",["Écosse","Maroc","Brésil","Haïti"]],
+  ["Groupe D",["USA","Australie","Turquie","Paraguay"]],
+  ["Groupe E",["Allemagne","Côte d’Ivoire","Équateur","Curaçao"]],
+  ["Groupe F",["Suède","Japon","Pays-Bas","Tunisie"]],
+  ["Groupe G",["Nouvelle-Zélande","Iran","Belgique","Égypte"]],
+  ["Groupe H",["Uruguay","Arabie Saoudite","Espagne","Cap-Vert"]],
+  ["Groupe I",["Norvège","France","Sénégal","Irak"]],
+  ["Groupe J",["Argentine","Autriche","Jordanie","Algérie"]],
+  ["Groupe K",["Portugal","RD Congo","Ouzbékistan","Colombie"]],
+  ["Groupe L",["Angleterre","Croatie","Ghana","Panama"]]
 ];
 
 const RESULTS = [
@@ -65,23 +65,21 @@ function clean(v){
     .trim();
 }
 
-function canonTeam(name){
-  var input = clean(name);
+function canon(name){
+  const x = clean(name);
 
-  for(var i = 0; i < GROUPS.length; i++){
-    for(var j = 0; j < GROUPS[i].teams.length; j++){
-      if(clean(GROUPS[i].teams[j]) === input){
-        return GROUPS[i].teams[j];
-      }
+  for(const group of GROUPS){
+    for(const team of group[1]){
+      if(clean(team) === x) return team;
     }
   }
 
-  var aliases = {
+  const aliases = {
     "senegal":"Sénégal",
-    "coree du sud":"Corée du Sud",
     "cote ivoire":"Côte d’Ivoire",
     "cote d ivoire":"Côte d’Ivoire",
     "cote divoire":"Côte d’Ivoire",
+    "coree du sud":"Corée du Sud",
     "rd congo":"RD Congo",
     "nouvelle zelande":"Nouvelle-Zélande",
     "egypte":"Égypte",
@@ -89,125 +87,94 @@ function canonTeam(name){
     "haiti":"Haïti",
     "bresil":"Brésil",
     "suede":"Suède",
-    "norvege":"Norvège",
-    "algerie":"Algérie",
-    "ouzbekistan":"Ouzbékistan",
-    "cap vert":"Cap-Vert",
-    "capvert":"Cap-Vert",
-    "usa":"USA",
-    "etats unis":"USA",
-    "afrique du sud":"Afrique du Sud",
-    "bosnie herzegovine":"Bosnie",
     "curacao":"Curaçao",
     "pays bas":"Pays-Bas",
-    "arabie saoudite":"Arabie Saoudite"
+    "arabie saoudite":"Arabie Saoudite",
+    "cap vert":"Cap-Vert",
+    "usa":"USA",
+    "afrique du sud":"Afrique du Sud"
   };
 
-  return aliases[input] || String(name || "").trim();
+  return aliases[x] || String(name || "").trim();
+}
+
+function parseBody(req){
+  if(!req.body) return {};
+  if(typeof req.body === "string"){
+    try{
+      return JSON.parse(req.body);
+    }catch(e){
+      return {};
+    }
+  }
+  return req.body;
 }
 
 function parseMatch(input){
-  var raw = String(input || "")
+  let raw = String(input || "")
     .replace(/CDM\s*2026/gi,"")
     .replace(/Coupe du Monde\s*2026/gi,"")
     .replace(/Groupe\s+[A-L]/gi,"")
     .trim();
 
-  var parts = null;
+  let parts = null;
 
-  if(/\s+vs\s+/i.test(raw)){
-    parts = raw.split(/\s+vs\s+/i);
-  }else if(/\s+contre\s+/i.test(raw)){
-    parts = raw.split(/\s+contre\s+/i);
-  }else if(/\s+-\s+/i.test(raw)){
-    parts = raw.split(/\s+-\s+/i);
-  }
+  if(/\s+vs\s+/i.test(raw)) parts = raw.split(/\s+vs\s+/i);
+  else if(/\s+contre\s+/i.test(raw)) parts = raw.split(/\s+contre\s+/i);
+  else if(/\s+-\s+/i.test(raw)) parts = raw.split(/\s+-\s+/i);
 
-  if(!parts || parts.length < 2){
-    return null;
-  }
+  if(!parts || parts.length < 2) return null;
 
   return {
-    a: canonTeam(parts[0]),
-    b: canonTeam(parts[1])
+    a: canon(parts[0]),
+    b: canon(parts[1])
   };
 }
 
-function resultObjects(){
-  return RESULTS.map(function(r){
-    return {
-      date:r[0],
-      group:r[1],
-      home:r[2],
-      away:r[3],
-      hg:r[4],
-      ag:r[5]
-    };
-  });
-}
-
 function findGroup(a,b){
-  for(var i = 0; i < GROUPS.length; i++){
-    var hasA = false;
-    var hasB = false;
-
-    for(var j = 0; j < GROUPS[i].teams.length; j++){
-      if(clean(GROUPS[i].teams[j]) === clean(a)){ hasA = true; }
-      if(clean(GROUPS[i].teams[j]) === clean(b)){ hasB = true; }
-    }
-
-    if(hasA && hasB){
-      return GROUPS[i].g;
-    }
+  for(const g of GROUPS){
+    const hasA = g[1].some(t => clean(t) === clean(a));
+    const hasB = g[1].some(t => clean(t) === clean(b));
+    if(hasA && hasB) return g[0];
   }
-
   return "";
 }
 
 function findCompleted(a,b){
-  var list = resultObjects();
+  for(const r of RESULTS){
+    const home = r[2];
+    const away = r[3];
 
-  for(var i = 0; i < list.length; i++){
-    var m = list[i];
-
-    var same = clean(m.home) === clean(a) && clean(m.away) === clean(b);
-    var reverse = clean(m.home) === clean(b) && clean(m.away) === clean(a);
+    const same = clean(home) === clean(a) && clean(away) === clean(b);
+    const reverse = clean(home) === clean(b) && clean(away) === clean(a);
 
     if(same || reverse){
-      return m;
+      return {
+        date:r[0],
+        group:r[1],
+        home:r[2],
+        away:r[3],
+        hg:r[4],
+        ag:r[5]
+      };
     }
   }
-
   return null;
 }
 
-function scoreFor(m, team){
-  if(clean(m.home) === clean(team)){
-    return { gf:m.hg, ga:m.ag };
+function scoreFor(match, team){
+  if(clean(match.home) === clean(team)){
+    return { gf:match.hg, ga:match.ag };
   }
-
-  if(clean(m.away) === clean(team)){
-    return { gf:m.ag, ga:m.hg };
+  if(clean(match.away) === clean(team)){
+    return { gf:match.ag, ga:match.hg };
   }
-
   return { gf:0, ga:0 };
 }
 
-function winnerOf(m){
-  if(m.hg > m.ag){ return m.home; }
-  if(m.ag > m.hg){ return m.away; }
-  return "Match nul";
-}
-
-function loserOf(m){
-  if(m.hg > m.ag){ return m.away; }
-  if(m.ag > m.hg){ return m.home; }
-  return "Aucun";
-}
-
 function stats(team){
-  var s = {
-    team:team,
+  const s = {
+    team,
     played:0,
     wins:0,
     draws:0,
@@ -225,37 +192,42 @@ function stats(team){
     form:[]
   };
 
-  var list = resultObjects();
-
-  for(var i = 0; i < list.length; i++){
-    var m = list[i];
+  for(const r of RESULTS){
+    const m = {
+      date:r[0],
+      group:r[1],
+      home:r[2],
+      away:r[3],
+      hg:r[4],
+      ag:r[5]
+    };
 
     if(clean(m.home) !== clean(team) && clean(m.away) !== clean(team)){
       continue;
     }
 
-    var sc = scoreFor(m, team);
-    var totalGoals = m.hg + m.ag;
+    const sc = scoreFor(m, team);
+    const totalGoals = m.hg + m.ag;
 
-    s.played += 1;
+    s.played++;
     s.gf += sc.gf;
     s.ga += sc.ga;
 
-    if(sc.ga === 0){ s.cleanSheets += 1; }
-    if(m.hg > 0 && m.ag > 0){ s.btts += 1; }
-    if(totalGoals >= 2){ s.over15 += 1; }
-    if(totalGoals >= 3){ s.over25 += 1; }
+    if(sc.ga === 0) s.cleanSheets++;
+    if(m.hg > 0 && m.ag > 0) s.btts++;
+    if(totalGoals >= 2) s.over15++;
+    if(totalGoals >= 3) s.over25++;
 
     if(sc.gf > sc.ga){
-      s.wins += 1;
+      s.wins++;
       s.points += 3;
       s.form.push("V");
     }else if(sc.gf === sc.ga){
-      s.draws += 1;
+      s.draws++;
       s.points += 1;
       s.form.push("N");
     }else{
-      s.losses += 1;
+      s.losses++;
       s.form.push("D");
     }
   }
@@ -270,14 +242,14 @@ function stats(team){
   return s;
 }
 
-function pct(value,total){
-  if(!total){ return 0; }
-  return Math.round((value / total) * 100);
+function pct(v,total){
+  if(!total) return 0;
+  return Math.round((v / total) * 100);
 }
 
 function formatStats(s){
   if(!s || s.played === 0){
-    return s.team + " : aucune statistique CDM 2026 disponible pour le moment.";
+    return s.team + " : aucune statistique disponible.";
   }
 
   return s.team + " : " +
@@ -286,103 +258,37 @@ function formatStats(s){
     s.draws + "N, " +
     s.losses + "D, " +
     s.gf + " but(s) marqué(s), " +
-    s.ga + " encaissé(s), " +
-    "diff " + (s.gd >= 0 ? "+" : "") + s.gd + ", " +
-    s.points + " pt(s), " +
-    "clean sheet " + pct(s.cleanSheets,s.played) + "%, " +
-    "BTTS " + pct(s.btts,s.played) + "%, " +
-    "Over 1.5 " + pct(s.over15,s.played) + "%, " +
-    "forme " + s.form.join("-");
-}
-
-function groupTable(groupName){
-  var group = null;
-
-  for(var i = 0; i < GROUPS.length; i++){
-    if(GROUPS[i].g === groupName){
-      group = GROUPS[i];
-    }
-  }
-
-  if(!group){
-    return [];
-  }
-
-  var table = group.teams.map(function(t){
-    return stats(t);
-  });
-
-  table.sort(function(a,b){
-    if(b.points !== a.points){ return b.points - a.points; }
-    if(b.gd !== a.gd){ return b.gd - a.gd; }
-    if(b.gf !== a.gf){ return b.gf - a.gf; }
-    return a.team.localeCompare(b.team);
-  });
-
-  return table;
+    s.ga + " encaissé(s), diff " +
+    (s.gd >= 0 ? "+" : "") + s.gd + ", " +
+    s.points + " pt(s), clean sheet " +
+    pct(s.cleanSheets,s.played) + "%, BTTS " +
+    pct(s.btts,s.played) + "%, Over 1.5 " +
+    pct(s.over15,s.played) + "%, forme " +
+    s.form.join("-");
 }
 
 function tableText(groupName){
-  var table = groupTable(groupName);
+  const group = GROUPS.find(g => g[0] === groupName);
+  if(!group) return "Classement indisponible.";
 
-  if(!table.length){
-    return "Classement indisponible.";
-  }
+  const table = group[1].map(t => stats(t));
 
-  return table.map(function(t, i){
+  table.sort((a,b) => {
+    if(b.points !== a.points) return b.points - a.points;
+    if(b.gd !== a.gd) return b.gd - a.gd;
+    if(b.gf !== a.gf) return b.gf - a.gf;
+    return a.team.localeCompare(b.team);
+  });
+
+  return table.map((t,i) => {
     return (i + 1) + ". " + t.team + " " + t.points + " pts diff " + (t.gd >= 0 ? "+" : "") + t.gd;
   }).join(" | ");
 }
 
-function riskLevel(sa,sb,diff){
-  var totalGames = sa.played + sb.played;
-
-  if(totalGames < 2){ return "Risque élevé"; }
-  if(totalGames < 4){ return "Risque moyen/élevé"; }
-  if(Math.abs(diff) < 8){ return "Risque moyen"; }
-
-  return "Risque modéré";
-}
-
-function buildScorerTips(a,b,sa,sb){
-  var tips = [];
-
-  var confA = sa.played > 0 ? Math.min(55, Math.round(25 + sa.avgGF * 15)) : 20;
-  var confB = sb.played > 0 ? Math.min(55, Math.round(25 + sb.avgGF * 15)) : 20;
-
-  tips.push({
-    type:"Buteur équipe A",
-    equipe:a,
-    valeur:confA >= 45 ? "Buteur à surveiller" : "Buteur à éviter",
-    confiance:confA,
-    raison:a + " marque en moyenne " + sa.avgGF + " but(s)/match sur les données CDM enregistrées."
-  });
-
-  tips.push({
-    type:"Buteur équipe B",
-    equipe:b,
-    valeur:confB >= 45 ? "Buteur à surveiller" : "Buteur à éviter",
-    confiance:confB,
-    raison:b + " marque en moyenne " + sb.avgGF + " but(s)/match sur les données CDM enregistrées."
-  });
-
-  var doubleConf = Math.max(10, Math.min(30, Math.round((sa.avgGF + sb.avgGF) * 8)));
-
-  tips.push({
-    type:"Doublé",
-    equipe:"Tous",
-    valeur:"À éviter",
-    confiance:doubleConf,
-    raison:"Le pari doublé est très risqué sans composition officielle, temps de jeu et tireur de penalties."
-  });
-
-  return tips;
-}
-
 function makePrediction(a,b,sa,sb){
-  var totalGames = sa.played + sb.played;
+  const total = sa.played + sb.played;
 
-  if(totalGames < 2){
+  if(total < 2){
     return {
       confidence:35,
       result:"À éviter",
@@ -398,92 +304,134 @@ function makePrediction(a,b,sa,sb){
       confOver:25,
       confBtts:20,
       confScore:10,
-      verdict:"Données encore trop limitées. Aucun pari fort conseillé."
+      verdict:"Données trop limitées. Aucun pari fort conseillé."
     };
   }
 
-  var powerA = sa.points * 8 + sa.gd * 3 + sa.gf * 2 + sa.wins * 5 - sa.ga;
-  var powerB = sb.points * 8 + sb.gd * 3 + sb.gf * 2 + sb.wins * 5 - sb.ga;
-  var diff = powerA - powerB;
+  const powerA = sa.points * 8 + sa.gd * 3 + sa.gf * 2 + sa.wins * 5 - sa.ga;
+  const powerB = sb.points * 8 + sb.gd * 3 + sb.gf * 2 + sb.wins * 5 - sb.ga;
+  const diff = powerA - powerB;
 
-  var winner = "Match serré";
-  var result = "X";
-  var doubleChance = "Pas de choix clair";
-  var confidence = 52;
+  let result = "X";
+  let winner = "Match serré";
+  let doubleChance = "Pas de choix clair";
+  let confidence = 52;
 
   if(diff >= 12){
-    winner = a;
     result = "1";
+    winner = a;
     doubleChance = "1X";
     confidence = 62;
   }
 
   if(diff <= -12){
-    winner = b;
     result = "2";
+    winner = b;
     doubleChance = "X2";
     confidence = 62;
   }
 
-  var totalGoalsAvg = sa.avgGF + sb.avgGF;
-  var overUnder = "À éviter";
-  var confOver = 35;
+  const avgGoals = sa.avgGF + sb.avgGF;
+  let overUnder = "Ligne buts à éviter";
+  let confOver = 35;
 
-  if(totalGoalsAvg >= 2.4){
+  if(avgGoals >= 2.4){
     overUnder = "Over 1.5 prudent";
     confOver = 58;
-  }else if(totalGoalsAvg <= 1.8){
+  }else if(avgGoals <= 1.8){
     overUnder = "Under 3.5 prudent";
     confOver = 60;
-  }else{
-    overUnder = "Ligne buts à éviter";
-    confOver = 35;
   }
 
-  var btts = "À éviter";
-  var confBtts = 30;
+  let btts = "À éviter";
+  let confBtts = 30;
 
   if(sa.avgGF >= 1 && sb.avgGF >= 1 && sa.avgGA >= 0.7 && sb.avgGA >= 0.7){
     btts = "Oui possible";
     confBtts = 48;
   }
 
-  var scoreA = Math.max(0, Math.round((sa.avgGF + sb.avgGA) / 2));
-  var scoreB = Math.max(0, Math.round((sb.avgGF + sa.avgGA) / 2));
+  const scoreA = Math.max(0, Math.round((sa.avgGF + sb.avgGA) / 2));
+  const scoreB = Math.max(0, Math.round((sb.avgGF + sa.avgGA) / 2));
 
-  var risk = riskLevel(sa,sb,diff);
-  var best = "Aucun pari fort conseillé";
+  let risk = "Risque moyen/élevé";
+  if(total >= 4 && Math.abs(diff) >= 8) risk = "Risque modéré";
+  if(total < 2) risk = "Risque élevé";
 
-  if(overUnder === "Under 3.5 prudent"){ best = "Option prudente : Under 3.5"; }
-  if(overUnder === "Over 1.5 prudent"){ best = "Option prudente : Over 1.5"; }
-  if(doubleChance !== "Pas de choix clair" && confidence >= 60){ best = "Option prudente : Double chance " + doubleChance; }
-  if(risk === "Risque élevé"){ best = "Aucun pari fort conseillé"; }
+  let best = "Aucun pari fort conseillé";
+
+  if(overUnder === "Under 3.5 prudent") best = "Option prudente : Under 3.5";
+  if(overUnder === "Over 1.5 prudent") best = "Option prudente : Over 1.5";
+  if(doubleChance !== "Pas de choix clair" && confidence >= 60){
+    best = "Option prudente : Double chance " + doubleChance;
+  }
 
   return {
-    confidence:confidence,
-    result:result,
-    doubleChance:doubleChance,
-    overUnder:overUnder,
-    btts:btts,
+    confidence,
+    result,
+    doubleChance,
+    overUnder,
+    btts,
     score:scoreA + "-" + scoreB,
-    winner:winner,
-    best:best,
-    risk:risk,
+    winner,
+    best,
+    risk,
     confResult:confidence,
     confDouble:doubleChance === "Pas de choix clair" ? 35 : Math.min(75, confidence + 10),
-    confOver:confOver,
-    confBtts:confBtts,
+    confOver,
+    confBtts,
     confScore:18,
-    verdict:best + ". " + risk + ". Analyse basée seulement sur les résultats CDM enregistrés. À confirmer avec compositions, blessures et contexte."
+    verdict:best + ". " + risk + ". Analyse basée sur les résultats CDM enregistrés."
   };
 }
 
+function scorerTips(a,b,sa,sb){
+  const confA = sa.played ? Math.min(55, Math.round(25 + sa.avgGF * 15)) : 20;
+  const confB = sb.played ? Math.min(55, Math.round(25 + sb.avgGF * 15)) : 20;
+  const doubleConf = Math.max(10, Math.min(30, Math.round((sa.avgGF + sb.avgGF) * 8)));
+
+  return [
+    {
+      type:"Buteur équipe A",
+      equipe:a,
+      valeur:confA >= 45 ? "Buteur à surveiller" : "Buteur à éviter",
+      confiance:confA,
+      raison:a + " marque en moyenne " + sa.avgGF + " but(s)/match."
+    },
+    {
+      type:"Buteur équipe B",
+      equipe:b,
+      valeur:confB >= 45 ? "Buteur à surveiller" : "Buteur à éviter",
+      confiance:confB,
+      raison:b + " marque en moyenne " + sb.avgGF + " but(s)/match."
+    },
+    {
+      type:"Doublé",
+      equipe:"Tous",
+      valeur:"À éviter",
+      confiance:doubleConf,
+      raison:"Pari très risqué sans compositions officielles et tireur de penalties."
+    }
+  ];
+}
+
 function completedResponse(a,b,m){
-  var sa = stats(a);
-  var sb = stats(b);
-  var scA = scoreFor(m,a);
-  var scB = scoreFor(m,b);
-  var finalScore = m.home + " " + m.hg + "-" + m.ag + " " + m.away;
+  const sa = stats(a);
+  const sb = stats(b);
+  const scA = scoreFor(m,a);
+  const scB = scoreFor(m,b);
+  const finalScore = m.home + " " + m.hg + "-" + m.ag + " " + m.away;
+
+  let winner = "Match nul";
+  let loser = "Aucun";
+
+  if(m.hg > m.ag){
+    winner = m.home;
+    loser = m.away;
+  }else if(m.ag > m.hg){
+    winner = m.away;
+    loser = m.home;
+  }
 
   return {
     match:a + " - " + b,
@@ -515,8 +463,8 @@ function completedResponse(a,b,m){
       mi_temps_fin:{ valeur:"Non disponible", confiance:0, cote_estimee:"" },
       cage_inviolee:{ valeur:m.hg === 0 || m.ag === 0 ? "Oui" : "Non", confiance:100, cote_estimee:"" },
       score_exact:{ valeur:m.hg + "-" + m.ag, confiance:100, cote_estimee:"" },
-      winner:{ valeur:winnerOf(m), confiance:100 },
-      perdant:{ valeur:loserOf(m), confiance:loserOf(m) === "Aucun" ? 0 : 100 }
+      winner:{ valeur:winner, confiance:100 },
+      perdant:{ valeur:loser, confiance:loser === "Aucun" ? 0 : 100 }
     },
     analyse_approfondie:{
       forces_A:formatStats(sa),
@@ -532,18 +480,18 @@ function completedResponse(a,b,m){
 }
 
 function upcomingResponse(a,b){
-  var group = findGroup(a,b);
-  var sa = stats(a);
-  var sb = stats(b);
-  var p = makePrediction(a,b,sa,sb);
-  var classement = tableText(group);
+  const group = findGroup(a,b);
+  const sa = stats(a);
+  const sb = stats(b);
+  const p = makePrediction(a,b,sa,sb);
+  const classement = tableText(group);
 
   return {
     match:a + " - " + b,
     competition:"Match à venir / statistiques CDM 2026",
     date_info:group || "Coupe du Monde 2026",
     is_world_cup:true,
-    group:group,
+    group,
     niveau_confiance_global:p.confidence,
     pari_du_jour:{
       type:"Analyse prudente",
@@ -573,24 +521,67 @@ function upcomingResponse(a,b){
     },
     analyse_approfondie:{
       forces_A:formatStats(sa),
-      faiblesses_A:"Moyenne encaissée : " + sa.avgGA + " but(s)/match. Tendance buts : Over 1.5 " + pct(sa.over15,sa.played) + "%, BTTS " + pct(sa.btts,sa.played) + "%.",
+      faiblesses_A:"Moyenne encaissée : " + sa.avgGA + " but(s)/match. Tendance : Over 1.5 " + pct(sa.over15,sa.played) + "%, BTTS " + pct(sa.btts,sa.played) + "%.",
       forces_B:formatStats(sb),
-      faiblesses_B:"Moyenne encaissée : " + sb.avgGA + " but(s)/match. Tendance buts : Over 1.5 " + pct(sb.over15,sb.played) + "%, BTTS " + pct(sb.btts,sb.played) + "%.",
+      faiblesses_B:"Moyenne encaissée : " + sb.avgGA + " but(s)/match. Tendance : Over 1.5 " + pct(sb.over15,sb.played) + "%, BTTS " + pct(sb.btts,sb.played) + "%.",
       facteur_cle:"Niveau de risque : " + p.risk + ". Classement du groupe : " + classement + ". Meilleure lecture prudente : " + p.best + "."
     },
     analysis:{},
-    buteurs_potentiels:buildScorerTips(a,b,sa,sb),
+    buteurs_potentiels:scorerTips(a,b,sa,sb),
     verdict:p.verdict
+  };
+}
+
+function errorResponse(message){
+  return {
+    match:"Erreur contrôlée",
+    competition:"Version stable " + VERSION,
+    date_info:VERSION,
+    is_world_cup:false,
+    group:"",
+    niveau_confiance_global:0,
+    pari_du_jour:{
+      type:"Erreur contrôlée",
+      valeur:"API stable",
+      raison:message || "Erreur inconnue",
+      cote_estimee:"N/D"
+    },
+    stats_techniques:null,
+    pronostics:{
+      resultat_1x2:{valeur:"Erreur",label:"Erreur contrôlée",confiance:0,cote_estimee:""},
+      over_under:{valeur:"Erreur",confiance:0,cote_estimee:""},
+      btts:{valeur:"Erreur",confiance:0,cote_estimee:""},
+      double_chance:{valeur:"Erreur",confiance:0,cote_estimee:""},
+      handicap:{valeur:"Erreur",confiance:0,cote_estimee:""},
+      premier_but:{valeur:"Erreur",confiance:0,cote_estimee:""},
+      mi_temps_fin:{valeur:"Erreur",confiance:0,cote_estimee:""},
+      cage_inviolee:{valeur:"Erreur",confiance:0,cote_estimee:""},
+      score_exact:{valeur:"Erreur",confiance:0,cote_estimee:""},
+      winner:{valeur:"Erreur",confiance:0},
+      perdant:{valeur:"Erreur",confiance:0}
+    },
+    analyse_approfondie:{
+      forces_A:"Erreur contrôlée.",
+      faiblesses_A:"Le serveur n’a pas crashé.",
+      forces_B:"Erreur contrôlée.",
+      faiblesses_B:"Corrigeable sans casser l’app.",
+      facteur_cle:"Message technique : " + (message || "Erreur inconnue")
+    },
+    analysis:{},
+    buteurs_potentiels:[],
+    verdict:"Erreur contrôlée : le serveur répond quand même en JSON."
   };
 }
 
 module.exports = async function handler(req,res){
   try{
+    res.setHeader("Content-Type","application/json; charset=utf-8");
+
     if(req.method === "GET"){
       return res.status(200).json({
         ok:true,
         version:VERSION,
-        message:"API active V7.3 buteurs et confiance variable."
+        message:"API active. Utilise POST avec { match: 'Espagne vs Arabie Saoudite' }."
       });
     }
 
@@ -598,7 +589,8 @@ module.exports = async function handler(req,res){
       return res.status(405).json({ error:"Méthode non autorisée." });
     }
 
-    var parsed = parseMatch(req.body && req.body.match);
+    const body = parseBody(req);
+    const parsed = parseMatch(body.match);
 
     if(!parsed){
       return res.status(400).json({
@@ -606,9 +598,9 @@ module.exports = async function handler(req,res){
       });
     }
 
-    var a = parsed.a;
-    var b = parsed.b;
-    var completed = findCompleted(a,b);
+    const a = parsed.a;
+    const b = parsed.b;
+    const completed = findCompleted(a,b);
 
     if(completed){
       return res.status(200).json(completedResponse(a,b,completed));
@@ -617,34 +609,6 @@ module.exports = async function handler(req,res){
     return res.status(200).json(upcomingResponse(a,b));
 
   }catch(e){
-    return res.status(200).json({
-      match:"Erreur contrôlée",
-      competition:"Version stable V7.3",
-      date_info:VERSION,
-      is_world_cup:false,
-      group:"",
-      niveau_confiance_global:0,
-      pari_du_jour:{
-        type:"Erreur contrôlée",
-        valeur:"API stable",
-        raison:e.message || "Erreur inconnue",
-        cote_estimee:"N/D"
-      },
-      stats_techniques:null,
-      pronostics:{
-        resultat_1x2:{valeur:"Erreur",label:"Erreur contrôlée",confiance:0,cote_estimee:""},
-        over_under:{valeur:"Erreur",confiance:0,cote_estimee:""},
-        btts:{valeur:"Erreur",confiance:0,cote_estimee:""},
-        double_chance:{valeur:"Erreur",confiance:0,cote_estimee:""},
-        handicap:{valeur:"Erreur",confiance:0,cote_estimee:""},
-        premier_but:{valeur:"Erreur",confiance:0,cote_estimee:""},
-        mi_temps_fin:{valeur:"Erreur",confiance:0,cote_estimee:""},
-        cage_inviolee:{valeur:"Erreur",confiance:0,cote_estimee:""},
-        score_exact:{valeur:"Erreur",confiance:0,cote_estimee:""},
-        winner:{valeur:"Erreur",confiance:0},
-        perdant:{valeur:"Erreur",confiance:0}
-      },
-      analyse_approfondie:{
-        forces_A:"Erreur contrôlée.",
-        faiblesses_A:"Le serveur n’a pas crashé.",
-        fo
+    return res.status(200).json(errorResponse(e.message));
+  }
+};
