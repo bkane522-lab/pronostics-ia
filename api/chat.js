@@ -1,4 +1,4 @@
-const VERSION = "STABLE_MATCHS_TERMINES_MAJ_2026_06_20";
+const VERSION = "STABLE_MATCHS_TERMINES_MAJ_2026_06_21";
 
 const GROUPS = [
   { g:"Groupe A", teams:["Mexique","Corée du Sud","Tchéquie","Afrique du Sud"] },
@@ -55,7 +55,12 @@ const WC_2026_RESULTS = [
 
   { date:"2026-06-20", group:"Groupe C", home:"Écosse", away:"Maroc", hg:0, ag:1 },
   { date:"2026-06-20", group:"Groupe C", home:"Brésil", away:"Haïti", hg:3, ag:0 },
-  { date:"2026-06-20", group:"Groupe D", home:"Turquie", away:"Paraguay", hg:0, ag:1 }
+  { date:"2026-06-20", group:"Groupe D", home:"Turquie", away:"Paraguay", hg:0, ag:1 },
+  { date:"2026-06-20", group:"Groupe F", home:"Pays-Bas", away:"Suède", hg:5, ag:1 },
+  { date:"2026-06-20", group:"Groupe E", home:"Allemagne", away:"Côte d’Ivoire", hg:2, ag:1 },
+
+  { date:"2026-06-21", group:"Groupe E", home:"Équateur", away:"Curaçao", hg:0, ag:0 },
+  { date:"2026-06-21", group:"Groupe F", home:"Tunisie", away:"Japon", hg:0, ag:4 }
 ];
 
 function clean(value){
@@ -104,7 +109,9 @@ function canonTeam(name){
     "bosnie herzégovine":"Bosnie",
     "tcheque":"Tchéquie",
     "republique tcheque":"Tchéquie",
-    "curacao":"Curaçao"
+    "curacao":"Curaçao",
+    "pays bas":"Pays-Bas",
+    "japon":"Japon"
   };
 
   return aliases[input] || String(name || "").trim();
@@ -123,9 +130,9 @@ function parseMatch(input){
 
   if(/\s+vs\s+/i.test(raw)){
     parts = raw.split(/\s+vs\s+/i);
-  } else if(/\s+contre\s+/i.test(raw)){
+  }else if(/\s+contre\s+/i.test(raw)){
     parts = raw.split(/\s+contre\s+/i);
-  } else if(/\s+-\s+/i.test(raw)){
+  }else if(/\s+-\s+/i.test(raw)){
     parts = raw.split(/\s+-\s+/i);
   }
 
@@ -141,8 +148,13 @@ function parseMatch(input){
 
 function findGroup(teamA, teamB){
   for(const group of GROUPS){
-    const hasA = group.teams.some(t => clean(t) === clean(teamA));
-    const hasB = group.teams.some(t => clean(t) === clean(teamB));
+    const hasA = group.teams.some(function(team){
+      return clean(team) === clean(teamA);
+    });
+
+    const hasB = group.teams.some(function(team){
+      return clean(team) === clean(teamB);
+    });
 
     if(hasA && hasB){
       return group.g;
@@ -153,7 +165,7 @@ function findGroup(teamA, teamB){
 }
 
 function findCompletedMatch(teamA, teamB){
-  return WC_2026_RESULTS.find(match => {
+  return WC_2026_RESULTS.find(function(match){
     const sameOrder =
       clean(match.home) === clean(teamA) &&
       clean(match.away) === clean(teamB);
@@ -188,14 +200,26 @@ function getScoreForTeam(match, team){
 }
 
 function getWinner(match){
-  if(match.hg > match.ag) return match.home;
-  if(match.ag > match.hg) return match.away;
+  if(match.hg > match.ag){
+    return match.home;
+  }
+
+  if(match.ag > match.hg){
+    return match.away;
+  }
+
   return "Match nul";
 }
 
 function getLoser(match){
-  if(match.hg > match.ag) return match.away;
-  if(match.ag > match.hg) return match.home;
+  if(match.hg > match.ag){
+    return match.away;
+  }
+
+  if(match.ag > match.hg){
+    return match.home;
+  }
+
   return "Aucun";
 }
 
@@ -346,7 +370,7 @@ function buildUpcomingMatchResponse(teamA, teamB){
     competition: "Match non terminé / données insuffisantes",
     date_info: group ? group : "Coupe du Monde 2026",
     is_world_cup: true,
-    group,
+    group: group,
     niveau_confiance_global: 30,
 
     pari_du_jour: {
@@ -496,7 +520,8 @@ module.exports = async function handler(req, res){
       });
     }
 
-    const { teamA, teamB } = parsed;
+    const teamA = parsed.teamA;
+    const teamB = parsed.teamB;
 
     const completedMatch = findCompletedMatch(teamA, teamB);
 
