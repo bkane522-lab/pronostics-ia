@@ -17,9 +17,7 @@
   --line:rgba(255,255,255,.12);
 }
 
-*{
-  box-sizing:border-box;
-}
+*{box-sizing:border-box}
 
 body{
   margin:0;
@@ -32,13 +30,8 @@ body{
   padding-bottom:90px;
 }
 
-button,input{
-  font-family:inherit;
-}
-
-button{
-  cursor:pointer;
-}
+button,input{font-family:inherit}
+button{cursor:pointer}
 
 .app{
   max-width:560px;
@@ -72,16 +65,12 @@ button{
   box-shadow:0 0 25px rgba(24,245,166,.22);
 }
 
-.title{
-  line-height:1.05;
-}
-
+.title{line-height:1.05}
 .title strong{
   display:block;
   letter-spacing:2px;
   font-size:18px;
 }
-
 .title span{
   color:var(--green);
   font-weight:900;
@@ -138,13 +127,8 @@ button{
   background:linear-gradient(135deg,var(--green),#6bffd1);
 }
 
-.page{
-  display:none;
-}
-
-.page.active{
-  display:block;
-}
+.page{display:none}
+.page.active{display:block}
 
 .card{
   background:
@@ -306,10 +290,7 @@ button{
   text-align:left;
 }
 
-.match-btn:active,
-.tab:active,
-.nav:active,
-.action:active{
+.match-btn:active,.tab:active,.nav:active,.action:active{
   transform:scale(.985);
 }
 
@@ -329,15 +310,11 @@ button{
   font-weight:850;
 }
 
-.odd{
-  text-align:right;
-}
-
+.odd{text-align:right}
 .odd b{
   color:var(--gold);
   display:block;
 }
-
 .odd span{
   color:var(--green);
   font-size:12px;
@@ -433,13 +410,8 @@ button{
   font-weight:750;
 }
 
-.loader,.error,.result{
-  display:none;
-}
-
-.loader.show,.error.show,.result.show{
-  display:block;
-}
+.loader,.error,.result{display:none}
+.loader.show,.error.show,.result.show{display:block}
 
 .loader{
   color:var(--green);
@@ -488,18 +460,13 @@ button{
   background:rgba(255,85,112,.1);
 }
 
-.result-head h2{
-  margin:0;
-}
-
+.result-head h2{margin:0}
 .result-head p{
   color:var(--muted);
   margin:6px 0 0;
 }
 
-.result-body{
-  padding:15px;
-}
+.result-body{padding:15px}
 
 .pick{
   border:1px solid rgba(245,197,66,.3);
@@ -515,10 +482,7 @@ button{
   text-transform:uppercase;
 }
 
-.pick h3{
-  margin:7px 0;
-}
-
+.pick h3{margin:7px 0}
 .pick p{
   color:var(--muted);
   margin:0;
@@ -617,26 +581,13 @@ button{
   color:var(--muted);
 }
 
-.row:first-of-type{
-  border-top:0;
-}
+.row:first-of-type{border-top:0}
 
 @media(max-width:390px){
-  .stats{
-    grid-template-columns:repeat(2,1fr);
-  }
-
-  .grid{
-    grid-template-columns:1fr;
-  }
-
-  .confidence{
-    grid-template-columns:1fr;
-  }
-
-  .action{
-    width:100%;
-  }
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .grid{grid-template-columns:1fr}
+  .confidence{grid-template-columns:1fr}
+  .action{width:100%}
 }
 </style>
 </head>
@@ -694,8 +645,8 @@ button{
 
       <div class="confidence">
         <div>
-          <small>Confiance IA</small>
-          <b>30%</b>
+          <small>Analyse IA</small>
+          <b>Variable</b>
         </div>
 
         <button class="action" type="button" data-match="Espagne vs Arabie Saoudite">Voir l'analyse →</button>
@@ -792,30 +743,6 @@ button{
     <h2 class="section-title">Matchs CDM 2026</h2>
 
     <div class="match-list">
-      <button class="match-btn" type="button" data-match="Pays-Bas vs Suède">
-        <div class="match-time"><b>Terminé</b><span>Groupe F</span></div>
-        <div class="match-teams"><div>🇳🇱 Pays-Bas</div><div>🇸🇪 Suède</div></div>
-        <div class="odd"><b>5-1</b><span>Final</span></div>
-      </button>
-
-      <button class="match-btn" type="button" data-match="Allemagne vs Côte d'Ivoire">
-        <div class="match-time"><b>Terminé</b><span>Groupe E</span></div>
-        <div class="match-teams"><div>🇩🇪 Allemagne</div><div>🇨🇮 Côte d'Ivoire</div></div>
-        <div class="odd"><b>2-1</b><span>Final</span></div>
-      </button>
-
-      <button class="match-btn" type="button" data-match="Équateur vs Curaçao">
-        <div class="match-time"><b>Terminé</b><span>Groupe E</span></div>
-        <div class="match-teams"><div>🇪🇨 Équateur</div><div>🇨🇼 Curaçao</div></div>
-        <div class="odd"><b>0-0</b><span>Final</span></div>
-      </button>
-
-      <button class="match-btn" type="button" data-match="Tunisie vs Japon">
-        <div class="match-time"><b>Terminé</b><span>Groupe F</span></div>
-        <div class="match-teams"><div>🇹🇳 Tunisie</div><div>🇯🇵 Japon</div></div>
-        <div class="odd"><b>0-4</b><span>Final</span></div>
-      </button>
-
       <button class="match-btn" type="button" data-match="Espagne vs Arabie Saoudite">
         <div class="match-time"><b>18:00</b><span>Aujourd'hui</span></div>
         <div class="match-teams"><div>🇪🇸 Espagne</div><div>🇸🇦 Arabie Saoudite</div></div>
@@ -948,252 +875,4 @@ function setActivePage(pageId){
 
 function renderGroups(){
   var holder = document.getElementById("groupsList");
-  if(!holder){ return; }
-
-  var html = "";
-
-  for(var i = 0; i < groups.length; i++){
-    html += '<div class="table-card">';
-    html += '<h3>' + escapeHtml(groups[i][0]) + '</h3>';
-
-    for(var j = 0; j < groups[i][1].length; j++){
-      var pts = j === 0 ? "6 pts" : j === 1 ? "3 pts" : "1 pt";
-      html += '<div class="row">';
-      html += '<span>' + (j + 1) + '. ' + escapeHtml(groups[i][1][j]) + '</span>';
-      html += '<span>' + pts + '</span>';
-      html += '</div>';
-    }
-
-    html += '</div>';
-  }
-
-  holder.innerHTML = html;
-}
-
-function analyzeMatch(match){
-  setActivePage("home");
-
-  var input = document.getElementById("matchInput");
-  if(input){
-    input.value = match;
-  }
-
-  setTimeout(function(){
-    sendMatch();
-  },250);
-}
-
-function sendMatch(){
-  var input = document.getElementById("matchInput");
-  var loader = document.getElementById("loader");
-  var errorBox = document.getElementById("errorBox");
-  var result = document.getElementById("result");
-  var match = input ? input.value.trim() : "";
-
-  if(errorBox){
-    errorBox.classList.remove("show");
-    errorBox.innerHTML = "";
-  }
-
-  if(result){
-    result.classList.remove("show");
-  }
-
-  if(!match){
-    if(errorBox){
-      errorBox.innerHTML = "Écris un match complet, exemple : France vs Sénégal.";
-      errorBox.classList.add("show");
-    }
-    return;
-  }
-
-  if(loader){
-    loader.classList.add("show");
-  }
-
-  fetch("/api/chat", {
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json"
-    },
-    body:JSON.stringify({
-      match:match
-    })
-  })
-  .then(function(response){
-    return response.text();
-  })
-  .then(function(text){
-    var data;
-
-    try{
-      data = JSON.parse(text);
-    }catch(e){
-      throw new Error("Réponse API non JSON : " + text.substring(0,120));
-    }
-
-    renderResult(data);
-  })
-  .catch(function(error){
-    if(errorBox){
-      errorBox.innerHTML = "Erreur : " + escapeHtml(error.message || "Impossible de contacter l'API.");
-      errorBox.classList.add("show");
-    }
-  })
-  .finally(function(){
-    if(loader){
-      loader.classList.remove("show");
-    }
-  });
-}
-
-function isFinished(data){
-  var type = "";
-  var comp = "";
-
-  if(data && data.pari_du_jour && data.pari_du_jour.type){
-    type = String(data.pari_du_jour.type).toLowerCase();
-  }
-
-  if(data && data.competition){
-    comp = String(data.competition).toLowerCase();
-  }
-
-  return type.indexOf("terminé") !== -1 ||
-         comp.indexOf("terminé") !== -1 ||
-         type.indexOf("termine") !== -1 ||
-         comp.indexOf("termine") !== -1;
-}
-
-function getValue(obj){
-  if(!obj){ return "Non disponible"; }
-  if(typeof obj === "string"){ return obj; }
-  return obj.valeur || obj.label || "Non disponible";
-}
-
-function pred(title,value){
-  return '<div class="pred"><span>' + escapeHtml(title) + '</span><b>' + escapeHtml(value) + '</b></div>';
-}
-
-function info(title,text){
-  if(!text){ return ""; }
-  return '<div class="info-box"><b style="color:var(--green)">' + escapeHtml(title) + '</b><br>' + escapeHtml(text) + '</div>';
-}
-
-function renderResult(data){
-  var result = document.getElementById("result");
-  if(!result){ return; }
-
-  var finished = isFinished(data);
-  var pick = data.pari_du_jour || {};
-  var pronos = data.pronostics || {};
-  var analyse = data.analyse_approfondie || {};
-
-  var html = "";
-
-  html += '<div class="result-card">';
-  html += '<div class="result-head">';
-  html += '<div class="status ' + (finished ? "finished" : "") + '">' + (finished ? "⛔ Match terminé" : "🤖 Analyse IA") + '</div>';
-  html += '<h2>' + escapeHtml(data.match || "Match") + '</h2>';
-  html += '<p>' + escapeHtml(data.competition || "") + '</p>';
-  html += '<p>' + escapeHtml(data.date_info || "") + '</p>';
-  html += '</div>';
-
-  html += '<div class="result-body">';
-  html += '<div class="pick">';
-  html += '<small>' + escapeHtml(pick.type || "Verdict") + '</small>';
-  html += '<h3>' + escapeHtml(pick.valeur || "Aucun pari conseillé") + '</h3>';
-  html += '<p>' + escapeHtml(pick.raison || data.verdict || "") + '</p>';
-  html += '</div>';
-
-  html += '<div class="pred-grid">';
-  html += pred("Résultat 1X2", getValue(pronos.resultat_1x2));
-  html += pred("Double chance", getValue(pronos.double_chance));
-  html += pred("Over / Under", getValue(pronos.over_under));
-  html += pred("BTTS", getValue(pronos.btts));
-  html += pred("Score", getValue(pronos.score_exact));
-  html += pred("Winner", getValue(pronos.winner));
-  html += '</div>';
-
-  html += info("Forces A", analyse.forces_A);
-  html += info("Forces B", analyse.forces_B);
-  html += info("Facteur clé", analyse.facteur_cle);
-
-  html += '<div class="info-box">⚠️ Estimations informatives uniquement. Ne pas utiliser cet outil comme seule base pour parier de l’argent réel.</div>';
-
-  html += '</div>';
-  html += '</div>';
-
-  result.innerHTML = html;
-  result.classList.add("show");
-
-  result.scrollIntoView({
-    behavior:"smooth",
-    block:"start"
-  });
-}
-
-document.addEventListener("DOMContentLoaded", function(){
-  var jsStatus = document.getElementById("jsStatus");
-
-  if(jsStatus){
-    jsStatus.innerHTML = "✅ JavaScript actif - boutons prêts";
-    jsStatus.classList.add("ok");
-  }
-
-  renderGroups();
-
-  var pageButtons = document.querySelectorAll("[data-page]");
-
-  for(var i = 0; i < pageButtons.length; i++){
-    pageButtons[i].addEventListener("click", function(){
-      setActivePage(this.getAttribute("data-page"));
-    });
-  }
-
-  var matchButtons = document.querySelectorAll("[data-match]");
-
-  for(var m = 0; m < matchButtons.length; m++){
-    matchButtons[m].addEventListener("click", function(){
-      analyzeMatch(this.getAttribute("data-match"));
-    });
-  }
-
-  var sendBtn = document.getElementById("sendBtn");
-
-  if(sendBtn){
-    sendBtn.addEventListener("click", function(){
-      sendMatch();
-    });
-  }
-
-  var input = document.getElementById("matchInput");
-
-  if(input){
-    input.addEventListener("keydown", function(e){
-      if(e.key === "Enter"){
-        sendMatch();
-      }
-    });
-  }
-
-  var notifyBtn = document.getElementById("notifyBtn");
-
-  if(notifyBtn){
-    notifyBtn.addEventListener("click", function(){
-      alert("Les notifications arrivent dans la prochaine version.");
-    });
-  }
-
-  var vipBtn = document.getElementById("vipBtn");
-
-  if(vipBtn){
-    vipBtn.addEventListener("click", function(){
-      alert("Paiement VIP à connecter plus tard.");
-    });
-  }
-});
-</script>
-
-</body>
-</html>
+  if(
