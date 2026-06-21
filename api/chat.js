@@ -1,4 +1,4 @@
-const VERSION = "V7_2_ANALYSE_PLUS_STABLE";
+const VERSION = "V7_3_BUTEURS_CONFIANCE_VARIABLE";
 
 const GROUPS = [
   { g:"Groupe A", teams:["Mexique","Corée du Sud","Tchéquie","Afrique du Sud"] },
@@ -337,19 +337,46 @@ function tableText(groupName){
 function riskLevel(sa,sb,diff){
   var totalGames = sa.played + sb.played;
 
-  if(totalGames < 2){
-    return "Risque élevé";
-  }
-
-  if(totalGames < 4){
-    return "Risque moyen/élevé";
-  }
-
-  if(Math.abs(diff) < 8){
-    return "Risque moyen";
-  }
+  if(totalGames < 2){ return "Risque élevé"; }
+  if(totalGames < 4){ return "Risque moyen/élevé"; }
+  if(Math.abs(diff) < 8){ return "Risque moyen"; }
 
   return "Risque modéré";
+}
+
+function buildScorerTips(a,b,sa,sb){
+  var tips = [];
+
+  var confA = sa.played > 0 ? Math.min(55, Math.round(25 + sa.avgGF * 15)) : 20;
+  var confB = sb.played > 0 ? Math.min(55, Math.round(25 + sb.avgGF * 15)) : 20;
+
+  tips.push({
+    type:"Buteur équipe A",
+    equipe:a,
+    valeur:confA >= 45 ? "Buteur à surveiller" : "Buteur à éviter",
+    confiance:confA,
+    raison:a + " marque en moyenne " + sa.avgGF + " but(s)/match sur les données CDM enregistrées."
+  });
+
+  tips.push({
+    type:"Buteur équipe B",
+    equipe:b,
+    valeur:confB >= 45 ? "Buteur à surveiller" : "Buteur à éviter",
+    confiance:confB,
+    raison:b + " marque en moyenne " + sb.avgGF + " but(s)/match sur les données CDM enregistrées."
+  });
+
+  var doubleConf = Math.max(10, Math.min(30, Math.round((sa.avgGF + sb.avgGF) * 8)));
+
+  tips.push({
+    type:"Doublé",
+    equipe:"Tous",
+    valeur:"À éviter",
+    confiance:doubleConf,
+    raison:"Le pari doublé est très risqué sans composition officielle, temps de jeu et tireur de penalties."
+  });
+
+  return tips;
 }
 
 function makePrediction(a,b,sa,sb){
@@ -357,7 +384,7 @@ function makePrediction(a,b,sa,sb){
 
   if(totalGames < 2){
     return {
-      confidence:30,
+      confidence:35,
       result:"À éviter",
       doubleChance:"Pas de choix clair",
       overUnder:"À éviter",
@@ -366,6 +393,11 @@ function makePrediction(a,b,sa,sb){
       winner:"Données insuffisantes",
       best:"Aucun pari fort conseillé",
       risk:"Risque élevé",
+      confResult:20,
+      confDouble:25,
+      confOver:25,
+      confBtts:20,
+      confScore:10,
       verdict:"Données encore trop limitées. Aucun pari fort conseillé."
     };
   }
@@ -377,7 +409,7 @@ function makePrediction(a,b,sa,sb){
   var winner = "Match serré";
   var result = "X";
   var doubleChance = "Pas de choix clair";
-  var confidence = 50;
+  var confidence = 52;
 
   if(diff >= 12){
     winner = a;
@@ -395,43 +427,37 @@ function makePrediction(a,b,sa,sb){
 
   var totalGoalsAvg = sa.avgGF + sb.avgGF;
   var overUnder = "À éviter";
+  var confOver = 35;
 
   if(totalGoalsAvg >= 2.4){
     overUnder = "Over 1.5 prudent";
+    confOver = 58;
   }else if(totalGoalsAvg <= 1.8){
     overUnder = "Under 3.5 prudent";
+    confOver = 60;
   }else{
     overUnder = "Ligne buts à éviter";
+    confOver = 35;
   }
 
   var btts = "À éviter";
+  var confBtts = 30;
 
   if(sa.avgGF >= 1 && sb.avgGF >= 1 && sa.avgGA >= 0.7 && sb.avgGA >= 0.7){
     btts = "Oui possible";
+    confBtts = 48;
   }
 
   var scoreA = Math.max(0, Math.round((sa.avgGF + sb.avgGA) / 2));
   var scoreB = Math.max(0, Math.round((sb.avgGF + sa.avgGA) / 2));
 
   var risk = riskLevel(sa,sb,diff);
-
   var best = "Aucun pari fort conseillé";
 
-  if(overUnder === "Under 3.5 prudent"){
-    best = "Option prudente : Under 3.5";
-  }
-
-  if(overUnder === "Over 1.5 prudent"){
-    best = "Option prudente : Over 1.5";
-  }
-
-  if(doubleChance !== "Pas de choix clair" && confidence >= 60){
-    best = "Option prudente : Double chance " + doubleChance;
-  }
-
-  if(risk === "Risque élevé"){
-    best = "Aucun pari fort conseillé";
-  }
+  if(overUnder === "Under 3.5 prudent"){ best = "Option prudente : Under 3.5"; }
+  if(overUnder === "Over 1.5 prudent"){ best = "Option prudente : Over 1.5"; }
+  if(doubleChance !== "Pas de choix clair" && confidence >= 60){ best = "Option prudente : Double chance " + doubleChance; }
+  if(risk === "Risque élevé"){ best = "Aucun pari fort conseillé"; }
 
   return {
     confidence:confidence,
@@ -443,6 +469,11 @@ function makePrediction(a,b,sa,sb){
     winner:winner,
     best:best,
     risk:risk,
+    confResult:confidence,
+    confDouble:doubleChance === "Pas de choix clair" ? 35 : Math.min(75, confidence + 10),
+    confOver:confOver,
+    confBtts:confBtts,
+    confScore:18,
     verdict:best + ". " + risk + ". Analyse basée seulement sur les résultats CDM enregistrés. À confirmer avec compositions, blessures et contexte."
   };
 }
@@ -528,16 +559,16 @@ function upcomingResponse(a,b){
       rapport_force:{ detail:"Classement " + group + " : " + classement }
     },
     pronostics:{
-      resultat_1x2:{ valeur:p.result, label:p.winner, confiance:p.confidence, cote_estimee:"" },
-      over_under:{ valeur:p.overUnder, confiance:Math.max(25,p.confidence - 10), cote_estimee:"" },
-      btts:{ valeur:p.btts, confiance:Math.max(25,p.confidence - 12), cote_estimee:"" },
-      double_chance:{ valeur:p.doubleChance, confiance:Math.min(75,p.confidence + 10), cote_estimee:"" },
+      resultat_1x2:{ valeur:p.result, label:p.winner, confiance:p.confResult, cote_estimee:"" },
+      over_under:{ valeur:p.overUnder, confiance:p.confOver, cote_estimee:"" },
+      btts:{ valeur:p.btts, confiance:p.confBtts, cote_estimee:"" },
+      double_chance:{ valeur:p.doubleChance, confiance:p.confDouble, cote_estimee:"" },
       handicap:{ valeur:"À éviter", confiance:30, cote_estimee:"" },
       premier_but:{ valeur:"À éviter", confiance:25, cote_estimee:"" },
       mi_temps_fin:{ valeur:"À éviter", confiance:25, cote_estimee:"" },
       cage_inviolee:{ valeur:"À éviter", confiance:25, cote_estimee:"" },
-      score_exact:{ valeur:p.score, confiance:18, cote_estimee:"" },
-      winner:{ valeur:p.winner, confiance:p.confidence },
+      score_exact:{ valeur:p.score, confiance:p.confScore, cote_estimee:"" },
+      winner:{ valeur:p.winner, confiance:p.confResult },
       perdant:{ valeur:"Données insuffisantes", confiance:0 }
     },
     analyse_approfondie:{
@@ -548,7 +579,7 @@ function upcomingResponse(a,b){
       facteur_cle:"Niveau de risque : " + p.risk + ". Classement du groupe : " + classement + ". Meilleure lecture prudente : " + p.best + "."
     },
     analysis:{},
-    buteurs_potentiels:[],
+    buteurs_potentiels:buildScorerTips(a,b,sa,sb),
     verdict:p.verdict
   };
 }
@@ -559,7 +590,7 @@ module.exports = async function handler(req,res){
       return res.status(200).json({
         ok:true,
         version:VERSION,
-        message:"API active V7.2 Analyse Plus."
+        message:"API active V7.3 buteurs et confiance variable."
       });
     }
 
@@ -588,7 +619,7 @@ module.exports = async function handler(req,res){
   }catch(e){
     return res.status(200).json({
       match:"Erreur contrôlée",
-      competition:"Version stable V7.2",
+      competition:"Version stable V7.3",
       date_info:VERSION,
       is_world_cup:false,
       group:"",
@@ -616,13 +647,4 @@ module.exports = async function handler(req,res){
       analyse_approfondie:{
         forces_A:"Erreur contrôlée.",
         faiblesses_A:"Le serveur n’a pas crashé.",
-        forces_B:"Erreur contrôlée.",
-        faiblesses_B:"Corrigeable sans casser l’app.",
-        facteur_cle:"Message technique : " + (e.message || "Erreur inconnue")
-      },
-      analysis:{},
-      buteurs_potentiels:[],
-      verdict:"Erreur contrôlée : le serveur répond quand même en JSON."
-    });
-  }
-};
+        fo
