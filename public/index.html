@@ -9,7 +9,6 @@
 :root{
   --bg:#030914;
   --card:#0b1828;
-  --card2:#101f33;
   --green:#18f5a6;
   --gold:#f5c542;
   --red:#ff5570;
@@ -31,6 +30,14 @@ body{
     linear-gradient(180deg,#020712,#071322,#030914);
   color:var(--text);
   padding-bottom:90px;
+}
+
+button,input{
+  font-family:inherit;
+}
+
+button{
+  cursor:pointer;
 }
 
 .app{
@@ -299,9 +306,16 @@ body{
   text-align:left;
 }
 
+.match-btn:active,
+.tab:active,
+.nav:active,
+.action:active{
+  transform:scale(.985);
+}
+
 .match-time b{
   display:block;
-  font-size:18px;
+  font-size:17px;
 }
 
 .match-time span{
@@ -412,7 +426,7 @@ body{
 .sample{
   border:1px solid var(--line);
   background:rgba(255,255,255,.06);
-  color:var(--soft);
+  color:var(--text);
   border-radius:999px;
   padding:8px 10px;
   font-size:12px;
@@ -506,7 +520,7 @@ body{
 }
 
 .pick p{
-  color:var(--soft);
+  color:var(--muted);
   margin:0;
   line-height:1.4;
 }
@@ -544,7 +558,7 @@ body{
   border-radius:16px;
   padding:12px;
   margin-top:10px;
-  color:var(--soft);
+  color:var(--muted);
   line-height:1.4;
 }
 
@@ -600,7 +614,7 @@ body{
   justify-content:space-between;
   padding:8px 0;
   border-top:1px solid var(--line);
-  color:var(--soft);
+  color:var(--muted);
 }
 
 .row:first-of-type{
@@ -638,7 +652,7 @@ body{
       <div class="logo">⚽</div>
       <div class="title">
         <strong>PRONOSTICS</strong>
-        <span><span class="ia">IA</span> <span class="pro">PRO</span></span>
+        <span>IA PRO</span>
       </div>
     </div>
 
@@ -648,76 +662,78 @@ body{
   <div id="jsStatus" class="js-status">⚠️ JavaScript pas encore actif</div>
 
   <div class="tabs">
-    <button class="tab-btn active" type="button" data-page="home">🎯 Pronostics</button>
-    <button class="tab-btn" type="button" data-page="matchs">⚽ Matchs</button>
-    <button class="tab-btn" type="button" data-page="live">📡 Live</button>
-    <button class="tab-btn" type="button" data-page="vip">👑 VIP</button>
-    <button class="tab-btn" type="button" data-page="groups">🏆 Groupes</button>
+    <button class="tab active" type="button" data-page="home">🎯 Pronostics</button>
+    <button class="tab" type="button" data-page="matchs">⚽ Matchs</button>
+    <button class="tab" type="button" data-page="live">📡 Live</button>
+    <button class="tab" type="button" data-page="vip">👑 VIP</button>
+    <button class="tab" type="button" data-page="groups">🏆 Groupes</button>
   </div>
 
   <main id="home" class="page active">
 
     <section class="card">
-      <div class="hero-top">
-        <div class="label">🏆 Coupe du Monde 2026</div>
-        <div class="badge">CDM 2026</div>
-      </div>
+      <div class="label">🏆 Coupe du Monde 2026</div>
 
       <div class="hero-match">
         <div>
-          <div class="flag">🇩🇪</div>
-          <div class="team-name">Allemagne</div>
-          <div class="group">Groupe E</div>
+          <div class="flag">🇪🇸</div>
+          <div class="team-name">Espagne</div>
+          <div class="group">Groupe H</div>
         </div>
 
         <div class="vs">VS</div>
 
         <div>
-          <div class="flag">🇨🇮</div>
-          <div class="team-name">Côte d'Ivoire</div>
-          <div class="group">Groupe E</div>
+          <div class="flag">🇸🇦</div>
+          <div class="team-name">Arabie Saoudite</div>
+          <div class="group">Groupe H</div>
         </div>
       </div>
 
-      <div class="meta">📅 Aujourd'hui · 22:00 · Analyse prudente</div>
+      <div class="meta">📅 Aujourd'hui · 18:00 · Match à venir</div>
 
       <div class="confidence">
         <div>
           <small>Confiance IA</small>
-          <b>72%</b>
-          <div class="progress"><i></i></div>
+          <b>30%</b>
         </div>
 
-        <button class="action" type="button" data-match="Allemagne vs Côte d'Ivoire">Voir l'analyse →</button>
+        <button class="action" type="button" data-match="Espagne vs Arabie Saoudite">Voir l'analyse →</button>
       </div>
     </section>
 
     <section class="stats">
-      <div class="stat"><b>25</b><span>Bons pronos</span></div>
-      <div class="stat"><b>68%</b><span>Réussite IA</span></div>
-      <div class="stat"><b>12</b><span>Alertes live</span></div>
-      <div class="stat"><b>8</b><span>Dans 48h</span></div>
+      <div class="stat"><b>CDM</b><span>2026</span></div>
+      <div class="stat"><b>4</b><span>Terminés</span></div>
+      <div class="stat"><b>4</b><span>À venir</span></div>
+      <div class="stat"><b>IA</b><span>Prudente</span></div>
     </section>
 
-    <h2 class="section-title">Matchs du jour</h2>
+    <h2 class="section-title">Matchs CDM récents</h2>
 
     <div class="match-list">
       <button class="match-btn" type="button" data-match="Pays-Bas vs Suède">
-        <div class="match-time"><b>19:00</b><span>Aujourd'hui</span></div>
+        <div class="match-time"><b>Terminé</b><span>Groupe F</span></div>
         <div class="match-teams"><div>🇳🇱 Pays-Bas</div><div>🇸🇪 Suède</div></div>
-        <div class="odd"><b>1.95</b><span>65%</span></div>
+        <div class="odd"><b>5-1</b><span>Final</span></div>
       </button>
 
       <button class="match-btn" type="button" data-match="Allemagne vs Côte d'Ivoire">
-        <div class="match-time"><b>22:00</b><span>Aujourd'hui</span></div>
+        <div class="match-time"><b>Terminé</b><span>Groupe E</span></div>
         <div class="match-teams"><div>🇩🇪 Allemagne</div><div>🇨🇮 Côte d'Ivoire</div></div>
-        <div class="odd"><b>2.10</b><span>72%</span></div>
+        <div class="odd"><b>2-1</b><span>Final</span></div>
       </button>
 
       <button class="match-btn" type="button" data-match="Équateur vs Curaçao">
-        <div class="match-time"><b>02:00</b><span>Demain</span></div>
+        <div class="match-time"><b>Terminé</b><span>Groupe E</span></div>
         <div class="match-teams"><div>🇪🇨 Équateur</div><div>🇨🇼 Curaçao</div></div>
-        <div class="odd"><b>N/D</b><span>À venir</span></div>
+        <div class="odd"><b>0-0</b><span>Final</span></div>
+      </button>
+
+      <button class="match-btn" type="button" data-match="Tunisie vs Japon">
+        <div class="match-time"><b>Terminé</b><span>Groupe F</span></div>
+        <div class="match-teams"><div>🇹🇳 Tunisie</div><div>🇯🇵 Japon</div></div>
+        <div class="odd"><b>0-4</b><span>Final</span></div>
       </button>
     </div>
 
@@ -725,27 +741,27 @@ body{
 
     <div class="grid">
       <button class="tile" type="button" data-page="matchs">
-        <div class="icon">📅</div>
-        <h3>Pronostics du jour</h3>
-        <p>Voir les coupons et matchs proposés.</p>
+        <div class="icon">⚽</div>
+        <h3>Matchs CDM</h3>
+        <p>Voir les matchs terminés et à venir.</p>
       </button>
 
       <button class="tile" type="button" data-page="live">
         <div class="icon">📡</div>
         <h3>Live</h3>
-        <p>Suivre les données en direct.</p>
+        <p>Page de suivi en direct.</p>
       </button>
 
       <button class="tile" type="button" data-page="vip">
         <div class="icon">👑</div>
         <h3>VIP</h3>
-        <p>Voir les options premium.</p>
+        <p>Options premium à connecter plus tard.</p>
       </button>
 
       <button class="tile" type="button" data-page="groups">
         <div class="icon">🏆</div>
         <h3>Groupes</h3>
-        <p>Voir les poules CDM 2026.</p>
+        <p>Poules CDM 2026.</p>
       </button>
     </div>
 
@@ -759,9 +775,9 @@ body{
 
       <div class="samples">
         <button class="sample" type="button" data-match="France vs Sénégal">France vs Sénégal</button>
-        <button class="sample" type="button" data-match="Suisse vs Bosnie">Suisse vs Bosnie</button>
-        <button class="sample" type="button" data-match="Canada vs Qatar">Canada vs Qatar</button>
-        <button class="sample" type="button" data-match="Brésil vs Haïti">Brésil vs Haïti</button>
+        <button class="sample" type="button" data-match="Allemagne vs Côte d'Ivoire">Allemagne vs Côte d'Ivoire</button>
+        <button class="sample" type="button" data-match="Pays-Bas vs Suède">Pays-Bas vs Suède</button>
+        <button class="sample" type="button" data-match="Tunisie vs Japon">Tunisie vs Japon</button>
       </div>
 
       <div id="loader" class="loader">Analyse IA en cours...</div>
@@ -773,25 +789,55 @@ body{
   </main>
 
   <main id="matchs" class="page">
-    <h2 class="section-title">Coupons gratuits</h2>
+    <h2 class="section-title">Matchs CDM 2026</h2>
 
     <div class="match-list">
-      <button class="match-btn" type="button" data-match="Arsenal vs Chelsea">
-        <div class="match-time"><b>15:00</b><span>Premier League</span></div>
-        <div class="match-teams"><div>🔴 Arsenal</div><div>🔵 Chelsea</div></div>
-        <div class="odd"><b>1X</b><span>74%</span></div>
+      <button class="match-btn" type="button" data-match="Pays-Bas vs Suède">
+        <div class="match-time"><b>Terminé</b><span>Groupe F</span></div>
+        <div class="match-teams"><div>🇳🇱 Pays-Bas</div><div>🇸🇪 Suède</div></div>
+        <div class="odd"><b>5-1</b><span>Final</span></div>
       </button>
 
-      <button class="match-btn" type="button" data-match="Real Madrid vs Barcelone">
-        <div class="match-time"><b>18:30</b><span>La Liga</span></div>
-        <div class="match-teams"><div>⚪ Real Madrid</div><div>🔵 Barcelone</div></div>
-        <div class="odd"><b>+1.5</b><span>81%</span></div>
+      <button class="match-btn" type="button" data-match="Allemagne vs Côte d'Ivoire">
+        <div class="match-time"><b>Terminé</b><span>Groupe E</span></div>
+        <div class="match-teams"><div>🇩🇪 Allemagne</div><div>🇨🇮 Côte d'Ivoire</div></div>
+        <div class="odd"><b>2-1</b><span>Final</span></div>
       </button>
 
-      <button class="match-btn" type="button" data-match="Paris SG vs Marseille">
-        <div class="match-time"><b>21:00</b><span>Ligue 1</span></div>
-        <div class="match-teams"><div>🔵 Paris SG</div><div>⚪ Marseille</div></div>
-        <div class="odd"><b>1</b><span>78%</span></div>
+      <button class="match-btn" type="button" data-match="Équateur vs Curaçao">
+        <div class="match-time"><b>Terminé</b><span>Groupe E</span></div>
+        <div class="match-teams"><div>🇪🇨 Équateur</div><div>🇨🇼 Curaçao</div></div>
+        <div class="odd"><b>0-0</b><span>Final</span></div>
+      </button>
+
+      <button class="match-btn" type="button" data-match="Tunisie vs Japon">
+        <div class="match-time"><b>Terminé</b><span>Groupe F</span></div>
+        <div class="match-teams"><div>🇹🇳 Tunisie</div><div>🇯🇵 Japon</div></div>
+        <div class="odd"><b>0-4</b><span>Final</span></div>
+      </button>
+
+      <button class="match-btn" type="button" data-match="Espagne vs Arabie Saoudite">
+        <div class="match-time"><b>18:00</b><span>Aujourd'hui</span></div>
+        <div class="match-teams"><div>🇪🇸 Espagne</div><div>🇸🇦 Arabie Saoudite</div></div>
+        <div class="odd"><b>À venir</b><span>Groupe H</span></div>
+      </button>
+
+      <button class="match-btn" type="button" data-match="Belgique vs Iran">
+        <div class="match-time"><b>21:00</b><span>Aujourd'hui</span></div>
+        <div class="match-teams"><div>🇧🇪 Belgique</div><div>🇮🇷 Iran</div></div>
+        <div class="odd"><b>À venir</b><span>Groupe G</span></div>
+      </button>
+
+      <button class="match-btn" type="button" data-match="Uruguay vs Cap-Vert">
+        <div class="match-time"><b>00:00</b><span>Demain</span></div>
+        <div class="match-teams"><div>🇺🇾 Uruguay</div><div>🇨🇻 Cap-Vert</div></div>
+        <div class="odd"><b>À venir</b><span>Groupe H</span></div>
+      </button>
+
+      <button class="match-btn" type="button" data-match="Nouvelle-Zélande vs Égypte">
+        <div class="match-time"><b>03:00</b><span>Demain</span></div>
+        <div class="match-teams"><div>🇳🇿 Nouvelle-Zélande</div><div>🇪🇬 Égypte</div></div>
+        <div class="odd"><b>À venir</b><span>Groupe G</span></div>
       </button>
     </div>
   </main>
@@ -802,26 +848,26 @@ body{
 
       <div class="hero-match">
         <div>
-          <div class="flag">🇫🇷</div>
-          <div class="team-name">France</div>
-          <div class="group">xG 1.47</div>
-        </div>
-
-        <div class="vs">1-1</div>
-
-        <div>
           <div class="flag">🇪🇸</div>
           <div class="team-name">Espagne</div>
-          <div class="group">xG 0.83</div>
+          <div class="group">Groupe H</div>
+        </div>
+
+        <div class="vs">VS</div>
+
+        <div>
+          <div class="flag">🇸🇦</div>
+          <div class="team-name">Arabie Saoudite</div>
+          <div class="group">Groupe H</div>
         </div>
       </div>
 
-      <div class="meta">2e MT · 78:24 · Données en direct</div>
+      <div class="meta">18:00 · Données live à connecter</div>
     </section>
 
     <div class="info-box">
       <b style="color:var(--green)">Lecture IA</b><br>
-      France domine légèrement en xG et en possession. L'Espagne reste menaçante en contre.
+      Cette page servira plus tard pour les statistiques en direct : xG, possession, momentum et alertes.
     </div>
   </main>
 
@@ -829,16 +875,9 @@ body{
     <section class="card">
       <div class="label">👑 VIP / Premium</div>
       <h2>Pronostics IA Pro VIP</h2>
-      <p style="color:var(--soft)">Analyses avancées, alertes live, coupons premium et statistiques détaillées.</p>
+      <p style="color:var(--muted)">Analyses avancées, alertes live, coupons premium et statistiques détaillées.</p>
       <button class="action" type="button" id="vipBtn">Passer en VIP →</button>
     </section>
-
-    <div class="grid">
-      <div class="stat"><b>0€</b><span>Gratuit</span></div>
-      <div class="stat"><b>3,99€</b><span>Pro</span></div>
-      <div class="stat"><b>9,99€</b><span>VIP</span></div>
-      <div class="stat"><b>24/7</b><span>Alertes</span></div>
-    </div>
   </main>
 
   <main id="groups" class="page">
@@ -850,7 +889,7 @@ body{
 
 <nav class="bottom-nav">
   <button class="nav active" type="button" data-page="home"><i>🏠</i><span>Accueil</span></button>
-  <button class="nav" type="button" data-page="matchs"><i>🎯</i><span>Matchs</span></button>
+  <button class="nav" type="button" data-page="matchs"><i>⚽</i><span>Matchs</span></button>
   <button class="nav" type="button" data-page="live"><i>📡</i><span>Live</span></button>
   <button class="nav" type="button" data-page="vip"><i>👑</i><span>VIP</span></button>
   <button class="nav" type="button" data-page="groups"><i>🏆</i><span>Groupes</span></button>
@@ -874,7 +913,6 @@ var groups = [
 
 function escapeHtml(value){
   value = String(value === undefined || value === null ? "" : value);
-
   return value
     .replace(/&/g,"&amp;")
     .replace(/</g,"&lt;")
@@ -885,7 +923,7 @@ function escapeHtml(value){
 
 function setActivePage(pageId){
   var pages = document.querySelectorAll(".page");
-  var tabs = document.querySelectorAll(".tab-btn");
+  var tabs = document.querySelectorAll(".tab");
   var navs = document.querySelectorAll(".nav");
 
   for(var i = 0; i < pages.length; i++){
@@ -893,7 +931,6 @@ function setActivePage(pageId){
   }
 
   var page = document.getElementById(pageId);
-
   if(page){
     page.classList.add("active");
   }
@@ -911,10 +948,7 @@ function setActivePage(pageId){
 
 function renderGroups(){
   var holder = document.getElementById("groupsList");
-
-  if(!holder){
-    return;
-  }
+  if(!holder){ return; }
 
   var html = "";
 
@@ -924,7 +958,6 @@ function renderGroups(){
 
     for(var j = 0; j < groups[i][1].length; j++){
       var pts = j === 0 ? "6 pts" : j === 1 ? "3 pts" : "1 pt";
-
       html += '<div class="row">';
       html += '<span>' + (j + 1) + '. ' + escapeHtml(groups[i][1][j]) + '</span>';
       html += '<span>' + pts + '</span>';
@@ -941,7 +974,6 @@ function analyzeMatch(match){
   setActivePage("home");
 
   var input = document.getElementById("matchInput");
-
   if(input){
     input.value = match;
   }
@@ -972,7 +1004,6 @@ function sendMatch(){
       errorBox.innerHTML = "Écris un match complet, exemple : France vs Sénégal.";
       errorBox.classList.add("show");
     }
-
     return;
   }
 
@@ -1035,14 +1066,8 @@ function isFinished(data){
 }
 
 function getValue(obj){
-  if(!obj){
-    return "Non disponible";
-  }
-
-  if(typeof obj === "string"){
-    return obj;
-  }
-
+  if(!obj){ return "Non disponible"; }
+  if(typeof obj === "string"){ return obj; }
   return obj.valeur || obj.label || "Non disponible";
 }
 
@@ -1051,19 +1076,13 @@ function pred(title,value){
 }
 
 function info(title,text){
-  if(!text){
-    return "";
-  }
-
+  if(!text){ return ""; }
   return '<div class="info-box"><b style="color:var(--green)">' + escapeHtml(title) + '</b><br>' + escapeHtml(text) + '</div>';
 }
 
 function renderResult(data){
   var result = document.getElementById("result");
-
-  if(!result){
-    return;
-  }
+  if(!result){ return; }
 
   var finished = isFinished(data);
   var pick = data.pari_du_jour || {};
