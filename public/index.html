@@ -875,4 +875,308 @@ function setActivePage(pageId){
 
 function renderGroups(){
   var holder = document.getElementById("groupsList");
-  if(
+  if(!holder){ return; }
+
+  var html = "";
+
+  for(var i = 0; i < groups.length; i++){
+    html += '<div class="table-card">';
+    html += '<h3>' + escapeHtml(groups[i][0]) + '</h3>';
+
+    for(var j = 0; j < groups[i][1].length; j++){
+      var pts = j === 0 ? "6 pts" : j === 1 ? "3 pts" : "1 pt";
+      html += '<div class="row">';
+      html += '<span>' + (j + 1) + '. ' + escapeHtml(groups[i][1][j]) + '</span>';
+      html += '<span>' + pts + '</span>';
+      html += '</div>';
+    }
+
+    html += '</div>';
+  }
+
+  holder.innerHTML = html;
+}
+
+function analyzeMatch(match){
+  setActivePage("home");
+
+  var input = document.getElementById("matchInput");
+  if(input){
+    input.value = match;
+  }
+
+  setTimeout(function(){
+    sendMatch();
+  },250);
+}
+
+function notifyUser(title,message){
+  if(!("Notification" in window)){
+    return;
+  }
+
+  if(Notification.permission === "granted"){
+    new Notification(title,{
+      body:message
+    });
+  }
+}
+
+function activateNotifications(){
+  if(!("Notification" in window)){
+    alert("Les notifications ne sont pas disponibles sur ce navigateur.");
+    return;
+  }
+
+  Notification.requestPermission().then(function(permission){
+    if(permission === "granted"){
+      alert("Notifications activées ✅");
+      notifyUser("Pronostics IA Pro","Les notifications sont activées.");
+    }else{
+      alert("Notifications refusées ou bloquées.");
+    }
+  });
+}
+
+function sendMatch(){
+  var input = document.getElementById("matchInput");
+  var loader = document.getElementById("loader");
+  var errorBox = document.getElementById("errorBox");
+  var result = document.getElementById("result");
+  var match = input ? input.value.trim() : "";
+
+  if(errorBox){
+    errorBox.classList.remove("show");
+    errorBox.innerHTML = "";
+  }
+
+  if(result){
+    result.classList.remove("show");
+  }
+
+  if(!match){
+    if(errorBox){
+      errorBox.innerHTML = "Écris un match complet, exemple : France vs Sénégal.";
+      errorBox.classList.add("show");
+    }
+    return;
+  }
+
+  if(loader){
+    loader.classList.add("show");
+  }
+
+  fetch("/api/chat", {
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json"
+    },
+    body:JSON.stringify({
+      match:match
+    })
+  })
+  .then(function(response){
+    return response.text();
+  })
+  .then(function(text){
+    var data;
+
+    try{
+      data = JSON.parse(text);
+    }catch(e){
+      throw new Error("Réponse API non JSON : " + text.substring(0,120));
+    }
+
+    renderResult(data);
+    notifyUser("Analyse IA prête", data.match || "Ton analyse est prête.");
+  })
+  .catch(function(error){
+    if(errorBox){
+      errorBox.innerHTML = "Erreur : " + escapeHtml(error.message || "Impossible de contacter l'API.");
+      errorBox.classList.add("show");
+    }
+  })
+  .finally(function(){
+    if(loader){
+      loader.classList.remove("show");
+    }
+  });
+}
+
+function isFinished(data){
+  var type = "";
+  var comp = "";
+
+  if(data && data.pari_du_jour && data.pari_du_jour.type){
+    type = String(data.pari_du_jour.type).toLowerCase();
+  }
+
+  if(data && data.competition){
+    comp = String(data.competition).toLowerCase();
+  }
+
+  return type.indexOf("match terminé") !== -1 ||
+         comp.indexOf("match terminé") !== -1 ||
+         type.indexOf("match termine") !== -1 ||
+         comp.indexOf("match termine") !== -1;
+}
+
+function getValue(obj){
+  if(!obj){ return "Non disponible"; }
+  if(typeof obj === "string"){ return obj; }
+  return obj.valeur || obj.label || "Non disponible";
+}
+
+function pred(title,value,confidence){
+  var conf = confidence || 0;
+  return '<div class="pred"><span>' + escapeHtml(title) + '</span><b>' + escapeHtml(value) + '</b><small>' + conf + '%</small></div>';
+}
+
+function info(title,text){
+  if(!text){ return ""; }
+  return '<div class="info-box"><b style="color:var(--green)">' + escapeHtml(title) + '</b><br>' + escapeHtml(text) + '</div>';
+}
+
+function renderScorers(list){
+  if(!list || !list.length){
+    return "";
+  }
+
+  var html = '<div class="info-box">';
+  html += '<b style="color:var(--gold)">⚽ Buteurs / Doublé</b><br>';
+
+  for(var i = 0; i < list.length; i++){
+    var item = list[i];
+
+    html += '<div style="margin-top:10px">';
+    html += '<b style="color:var(--green)">' + escapeHtml(item.type || "Buteur") + '</b><br>';
+    html += escapeHtml(item.equipe || "") + " — ";
+    html += escapeHtml(item.valeur || "") + " ";
+    html += "(" + escapeHtml(item.confiance || 0) + "%)<br>";
+    html += '<small>' + escapeHtml(item.raison || "") + '</small>';
+    html += '</div>';
+  }
+
+  html += '</div>';
+
+  return html;
+}
+
+function renderResult(data){
+  var result = document.getElementById("result");
+  if(!result){ return; }
+
+  var finished = isFinished(data);
+  var pick = data.pari_du_jour || {};
+  var pronos = data.pronostics || {};
+  var analyse = data.analyse_approfondie || {};
+
+  var html = "";
+
+  html += '<div class="result-card">';
+  html += '<div class="result-head">';
+  html += '<div class="status ' + (finished ? "finished" : "") + '">' + (finished ? "⛔ Match terminé" : "🤖 Analyse IA") + '</div>';
+  html += '<h2>' + escapeHtml(data.match || "Match") + '</h2>';
+  html += '<p>' + escapeHtml(data.competition || "") + '</p>';
+  html += '<p>' + escapeHtml(data.date_info || "") + '</p>';
+  html += '</div>';
+
+  html += '<div class="result-body">';
+  html += '<div class="pick">';
+  html += '<small>' + escapeHtml(pick.type || "Verdict") + '</small>';
+  html += '<h3>' + escapeHtml(pick.valeur || "Aucun pari conseillé") + '</h3>';
+  html += '<p>' + escapeHtml(pick.raison || data.verdict || "") + '</p>';
+  html += '</div>';
+
+  html += '<div class="pred-grid">';
+  html += pred("Résultat 1X2", getValue(pronos.resultat_1x2), pronos.resultat_1x2 ? pronos.resultat_1x2.confiance : 0);
+  html += pred("Double chance", getValue(pronos.double_chance), pronos.double_chance ? pronos.double_chance.confiance : 0);
+  html += pred("Over / Under", getValue(pronos.over_under), pronos.over_under ? pronos.over_under.confiance : 0);
+  html += pred("BTTS", getValue(pronos.btts), pronos.btts ? pronos.btts.confiance : 0);
+  html += pred("Score", getValue(pronos.score_exact), pronos.score_exact ? pronos.score_exact.confiance : 0);
+  html += pred("Winner", getValue(pronos.winner), pronos.winner ? pronos.winner.confiance : 0);
+  html += '</div>';
+
+  html += info("Forces A", analyse.forces_A);
+  html += info("Forces B", analyse.forces_B);
+  html += info("Facteur clé", analyse.facteur_cle);
+  html += renderScorers(data.buteurs_potentiels);
+
+  html += '<div class="info-box">⚠️ Estimations informatives uniquement. Ne pas utiliser cet outil comme seule base pour parier de l’argent réel.</div>';
+
+  html += '</div>';
+  html += '</div>';
+
+  result.innerHTML = html;
+  result.classList.add("show");
+
+  result.scrollIntoView({
+    behavior:"smooth",
+    block:"start"
+  });
+}
+
+document.addEventListener("DOMContentLoaded", function(){
+  var jsStatus = document.getElementById("jsStatus");
+
+  if(jsStatus){
+    jsStatus.innerHTML = "✅ JavaScript actif - boutons prêts";
+    jsStatus.classList.add("ok");
+  }
+
+  renderGroups();
+
+  var pageButtons = document.querySelectorAll("[data-page]");
+
+  for(var i = 0; i < pageButtons.length; i++){
+    pageButtons[i].addEventListener("click", function(){
+      setActivePage(this.getAttribute("data-page"));
+    });
+  }
+
+  var matchButtons = document.querySelectorAll("[data-match]");
+
+  for(var m = 0; m < matchButtons.length; m++){
+    matchButtons[m].addEventListener("click", function(){
+      analyzeMatch(this.getAttribute("data-match"));
+    });
+  }
+
+  var sendBtn = document.getElementById("sendBtn");
+
+  if(sendBtn){
+    sendBtn.addEventListener("click", function(){
+      sendMatch();
+    });
+  }
+
+  var input = document.getElementById("matchInput");
+
+  if(input){
+    input.addEventListener("keydown", function(e){
+      if(e.key === "Enter"){
+        sendMatch();
+      }
+    });
+  }
+
+  var notifyBtn = document.getElementById("notifyBtn");
+
+  if(notifyBtn){
+    notifyBtn.addEventListener("click", function(){
+      activateNotifications();
+    });
+  }
+
+  var vipBtn = document.getElementById("vipBtn");
+
+  if(vipBtn){
+    vipBtn.addEventListener("click", function(){
+      alert("Paiement VIP à connecter plus tard.");
+    });
+  }
+});
+</script>
+
+</body>
+</html>
