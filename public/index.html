@@ -1,1323 +1,1097 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Pronostics IA Pro</title>
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-
-body{
-  background:#04070B;
-  color:#E2EEF8;
-  font-family:sans-serif;
-  display:flex;
-  flex-direction:column;
-  height:100vh;
-  min-height:100dvh;
+:root{
+  --bg:#030914;
+  --bg2:#071322;
+  --card:#0b1828;
+  --card2:#101f33;
+  --line:rgba(255,255,255,.10);
+  --line2:rgba(21,255,176,.35);
+  --text:#f4f7fb;
+  --muted:#9aa7b8;
+  --soft:#c8d0dc;
+  --green:#18f5a6;
+  --green2:#00d18f;
+  --gold:#f5c542;
+  --gold2:#ffb300;
+  --red:#ff5570;
+  --blue:#3ca7ff;
+  --shadow:0 20px 60px rgba(0,0,0,.45);
 }
 
-header{
-  background:#070D14;
-  border-bottom:1px solid #0F1E2E;
-  padding:0 14px;
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
+html,body{
+  margin:0;
+  min-height:100%;
+  font-family:Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(24,245,166,.12), transparent 28%),
+    radial-gradient(circle at 90% 10%, rgba(245,197,66,.10), transparent 26%),
+    linear-gradient(180deg,#020712 0%,#071322 45%,#030914 100%);
+  color:var(--text);
+}
+
+body{
+  padding-bottom:96px;
+}
+
+button,input{
+  font-family:inherit;
+}
+
+.app{
+  width:100%;
+  max-width:560px;
+  margin:0 auto;
+  min-height:100vh;
+  padding:18px 16px 110px;
+  position:relative;
+  overflow:hidden;
+}
+
+.app:before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background:
+    linear-gradient(115deg, transparent 0%, rgba(24,245,166,.06) 48%, transparent 52%),
+    radial-gradient(circle at 50% 0%, rgba(255,255,255,.08), transparent 35%);
+  opacity:.8;
+}
+
+.topbar{
+  position:relative;
+  z-index:2;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:18px;
+}
+
+.icon-btn{
+  width:42px;
+  height:42px;
+  border-radius:14px;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
+  box-shadow:0 10px 25px rgba(0,0,0,.22);
+}
+
+.brand{
   display:flex;
   align-items:center;
   gap:10px;
-  height:52px;
-  flex-shrink:0;
+  min-width:0;
 }
 
 .logo{
-  width:34px;
-  height:34px;
-  background:linear-gradient(135deg,#00FF87,#00BFFF);
-  border-radius:9px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:17px;
-  box-shadow:0 0 18px #00FF8733;
-}
-
-.ht{
-  font-size:15px;
-  font-weight:800;
-  color:#00FF87;
-  letter-spacing:1px;
-}
-
-.hs{
-  font-size:9px;
-  color:#3A6A8A;
-}
-
-.wc{
-  margin-left:auto;
-  background:#2A1A00;
-  border:1px solid #FFD70055;
-  border-radius:14px;
-  padding:4px 10px;
-  font-size:9px;
-  color:#FFD700;
-  display:flex;
-  align-items:center;
-  gap:5px;
-}
-
-.dot{
-  width:5px;
-  height:5px;
+  width:48px;
+  height:48px;
   border-radius:50%;
-  background:#00FF87;
-  animation:pulse 2s infinite;
+  display:grid;
+  place-items:center;
+  font-size:25px;
+  background:
+    radial-gradient(circle, rgba(255,255,255,.18), transparent 62%),
+    linear-gradient(145deg, rgba(245,197,66,.25), rgba(24,245,166,.20));
+  border:1px solid rgba(245,197,66,.55);
+  box-shadow:
+    0 0 25px rgba(24,245,166,.25),
+    inset 0 0 20px rgba(255,255,255,.08);
 }
 
-@keyframes pulse{
-  0%,100%{opacity:1}
-  50%{opacity:.3}
+.brand-title{
+  line-height:1;
 }
 
-.warn{
-  background:#2A1500;
-  border-bottom:1px solid #FF8C0044;
-  padding:7px 12px;
-  font-size:9px;
-  color:#FFB366;
-  text-align:center;
-  flex-shrink:0;
-  line-height:1.4;
+.brand-title strong{
+  display:block;
+  letter-spacing:2px;
+  font-size:17px;
 }
 
-.tabs{
-  background:#070D14;
-  border-bottom:1px solid #0F1E2E;
-  display:flex;
-  flex-shrink:0;
+.brand-title span{
+  display:block;
+  margin-top:4px;
+  letter-spacing:2px;
+  font-weight:800;
+  font-size:17px;
 }
 
-.tab{
-  flex:1;
-  padding:9px 4px;
-  font-size:10px;
-  font-weight:700;
-  text-align:center;
-  cursor:pointer;
-  color:#3A6A8A;
-  border-bottom:2px solid transparent;
-  transition:.18s ease;
+.brand-title .ia{
+  color:var(--gold);
 }
 
-.tab.on{
-  color:#00FF87;
-  border-color:#00FF87;
+.brand-title .pro{
+  color:var(--green);
 }
 
-.mwrap{
-  display:none;
-  flex:1;
-  flex-direction:column;
-  overflow:hidden;
-}
-
-.mwrap.on{
-  display:flex;
-}
-
-.mbar{
-  background:#070D14;
-  padding:10px 12px;
-  flex-shrink:0;
-  overflow-x:auto;
-  white-space:nowrap;
-}
-
-.mbar::-webkit-scrollbar{
-  display:none;
-}
-
-.mlbl{
-  font-size:8px;
-  color:#3A6A8A;
-  text-transform:uppercase;
-  letter-spacing:1.5px;
-  margin-bottom:7px;
-}
-
-.mscroll{
-  display:flex;
-  gap:7px;
-}
-
-.mc{
+.badge{
   display:inline-flex;
   align-items:center;
-  background:#0A1420;
-  border:1px solid #0F2030;
-  border-radius:20px;
-  padding:6px 11px;
-  font-size:10px;
-  font-weight:700;
-  cursor:pointer;
-  white-space:nowrap;
-  color:#E2EEF8;
-  transition:.18s ease;
-}
-
-.mc.wc{
-  border-color:#FFD70033;
-  color:#FFD700;
-}
-
-.mc.hot{
-  border-color:#FF456066;
-  color:#FF6B6B;
-}
-
-.mc:active{
-  transform:scale(.96);
-  border-color:#00FF87;
-  box-shadow:0 0 12px #00FF8722;
-}
-
-.mempty{
-  flex:1;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  padding:30px 20px;
-  text-align:center;
-  gap:10px;
-}
-
-.quick-hero{
-  width:90%;
-  max-width:360px;
-  background:linear-gradient(180deg,#07131F,#050A11);
-  border:1px solid #12304A;
-  border-radius:18px;
-  padding:24px 18px;
-  box-shadow:0 0 28px #00FF8711;
-}
-
-.mempty-ico{
-  font-size:42px;
-  opacity:.75;
-}
-
-.mempty-t{
-  font-size:15px;
-  font-weight:800;
-  color:#A0C4E8;
-  margin-top:8px;
-}
-
-.mempty-s{
-  font-size:11px;
-  color:#3A6A8A;
-  line-height:1.6;
-  max-width:280px;
-  margin:10px auto 0;
-}
-
-.quick-steps{
-  display:flex;
-  justify-content:center;
-  flex-wrap:wrap;
   gap:6px;
-  margin-top:14px;
-}
-
-.quick-steps span{
-  background:#061A12;
-  border:1px solid #00FF8733;
-  color:#00FF87;
-  border-radius:20px;
-  padding:5px 9px;
-  font-size:9px;
+  border-radius:999px;
+  padding:8px 12px;
   font-weight:800;
+  letter-spacing:.5px;
+  color:var(--gold);
+  border:1px solid rgba(245,197,66,.45);
+  background:rgba(245,197,66,.08);
+  box-shadow:0 0 22px rgba(245,197,66,.12);
 }
 
-.poules{
-  background:#070D14;
-  flex:1;
-  overflow-y:auto;
-  display:none;
-}
-
-.poules.on{
-  display:block;
-}
-
-.pjump{
-  position:sticky;
-  top:0;
-  background:#070D14;
-  padding:8px 10px;
-  border-bottom:1px solid #0F2030;
-  display:flex;
-  flex-wrap:wrap;
-  gap:5px;
-  z-index:5;
-}
-
-.pjbtn{
-  background:#0A1420;
-  border:1px solid #0F2030;
-  border-radius:6px;
-  width:27px;
-  height:27px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:11px;
-  font-weight:700;
-  color:#00FF87;
-  cursor:pointer;
-  transition:.18s ease;
-}
-
-.pjbtn:active{
-  transform:scale(.92);
-  background:#062015;
-}
-
-.pbody{
-  padding:10px 12px;
-}
-
-.poule-section{
-  margin-bottom:16px;
-}
-
-.poule-title{
-  font-size:12px;
-  font-weight:800;
-  color:#00FF87;
-  margin-bottom:7px;
-  padding:7px 10px;
-  background:#0A1F0A;
-  border:1px solid #00FF8733;
-  border-radius:8px;
-}
-
-.poule-teams-list{
-  font-size:9px;
-  color:#3A6A8A;
-  margin-bottom:7px;
-  padding:0 4px;
-}
-
-.poule-match{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  background:#0A1420;
-  border:1px solid #0F2030;
-  border-radius:9px;
-  padding:10px 12px;
-  margin-bottom:6px;
-  cursor:pointer;
-  transition:.18s ease;
-}
-
-.poule-match:active{
-  transform:scale(.98);
-  border-color:#00FF87;
-  background:#0B1B28;
-}
-
-.poule-match::after{
-  content:'➜';
-  color:#00FF87;
-  opacity:.55;
-  font-size:12px;
-}
-
-.poule-teams{
-  font-size:13px;
-  font-weight:700;
-  color:#E2EEF8;
-}
-
-#chat{
-  flex:1;
-  overflow-y:auto;
-  padding:12px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-}
-
-.msg{
+.nav-chips{
+  position:relative;
+  z-index:2;
   display:flex;
   gap:8px;
+  overflow-x:auto;
+  padding:2px 0 14px;
+  scrollbar-width:none;
 }
 
-.user{
-  flex-direction:row-reverse;
-  margin-left:auto;
-}
-
-.av{
-  width:28px;
-  height:28px;
-  border-radius:8px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:13px;
-  flex-shrink:0;
-  background:#0A1420;
-  border:1px solid #0F2030;
-}
-
-.av.b{
-  background:#001A0F;
-  border-color:#00FF8744;
-}
-
-.bub{
-  background:#070D14;
-  border:1px solid #0F1E2E;
-  border-radius:12px;
-  padding:12px 14px;
-  font-size:13px;
-  line-height:1.6;
-  max-width:calc(100% - 38px);
-}
-
-.bub strong{
-  letter-spacing:.2px;
-}
-
-.user .bub{
-  background:#001A3A;
-  border-color:#003366;
-}
-
-.card{
-  background:#070D14;
-  border:1px solid #0F2030;
-  border-radius:14px;
-  overflow:hidden;
-  width:100%;
-}
-
-.ch{
-  background:#060B12;
-  border-bottom:1px solid #0F2030;
-  padding:13px 14px;
-  display:flex;
-  justify-content:space-between;
-}
-
-.cn{
-  font-size:18px;
-  font-weight:800;
-}
-
-.cm{
-  font-size:9px;
-  color:#3A6A8A;
-  margin-top:3px;
-}
-
-.wct{
-  background:#1A0F00;
-  border:1px solid #FFD70044;
-  border-radius:5px;
-  padding:2px 8px;
-  font-size:9px;
-  color:#FFD700;
-  margin-top:4px;
-  display:inline-block;
-}
-
-.cb{
-  text-align:right;
-}
-
-.cl{
-  font-size:8px;
-  color:#3A6A8A;
-}
-
-.cv{
-  font-size:28px;
-  font-weight:900;
-}
-
-.estimcard{
-  background:#1A1200;
-  border-bottom:1px solid #FFB80033;
-  padding:7px 14px;
-  font-size:9px;
-  color:#FFB366;
-  line-height:1.4;
-}
-
-.pj{
-  background:#0A1F0A;
-  border:1px solid #00FF8733;
-  border-radius:10px;
-  padding:10px 14px;
-  margin:10px 14px 0;
-}
-
-.pjt{
-  font-size:8px;
-  color:#00FF87;
-  text-transform:uppercase;
-  letter-spacing:1px;
-  margin-bottom:5px;
-}
-
-.pjv{
-  font-size:13px;
-  font-weight:700;
-}
-
-.pjr{
-  font-size:10px;
-  color:#3A6A8A;
-  margin-top:3px;
-}
-
-.pjc{
-  display:inline-block;
-  background:#00FF8722;
-  border:1px solid #00FF8755;
-  border-radius:6px;
-  padding:2px 8px;
-  font-size:11px;
-  font-weight:700;
-  color:#00FF87;
-  margin-top:5px;
-}
-
-.sb{
-  border-top:1px solid #0F2030;
-  padding:10px 14px;
-  background:#060B12;
-}
-
-.sbt{
-  font-size:8px;
-  color:#38BFFF;
-  text-transform:uppercase;
-  letter-spacing:1px;
-  margin-bottom:7px;
-}
-
-.sg{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:5px;
-}
-
-.si{
-  background:#0A1520;
-  border:1px solid #0F2030;
-  border-radius:8px;
-  padding:8px 10px;
-}
-
-.sl{
-  font-size:8px;
-  color:#3A6A8A;
-  margin-bottom:3px;
-}
-
-.sv{
-  font-size:15px;
-  font-weight:800;
-}
-
-.ss{
-  font-size:9px;
-  color:#3A6A8A;
-  margin-top:2px;
-}
-
-.rp{
-  background:#0A1520;
-  border:1px solid #38BFFF22;
-  border-radius:8px;
-  padding:8px 10px;
-  margin-top:5px;
-  font-size:10px;
-  color:#A0C4E8;
-  line-height:1.5;
-}
-
-.stl{
-  font-size:8px;
-  color:#3A6A8A;
-  text-transform:uppercase;
-  letter-spacing:1px;
-  padding:10px 14px 6px;
-  border-top:1px solid #0F2030;
-}
-
-.pg{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:1px;
-  background:#0F2030;
-}
-
-.pg3{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:1px;
-  background:#0F2030;
-}
-
-.pc{
-  background:#070D14;
-  padding:11px 8px;
-  text-align:center;
-}
-
-.pl{
-  font-size:8px;
-  color:#3A6A8A;
-  text-transform:uppercase;
-  letter-spacing:.8px;
-  margin-bottom:3px;
-}
-
-.pv{
-  font-size:15px;
-  font-weight:800;
-  line-height:1.2;
-}
-
-.pf{
-  font-size:9px;
-  margin-top:2px;
-}
-
-.pk{
-  font-size:9px;
-  color:#FFB800;
-  margin-top:2px;
-}
-
-.gh{color:#00FF87}
-.gm{color:#FFB800}
-.gl{color:#FF4560}
-
-.aa{
-  border-top:1px solid #0F2030;
-  padding:10px 14px;
-}
-
-.aat{
-  font-size:8px;
-  color:#3A6A8A;
-  text-transform:uppercase;
-  letter-spacing:1px;
-  margin-bottom:6px;
-}
-
-.ag{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:5px;
-  margin-bottom:8px;
-}
-
-.ai{
-  background:#0A1520;
-  border:1px solid #0F2030;
-  border-radius:8px;
-  padding:8px 10px;
-}
-
-.ail{
-  font-size:8px;
-  color:#3A6A8A;
-  margin-bottom:3px;
-}
-
-.aiv{
-  font-size:10px;
-  color:#A0C4E8;
-  line-height:1.4;
-}
-
-.fk{
-  margin:0 0 8px;
-  background:#0A1520;
-  border:1px solid #FFB80033;
-  border-radius:8px;
-  padding:8px 10px;
-  font-size:10px;
-  color:#FFB800;
-}
-
-.ar{
-  display:flex;
-  align-items:center;
-  gap:7px;
-  font-size:10px;
-  margin-bottom:4px;
-}
-
-.abar{
-  width:45px;
-  height:3px;
-  background:#0F2030;
-  border-radius:2px;
-  overflow:hidden;
-  flex-shrink:0;
-}
-
-.af{
-  height:100%;
-  border-radius:2px;
-  background:linear-gradient(90deg,#00FF87,#00BFFF);
-}
-
-.sc{
-  border-top:1px solid #0F2030;
-  padding:10px 14px;
-  display:flex;
-  flex-wrap:wrap;
-  gap:5px;
-}
-
-.sct{
-  width:100%;
-  font-size:8px;
-  color:#3A6A8A;
-  text-transform:uppercase;
-  letter-spacing:1px;
-  margin-bottom:4px;
+.nav-chips::-webkit-scrollbar{
+  display:none;
 }
 
 .chip{
-  background:#0A1520;
-  border:1px solid #0F2030;
-  border-radius:14px;
-  padding:4px 9px;
-  font-size:10px;
-  display:flex;
-  align-items:center;
-  gap:4px;
-}
-
-.sp{
-  font-size:9px;
-  color:#00FF87;
-}
-
-.sk{
-  font-size:9px;
-  color:#FFB800;
-}
-
-.vb{
+  flex:0 0 auto;
+  border:1px solid var(--line);
+  color:var(--soft);
+  background:rgba(255,255,255,.035);
   padding:10px 14px;
-  border-top:1px solid #0F2030;
-  display:flex;
-  align-items:center;
-  gap:9px;
-}
-
-.vg{
-  font-size:10px;
-  font-weight:800;
-  letter-spacing:1px;
-  padding:4px 10px;
-  border-radius:6px;
-  border:1px solid;
-  flex-shrink:0;
-}
-
-.bw{
-  color:#00FF87;
-  border-color:#00FF8766;
-  background:#00FF8711;
-}
-
-.bd{
-  color:#FFB800;
-  border-color:#FFB80066;
-  background:#FFB80011;
-}
-
-.bl{
-  color:#FF4560;
-  border-color:#FF456066;
-  background:#FF456011;
-}
-
-.ld{
-  display:flex;
-  align-items:center;
-  gap:6px;
-  font-size:10px;
-  color:#38BFFF;
-  padding:7px 10px;
-  background:#001A2A;
-  border:1px solid #38BFFF22;
-  border-radius:8px;
-  margin-bottom:6px;
-}
-
-.spin{
-  width:8px;
-  height:8px;
-  border:2px solid #38BFFF22;
-  border-top-color:#38BFFF;
-  border-radius:50%;
-  animation:spin .8s linear infinite;
-}
-
-@keyframes spin{
-  to{transform:rotate(360deg)}
-}
-
-.dots{
-  display:flex;
-  gap:4px;
-  padding:10px 13px;
-  background:#070D14;
-  border:1px solid #0F1E2E;
-  border-radius:10px;
-}
-
-.dots span{
-  width:5px;
-  height:5px;
-  border-radius:50%;
-  background:#00FF87;
-  animation:bounce 1.2s infinite;
-}
-
-.dots span:nth-child(2){animation-delay:.2s}
-.dots span:nth-child(3){animation-delay:.4s}
-
-@keyframes bounce{
-  0%,80%,100%{transform:translateY(0);opacity:.3}
-  40%{transform:translateY(-6px);opacity:1}
-}
-
-.inp{
-  background:#060B12;
-  border-top:1px solid #0F1E2E;
-  padding:10px 12px 16px;
-  flex-shrink:0;
-}
-
-.ir{
-  display:flex;
-  gap:8px;
-  align-items:flex-end;
-}
-
-.iw{
-  flex:1;
-  background:#0A1520;
-  border:2px solid #00FF87;
-  border-radius:11px;
-  display:flex;
-  align-items:flex-end;
-  padding:2px;
-}
-
-textarea{
-  flex:1;
-  background:transparent;
-  border:none;
-  color:#E2EEF8;
+  border-radius:16px;
+  font-weight:750;
   font-size:14px;
-  padding:8px 10px;
-  resize:none;
-  min-height:40px;
-  max-height:80px;
-  outline:none;
+}
+
+.chip.active{
+  color:#001b14;
+  background:linear-gradient(135deg,var(--green),#67ffd0);
+  box-shadow:0 0 30px rgba(24,245,166,.28);
+}
+
+.hero{
+  position:relative;
+  z-index:2;
+  border:1px solid rgba(24,245,166,.35);
+  border-radius:26px;
+  overflow:hidden;
+  padding:18px;
+  margin-bottom:16px;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.02)),
+    radial-gradient(circle at 15% 20%,rgba(24,245,166,.18),transparent 28%),
+    radial-gradient(circle at 90% 0%,rgba(245,197,66,.20),transparent 32%),
+    linear-gradient(145deg,#0a1728,#06101e);
+  box-shadow:var(--shadow), 0 0 45px rgba(24,245,166,.10);
+}
+
+.hero:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(90deg, transparent, rgba(255,255,255,.08), transparent),
+    radial-gradient(circle at 50% 0%, rgba(255,255,255,.20), transparent 36%);
+  opacity:.35;
+  pointer-events:none;
+}
+
+.hero-top{
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:18px;
+}
+
+.label{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  color:var(--gold);
+  font-weight:900;
+  letter-spacing:1.8px;
+  font-size:13px;
+  text-transform:uppercase;
+}
+
+.status-pill{
+  border-radius:999px;
+  border:1px solid rgba(24,245,166,.35);
+  color:var(--green);
+  padding:7px 10px;
+  font-weight:850;
+  font-size:12px;
+  background:rgba(24,245,166,.08);
+}
+
+.match-hero{
+  position:relative;
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  align-items:center;
+  gap:14px;
+  margin:14px 0 18px;
+}
+
+.team{
+  min-width:0;
+  text-align:center;
+}
+
+.flag{
+  width:62px;
+  height:62px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  font-size:38px;
+  margin:0 auto 10px;
+  background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.18);
+  box-shadow:0 0 28px rgba(255,255,255,.12);
+}
+
+.team strong{
+  display:block;
+  font-size:18px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+}
+
+.team small{
+  display:block;
+  color:var(--green);
+  margin-top:5px;
+  font-weight:800;
+}
+
+.vs{
+  width:64px;
+  height:64px;
+  border-radius:18px;
+  display:grid;
+  place-items:center;
+  color:var(--green);
+  font-size:24px;
+  font-weight:950;
+  border:1px solid rgba(24,245,166,.45);
+  background:rgba(24,245,166,.07);
+  box-shadow:0 0 28px rgba(24,245,166,.14);
+}
+
+.hero-meta{
+  position:relative;
+  display:flex;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-bottom:16px;
+  color:var(--soft);
+  font-weight:650;
+  font-size:13px;
+}
+
+.confidence-box{
+  position:relative;
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:12px;
+  align-items:center;
+  padding:14px;
+  border-radius:20px;
+  border:1px solid rgba(24,245,166,.34);
+  background:rgba(0,0,0,.25);
+}
+
+.confidence-left span{
+  display:block;
+  color:var(--muted);
+  font-size:11px;
+  letter-spacing:1.2px;
+  font-weight:900;
+  text-transform:uppercase;
+}
+
+.confidence-left strong{
+  display:block;
+  color:var(--green);
+  font-size:28px;
+  line-height:1.1;
+}
+
+.progress{
+  height:5px;
+  width:100%;
+  margin-top:8px;
+  overflow:hidden;
+  border-radius:999px;
+  background:rgba(255,255,255,.10);
+}
+
+.progress i{
+  display:block;
+  height:100%;
+  width:72%;
+  border-radius:999px;
+  background:linear-gradient(90deg,var(--green),var(--gold));
+}
+
+.cta{
+  border:none;
+  border-radius:16px;
+  background:linear-gradient(135deg,var(--green),#64ffd0);
+  color:#03150f;
+  font-size:14px;
+  font-weight:950;
+  padding:14px 16px;
+  box-shadow:0 0 28px rgba(24,245,166,.22);
+}
+
+.stats-strip{
+  position:relative;
+  z-index:2;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+  margin-bottom:18px;
+}
+
+.stat-mini{
+  border-radius:18px;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.04);
+  padding:12px 8px;
+  text-align:center;
+}
+
+.stat-mini b{
+  display:block;
+  font-size:20px;
+  color:var(--text);
+}
+
+.stat-mini span{
+  display:block;
+  margin-top:4px;
+  color:var(--muted);
+  font-size:10px;
+  font-weight:750;
+}
+
+.section{
+  position:relative;
+  z-index:2;
+  margin:18px 0;
+}
+
+.section-head{
+  display:flex;
+  align-items:end;
+  justify-content:space-between;
+  margin-bottom:12px;
+}
+
+.section-title{
+  font-size:17px;
+  letter-spacing:1.7px;
+  font-weight:950;
+  text-transform:uppercase;
+}
+
+.section-link{
+  color:var(--green);
+  font-weight:800;
+  font-size:13px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+}
+
+.feature{
+  min-height:144px;
+  border-radius:24px;
+  border:1px solid var(--line);
+  background:
+    radial-gradient(circle at 50% 0%,rgba(24,245,166,.14),transparent 40%),
+    linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.025));
+  box-shadow:0 14px 36px rgba(0,0,0,.25);
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+}
+
+.feature.gold{
+  border-color:rgba(245,197,66,.32);
+  background:
+    radial-gradient(circle at 50% 0%,rgba(245,197,66,.14),transparent 40%),
+    linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.025));
+}
+
+.feature .ico{
+  width:46px;
+  height:46px;
+  border-radius:16px;
+  display:grid;
+  place-items:center;
+  font-size:27px;
+  color:var(--green);
+  background:rgba(24,245,166,.10);
+}
+
+.feature.gold .ico{
+  color:var(--gold);
+  background:rgba(245,197,66,.10);
+}
+
+.feature h3{
+  margin:12px 0 6px;
+  font-size:17px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
+
+.feature p{
+  margin:0;
+  color:var(--muted);
+  font-size:13px;
   line-height:1.4;
 }
 
-textarea::placeholder{
-  color:#2A4A6A;
+.feature .arrow{
+  margin-top:14px;
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  color:var(--green);
+  border:1px solid rgba(24,245,166,.40);
 }
 
-#btn{
-  background:linear-gradient(135deg,#00FF87,#00CC6A);
-  color:#04070B;
-  border:none;
-  border-radius:9px;
-  width:44px;
-  height:44px;
-  cursor:pointer;
+.match-list{
+  display:grid;
+  gap:11px;
+}
+
+.match-card{
+  border-radius:20px;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.045);
+  padding:14px;
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  gap:13px;
+  align-items:center;
+}
+
+.match-time{
+  min-width:58px;
+}
+
+.match-time b{
+  display:block;
   font-size:19px;
+}
+
+.match-time span{
+  color:var(--muted);
+  font-size:12px;
+}
+
+.match-teams{
+  display:grid;
+  gap:7px;
   font-weight:900;
-  flex-shrink:0;
+  letter-spacing:1px;
 }
 
-#btn:disabled{
-  background:#0F2030;
-  cursor:not-allowed;
+.match-teams div{
+  display:flex;
+  align-items:center;
+  gap:8px;
 }
 
-.disc{
-  font-size:8px;
-  color:#2A4A6A;
+.match-odds{
+  text-align:right;
+  min-width:76px;
+}
+
+.match-odds strong{
+  display:block;
+  color:var(--gold);
+  border:1px solid rgba(245,197,66,.35);
+  border-radius:12px;
+  padding:6px 8px;
+}
+
+.match-odds span{
+  display:block;
+  color:var(--green);
+  margin-top:6px;
+  font-size:12px;
+  font-weight:850;
+}
+
+.quick{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
+
+.quick-card{
+  border-radius:18px;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.045);
+  padding:13px 10px;
   text-align:center;
-  padding:5px 0 0;
 }
 
-@media(max-width:420px){
-  .ht{font-size:14px}
-  .hs{font-size:8px}
-  .wc{font-size:8px;padding:4px 8px}
-  .tab{font-size:9px}
-  .cn{font-size:16px}
+.quick-card .num{
+  font-size:26px;
+  color:var(--green);
+  font-weight:950;
+}
+
+.quick-card small{
+  color:var(--muted);
+  display:block;
+  margin-top:6px;
+}
+
+.search-panel{
+  position:relative;
+  z-index:2;
+  border-radius:26px;
+  border:1px solid rgba(24,245,166,.25);
+  background:rgba(255,255,255,.045);
+  padding:15px;
+  margin-top:18px;
+}
+
+.search-title{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-weight:950;
+  letter-spacing:1px;
+  margin-bottom:10px;
+}
+
+.input-row{
+  display:flex;
+  gap:10px;
+}
+
+.input-row input{
+  flex:1;
+  min-width:0;
+  border:1px solid rgba(24,245,166,.38);
+  background:#061322;
+  color:var(--text);
+  border-radius:18px;
+  padding:16px 14px;
+  outline:none;
+  font-size:15px;
+}
+
+.input-row button{
+  width:58px;
+  border:none;
+  border-radius:18px;
+  background:linear-gradient(135deg,var(--green),#5dffcf);
+  color:#03150f;
+  font-size:22px;
+  font-weight:950;
+}
+
+.samples{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:12px;
+}
+
+.sample{
+  border:none;
+  border-radius:999px;
+  color:var(--soft);
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--line);
+  padding:8px 10px;
+  font-size:12px;
+  font-weight:750;
+}
+
+.result{
+  position:relative;
+  z-index:2;
+  margin-top:16px;
+  display:none;
+}
+
+.result.show{
+  display:block;
+}
+
+.result-card{
+  border-radius:26px;
+  border:1px solid rgba(24,245,166,.28);
+  background:
+    radial-gradient(circle at 100% 0%,rgba(245,197,66,.12),transparent 34%),
+    linear-gradient(180deg,rgba(255,255,255,.075),rgba(255,255,255,.035));
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+
+.result-header{
+  padding:18px;
+  border-bottom:1px solid var(--line);
+}
+
+.result-status{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  border-radius:999px;
+  padding:8px 11px;
+  font-weight:950;
+  font-size:12px;
+  letter-spacing:1px;
+  margin-bottom:12px;
+  color:var(--green);
+  background:rgba(24,245,166,.10);
+  border:1px solid rgba(24,245,166,.28);
+  text-transform:uppercase;
+}
+
+.result-status.finished{
+  color:var(--red);
+  background:rgba(255,85,112,.10);
+  border-color:rgba(255,85,112,.32);
+}
+
+.result-header h2{
+  margin:0;
+  font-size:22px;
+  letter-spacing:1px;
+}
+
+.result-header p{
+  margin:8px 0 0;
+  color:var(--muted);
+  line-height:1.45;
+}
+
+.result-main{
+  padding:18px;
+}
+
+.pick-card{
+  border-radius:20px;
+  border:1px solid rgba(245,197,66,.30);
+  background:rgba(245,197,66,.08);
+  padding:15px;
+  margin-bottom:14px;
+}
+
+.pick-card small{
+  color:var(--gold);
+  font-weight:950;
+  text-transform:uppercase;
+  letter-spacing:1px;
+}
+
+.pick-card h3{
+  margin:7px 0;
+  font-size:20px;
+}
+
+.pick-card p{
+  color:var(--soft);
+  margin:0;
+  line-height:1.45;
+}
+
+.pred-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+  margin-top:12px;
+}
+
+.pred{
+  border-radius:18px;
+  border:1px solid var(--line);
+  background:rgba(0,0,0,.22);
+  padding:12px;
+}
+
+.pred span{
+  color:var(--muted);
+  display:block;
+  font-size:11px;
+  letter-spacing:.8px;
+  text-transform:uppercase;
+  font-weight:900;
+}
+
+.pred b{
+  display:block;
+  margin-top:7px;
+  font-size:17px;
+  color:var(--green);
+}
+
+.pred small{
+  display:block;
+  margin-top:5px;
+  color:var(--soft);
+}
+
+.analysis{
+  margin-top:14px;
+  display:grid;
+  gap:10px;
+}
+
+.analysis-box{
+  border-radius:18px;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.04);
+  padding:13px;
+}
+
+.analysis-box b{
+  display:block;
+  color:var(--green);
+  margin-bottom:6px;
+}
+
+.analysis-box p{
+  margin:0;
+  color:var(--soft);
+  line-height:1.45;
+}
+
+.warn{
+  margin-top:14px;
+  border-radius:18px;
+  border:1px solid rgba(245,197,66,.28);
+  background:rgba(245,197,66,.08);
+  padding:12px;
+  color:#ffe7a5;
+  line-height:1.45;
+  font-size:13px;
+}
+
+.loader{
+  display:none;
+  margin-top:12px;
+  color:var(--green);
+  font-weight:900;
+}
+
+.loader.show{
+  display:block;
+}
+
+.error{
+  display:none;
+  margin-top:12px;
+  border:1px solid rgba(255,85,112,.35);
+  background:rgba(255,85,112,.09);
+  color:#ffd4db;
+  border-radius:18px;
+  padding:13px;
+  line-height:1.45;
+}
+
+.error.show{
+  display:block;
+}
+
+.page{
+  display:none;
+}
+
+.page.active{
+  display:block;
+}
+
+.bottom-nav{
+  position:fixed;
+  z-index:30;
+  left:50%;
+  bottom:12px;
+  transform:translateX(-50%);
+  width:min(540px, calc(100% - 24px));
+  height:76px;
+  border-radius:26px;
+  background:rgba(7,19,34,.88);
+  backdrop-filter:blur(18px);
+  border:1px solid rgba(255,255,255,.12);
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  box-shadow:0 20px 50px rgba(0,0,0,.50);
+  overflow:hidden;
+}
+
+.nav-item{
+  border:none;
+  background:transparent;
+  color:var(--muted);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  font-weight:750;
+  font-size:12px;
+}
+
+.nav-item i{
+  font-style:normal;
+  font-size:23px;
+}
+
+.nav-item.active{
+  color:var(--green);
+  background:radial-gradient(circle at 50% 20%, rgba(24,245,166,.18), transparent 55%);
+}
+
+.table-card{
+  border-radius:22px;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.045);
+  padding:14px;
+  margin-bottom:10px;
+}
+
+.table-card h3{
+  margin:0 0 10px;
+}
+
+.group-row{
+  display:flex;
+  justify-content:space-between;
+  color:var(--soft);
+  border-top:1px solid var(--line);
+  padding:10px 0;
+}
+
+.group-row:first-of-type{
+  border-top:0;
+}
+
+.vip-card{
+  border-radius:26px;
+  border:1px solid rgba(245,197,66,.38);
+  background:
+    radial-gradient(circle at 80% 10%,rgba(245,197,66,.24),transparent 34%),
+    linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.035));
+  padding:18px;
+  box-shadow:0 0 45px rgba(245,197,66,.10);
+}
+
+.vip-card h2{
+  margin:0 0 8px;
+  font-size:30px;
+}
+
+.vip-card p{
+  color:var(--soft);
+}
+
+.vip-price{
+  margin-top:18px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
+
+.price{
+  border-radius:20px;
+  border:1px solid var(--line);
+  padding:13px 9px;
+  text-align:center;
+  background:rgba(0,0,0,.22);
+}
+
+.price.vip{
+  border-color:rgba(245,197,66,.65);
+}
+
+.price b{
+  display:block;
+  color:var(--green);
+  font-size:21px;
+}
+
+.price.vip b{
+  color:var(--gold);
+}
+
+.price small{
+  color:var(--muted);
+}
+
+@media (max-width:390px){
+  .app{padding-left:12px;padding-right:12px;}
+  .stats-strip{grid-template-columns:repeat(2,1fr);}
+  .grid{grid-template-columns:1fr;}
+  .hero{padding:15px;}
+  .team strong{font-size:15px;}
+  .flag{width:54px;height:54px;font-size:32px;}
+  .vs{width:54px;height:54px;}
+  .confidence-box{grid-template-columns:1fr;}
+  .cta{width:100%;}
 }
 </style>
 </head>
 
 <body>
+<div class="app">
 
-<header>
-  <div class="logo">⚽</div>
-  <div>
-    <div class="ht">PRONOSTICS IA PRO</div>
-    <div class="hs">STATS · COTES · CDM 2026</div>
-  </div>
-  <div class="wc"><div class="dot"></div>🏆 CDM 2026</div>
-</header>
+  <header class="topbar">
+    <button class="icon-btn" type="button">☰</button>
 
-<div class="warn">
-  ⚠️ Estimations IA générées automatiquement. Données non officielles en temps réel. Ne pas utiliser cet outil comme seule base pour parier de l'argent réel.
-</div>
-
-<div class="tabs">
-  <div class="tab on" id="t1" onclick="showTab(1)">⚽ Pronostics</div>
-  <div class="tab" id="t2" onclick="showTab(2)">📋 Matchs rapides</div>
-  <div class="tab" id="t3" onclick="showTab(3)">🏆 Poules CDM</div>
-</div>
-
-<div class="mwrap" id="mwrap">
-  <div class="mbar">
-    <div class="mlbl">Glisse et clique sur un match</div>
-    <div class="mscroll" id="ms"></div>
-  </div>
-  <div class="mempty">
-    <div class="quick-hero">
-      <div class="mempty-ico">⚽</div>
-      <div class="mempty-t">Sélectionne un match rapide</div>
-      <div class="mempty-s">
-        Choisis une affiche dans la barre ci-dessus pour lancer une estimation IA instantanée.
-      </div>
-      <div class="quick-steps">
-        <span>1. Choisir</span>
-        <span>2. Analyser</span>
-        <span>3. Comparer</span>
+    <div class="brand">
+      <div class="logo">⚽</div>
+      <div class="brand-title">
+        <strong>PRONOSTICS</strong>
+        <span><span class="ia">IA</span> <span class="pro">PRO</span></span>
       </div>
     </div>
+
+    <button class="icon-btn" type="button">🔔</button>
+  </header>
+
+  <div class="nav-chips">
+    <button class="chip active" data-page="home">🎯 Pronostics</button>
+    <button class="chip" data-page="matchs">⚽ Matchs</button>
+    <button class="chip" data-page="live">📡 Live</button>
+    <button class="chip" data-page="vip">👑 VIP</button>
+    <button class="chip" data-page="groups">🏆 Groupes</button>
   </div>
-</div>
 
-<div class="poules" id="poules"></div>
-
-<div id="chat">
-  <div class="msg">
-    <div class="av b">🤖</div>
-    <div class="bub">
-      <strong style="color:#00FF87">Pronostics IA Pro</strong> est prêt 🔥<br><br>
-      ⚽ Sélectionne un match ou écris ton affiche ci-dessous.<br><br>
-      ⚠️ Estimation IA uniquement, pas une garantie de résultat.
-    </div>
-  </div>
-</div>
-
-<div class="inp" id="inpbar">
-  <div class="ir">
-    <div class="iw">
-      <textarea id="txt" placeholder="Ex : France vs Sénégal CDM 2026..." rows="1"></textarea>
-    </div>
-    <button id="btn">➤</button>
-  </div>
-  <p class="disc">⚠️ Estimations IA uniquement · Jouer avec modération</p>
-</div>
-
-<script>
-const POULES=[
-{g:'Groupe A',teams:'Mexique · Corée du Sud · Tchéquie · Afrique du Sud',m:[
-{t:'Mexique vs Corée du Sud',q:'Mexique vs Corée du Sud CDM 2026 Groupe A'},
-{t:'Tchéquie vs Afrique du Sud',q:'République Tchèque vs Afrique du Sud CDM 2026 Groupe A'},
-{t:'Mexique vs Tchéquie',q:'Mexique vs République Tchèque CDM 2026 Groupe A'},
-{t:'Corée du Sud vs Afrique du Sud',q:'Corée du Sud vs Afrique du Sud CDM 2026 Groupe A'}]},
-{g:'Groupe B',teams:'Suisse · Canada · Qatar · Bosnie',m:[
-{t:'Suisse vs Canada',q:'Suisse vs Canada CDM 2026 Groupe B'},
-{t:'Qatar vs Bosnie',q:'Qatar vs Bosnie Herzégovine CDM 2026 Groupe B'},
-{t:'Suisse vs Qatar',q:'Suisse vs Qatar CDM 2026 Groupe B'},
-{t:'Canada vs Bosnie',q:'Canada vs Bosnie Herzégovine CDM 2026 Groupe B'}]},
-{g:'Groupe C',teams:'Écosse · Maroc · Brésil · Haïti',m:[
-{t:'Écosse vs Maroc',q:'Écosse vs Maroc CDM 2026 Groupe C'},
-{t:'Brésil vs Haïti',q:'Brésil vs Haïti CDM 2026 Groupe C'},
-{t:'Écosse vs Brésil',q:'Écosse vs Brésil CDM 2026 Groupe C'},
-{t:'Maroc vs Haïti',q:'Maroc vs Haïti CDM 2026 Groupe C'}]},
-{g:'Groupe D',teams:'USA · Australie · Turquie · Paraguay',m:[
-{t:'USA vs Australie',q:'USA vs Australie CDM 2026 Groupe D'},
-{t:'Turquie vs Paraguay',q:'Turquie vs Paraguay CDM 2026 Groupe D'},
-{t:'USA vs Turquie',q:'USA vs Turquie CDM 2026 Groupe D'},
-{t:'Australie vs Paraguay',q:'Australie vs Paraguay CDM 2026 Groupe D'}]},
-{g:'Groupe E',teams:'Allemagne · Côte d’Ivoire · Équateur · Curaçao',m:[
-{t:'Allemagne vs Côte d’Ivoire',q:'Allemagne vs Côte Ivoire CDM 2026 Groupe E'},
-{t:'Équateur vs Curaçao',q:'Équateur vs Curaçao CDM 2026 Groupe E'},
-{t:'Allemagne vs Équateur',q:'Allemagne vs Équateur CDM 2026 Groupe E'},
-{t:'Côte d’Ivoire vs Curaçao',q:'Côte Ivoire vs Curaçao CDM 2026 Groupe E'}]},
-{g:'Groupe F',teams:'Suède · Japon · Pays-Bas · Tunisie',m:[
-{t:'Suède vs Japon',q:'Suède vs Japon CDM 2026 Groupe F'},
-{t:'Pays-Bas vs Tunisie',q:'Pays-Bas vs Tunisie CDM 2026 Groupe F'},
-{t:'Suède vs Pays-Bas',q:'Suède vs Pays-Bas CDM 2026 Groupe F'},
-{t:'Japon vs Tunisie',q:'Japon vs Tunisie CDM 2026 Groupe F'}]},
-{g:'Groupe G',teams:'Nouvelle-Zélande · Iran · Belgique · Égypte',m:[
-{t:'Nouvelle-Zélande vs Iran',q:'Nouvelle Zélande vs Iran CDM 2026 Groupe G'},
-{t:'Belgique vs Égypte',q:'Belgique vs Égypte CDM 2026 Groupe G'},
-{t:'Nouvelle-Zélande vs Belgique',q:'Nouvelle Zélande vs Belgique CDM 2026 Groupe G'},
-{t:'Iran vs Égypte',q:'Iran vs Égypte CDM 2026 Groupe G'}]},
-{g:'Groupe H',teams:'Uruguay · Arabie Saoudite · Espagne · Cap-Vert',m:[
-{t:'Uruguay vs Arabie Saoudite',q:'Uruguay vs Arabie Saoudite CDM 2026 Groupe H'},
-{t:'Espagne vs Cap-Vert',q:'Espagne vs Cap Vert CDM 2026 Groupe H'},
-{t:'Uruguay vs Espagne',q:'Uruguay vs Espagne CDM 2026 Groupe H'},
-{t:'Arabie Saoudite vs Cap-Vert',q:'Arabie Saoudite vs Cap Vert CDM 2026 Groupe H'}]},
-{g:'Groupe I',teams:'Norvège · France · Sénégal · Irak',m:[
-{t:'Norvège vs France',q:'Norvège vs France CDM 2026 Groupe I'},
-{t:'Sénégal vs Irak',q:'Sénégal vs Irak CDM 2026 Groupe I'},
-{t:'Norvège vs Sénégal',q:'Norvège vs Sénégal CDM 2026 Groupe I'},
-{t:'France vs Irak',q:'France vs Irak CDM 2026 Groupe I'}]},
-{g:'Groupe J',teams:'Argentine · Autriche · Jordanie · Algérie',m:[
-{t:'Argentine vs Autriche',q:'Argentine vs Autriche CDM 2026 Groupe J'},
-{t:'Jordanie vs Algérie',q:'Jordanie vs Algérie CDM 2026 Groupe J'},
-{t:'Argentine vs Jordanie',q:'Argentine vs Jordanie CDM 2026 Groupe J'},
-{t:'Autriche vs Algérie',q:'Autriche vs Algérie CDM 2026 Groupe J'}]},
-{g:'Groupe K',teams:'Portugal · RD Congo · Ouzbékistan · Colombie',m:[
-{t:'Portugal vs RD Congo',q:'Portugal vs RD Congo CDM 2026 Groupe K'},
-{t:'Ouzbékistan vs Colombie',q:'Ouzbékistan vs Colombie CDM 2026 Groupe K'},
-{t:'Portugal vs Ouzbékistan',q:'Portugal vs Ouzbékistan CDM 2026 Groupe K'},
-{t:'RD Congo vs Colombie',q:'RD Congo vs Colombie CDM 2026 Groupe K'}]},
-{g:'Groupe L',teams:'Angleterre · Croatie · Ghana · Panama',m:[
-{t:'Angleterre vs Croatie',q:'Angleterre vs Croatie CDM 2026 Groupe L'},
-{t:'Ghana vs Panama',q:'Ghana vs Panama CDM 2026 Groupe L'},
-{t:'Angleterre vs Ghana',q:'Angleterre vs Ghana CDM 2026 Groupe L'},
-{t:'Croatie vs Panama',q:'Croatie vs Panama CDM 2026 Groupe L'}]}
-];
-
-const MS=[
-{l:'🇲🇽 Mexique-Corée',q:'Mexique vs Corée du Sud CDM 2026 Groupe A',c:'hot'},
-{l:'🇨🇭 Suisse-Canada',q:'Suisse vs Canada CDM 2026 Groupe B',c:'wc'},
-{l:'🇺🇸 USA-Australie',q:'USA vs Australie CDM 2026 Groupe D',c:'wc'},
-{l:'🇩🇪 Allemagne-Côte d’Ivoire',q:'Allemagne vs Côte Ivoire CDM 2026 Groupe E',c:'wc'},
-{l:'🇫🇷 Norvège-France',q:'Norvège vs France CDM 2026 Groupe I',c:'wc'},
-{l:'🇪🇸 Espagne-Cap-Vert',q:'Espagne vs Cap Vert CDM 2026 Groupe H',c:'wc'},
-{l:'🇧🇷 Écosse-Brésil',q:'Écosse vs Brésil CDM 2026 Groupe C',c:'wc'},
-{l:'🇦🇷 Argentine-Autriche',q:'Argentine vs Autriche CDM 2026 Groupe J',c:'wc'},
-{l:'🇵🇹 Portugal-RD Congo',q:'Portugal vs RD Congo CDM 2026 Groupe K',c:'wc'},
-{l:'🏴 Angleterre-Croatie',q:'Angleterre vs Croatie CDM 2026 Groupe L',c:'wc'},
-{l:'🇧🇪 Belgique-Égypte',q:'Belgique vs Égypte CDM 2026 Groupe G',c:'wc'},
-{l:'🇸🇪 Suède-Japon',q:'Suède vs Japon CDM 2026 Groupe F',c:'wc'}
-];
-
-const ms=document.getElementById('ms');
-MS.forEach(function(m){
-  const d=document.createElement('div');
-  d.className='mc '+m.c;
-  d.textContent=m.l;
-  d.onclick=function(){showTab(1);go(m.q);};
-  ms.appendChild(d);
-});
-
-const poules=document.getElementById('poules');
-const jump=document.createElement('div');
-jump.className='pjump';
-
-POULES.forEach(function(p){
-  const b=document.createElement('div');
-  b.className='pjbtn';
-  b.textContent=p.g.replace('Groupe ','');
-  b.onclick=function(){
-    document.getElementById('grp-'+p.g.replace('Groupe ','')).scrollIntoView({behavior:'smooth',block:'start'});
-  };
-  jump.appendChild(b);
-});
-
-poules.appendChild(jump);
-
-const pbody=document.createElement('div');
-pbody.className='pbody';
-
-POULES.forEach(function(p){
-  const s=document.createElement('div');
-  s.className='poule-section';
-  s.id='grp-'+p.g.replace('Groupe ','');
-  s.innerHTML='<div class="poule-title">'+p.g+'</div><div class="poule-teams-list">'+p.teams+'</div>';
-
-  p.m.forEach(function(m){
-    const d=document.createElement('div');
-    d.className='poule-match';
-    d.innerHTML='<div class="poule-teams">'+m.t+'</div>';
-    d.onclick=function(){showTab(1);go(m.q);};
-    s.appendChild(d);
-  });
-
-  pbody.appendChild(s);
-});
-
-poules.appendChild(pbody);
-
-function showTab(n){
-  document.getElementById('t1').className='tab'+(n===1?' on':'');
-  document.getElementById('t2').className='tab'+(n===2?' on':'');
-  document.getElementById('t3').className='tab'+(n===3?' on':'');
-  document.getElementById('mwrap').className='mwrap'+(n===2?' on':'');
-  document.getElementById('poules').className='poules'+(n===3?' on':'');
-  document.getElementById('chat').style.display=n===1?'flex':'none';
-  document.getElementById('inpbar').style.display=n===1?'block':'none';
-}
-
-const chat=document.getElementById('chat');
-const txt=document.getElementById('txt');
-const btn=document.getElementById('btn');
-let busy=false;
-
-txt.oninput=function(){
-  this.style.height='auto';
-  this.style.height=Math.min(this.scrollHeight,80)+'px';
-};
-
-txt.onkeydown=function(e){
-  if(e.key==='Enter'&&!e.shiftKey){
-    e.preventDefault();
-    go(txt.value);
-  }
-};
-
-btn.onclick=function(){
-  go(txt.value);
-};
-
-function col(v){
-  return v>=70?'#00FF87':v>=50?'#FFB800':'#FF4560';
-}
-
-function cc(v){
-  return v>=70?'gh':v>=50?'gm':'gl';
-}
-
-function bc(v){
-  const s=(v||'').toLowerCase();
-  if(s==='1'||s.includes('victoire'))return'bw';
-  if(s==='x'||s.includes('nul'))return'bd';
-  return'bl';
-}
-
-function msg(role,html){
-  const d=document.createElement('div');
-  d.className='msg'+(role==='user'?' user':'');
-  const av=document.createElement('div');
-  av.className='av'+(role==='bot'?' b':'');
-  av.textContent=role==='bot'?'🤖':'👤';
-  const b=document.createElement('div');
-  b.className='bub';
-  b.innerHTML=html;
-  d.appendChild(av);
-  d.appendChild(b);
-  chat.appendChild(d);
-  chat.scrollTop=chat.scrollHeight;
-}
-
-function showL(){
-  const d=document.createElement('div');
-  d.className='msg';
-  d.id='ld';
-  d.innerHTML='<div class="av b">🤖</div><div><div class="ld"><div class="spin"></div>Analyse en cours...</div><div class="dots"><span></span><span></span><span></span></div></div>';
-  chat.appendChild(d);
-  chat.scrollTop=chat.scrollHeight;
-}
-
-function rmL(){
-  const e=document.getElementById('ld');
-  if(e)e.remove();
-}
-
-function cell(lbl,val,conf,cote){
-  if(!val)return'';
-  return '<div class="pc"><div class="pl">'+lbl+'</div><div class="pv" style="color:'+col(conf)+'">'+val+'</div><div class="pf '+cc(conf)+'">'+conf+'%</div>'+(cote?'<div class="pk">~'+cote+'</div>':'')+'</div>';
-}
-
-function card(d){
-  const p=d.pronostics||{};
-  const a=d.analysis||{};
-  const cg=d.niveau_confiance_global||65;
-  const st=d.stats_techniques;
-  const aa=d.analyse_approfondie;
-  const pj=d.pari_du_jour;
-  const fc=col(cg);
-
-  let h='<div class="card"><div class="estimcard">⚠️ Estimations IA à but informatif uniquement.</div><div class="ch"><div><div class="cn">'+d.match+'</div><div class="cm">'+d.competition+' · '+d.date_info+'</div>'+(d.is_world_cup?'<div class="wct">🏆 CDM 2026'+(d.group?' · '+d.group:'')+'</div>':'')+'</div><div class="cb"><div class="cl">CONFIANCE</div><div class="cv" style="color:'+fc+'">'+cg+'%</div></div></div>';
-
-  if(pj){
-    h+='<div class="pj"><div class="pjt">⭐ Pari du jour — estimation</div><div class="pjv">'+pj.type+' — '+pj.valeur+'</div><div class="pjr">'+pj.raison+'</div><span class="pjc">Cote estimée ~'+pj.cote_estimee+'</span></div>';
-  }
-
-  if(st){
-    function dc(v){
-      return v<1?'#00FF87':v<1.5?'#FFB800':'#FF4560';
-    }
-
-    h+='<div class="sb"><div class="sbt">📊 Stats techniques — estimées</div><div class="sg">';
-
-    if(st.buts_marques_A){
-      h+='<div class="si"><div class="sl">⚽ BUTS/MATCH A</div><div class="sv" style="color:#38BFFF">'+st.buts_marques_A.valeur+'</div><div class="ss">'+st.buts_marques_A.detail+'</div></div>';
-    }
-
-    if(st.buts_encaisses_A){
-      h+='<div class="si"><div class="sl">🛡️ ENCAISSÉS/MATCH A</div><div class="sv" style="color:'+dc(st.buts_encaisses_A.valeur)+'">'+st.buts_encaisses_A.valeur+'</div><div class="ss">'+st.buts_encaisses_A.detail+'</div></div>';
-    }
-
-    if(st.buts_marques_B){
-      h+='<div class="si"><div class="sl">⚽ BUTS/MATCH B</div><div class="sv" style="color:#38BFFF">'+st.buts_marques_B.valeur+'</div><div class="ss">'+st.buts_marques_B.detail+'</div></div>';
-    }
-
-    if(st.buts_encaisses_B){
-      h+='<div class="si"><div class="sl">🛡️ ENCAISSÉS/MATCH B</div><div class="sv" style="color:'+dc(st.buts_encaisses_B.valeur)+'">'+st.buts_encaisses_B.valeur+'</div><div class="ss">'+st.buts_encaisses_B.detail+'</div></div>';
-    }
-
-    h+='</div>';
-
-    if(st.rapport_force){
-      h+='<div class="rp">⚔️ '+st.rapport_force.detail+'</div>';
-    }
-
-    h+='</div>';
-  }
-
-  h+='<div class="stl">💰 Paris & cotes estimées</div><div class="pg">'+
-  cell('1X2',p.resultat_1x2&&p.resultat_1x2.valeur,p.resultat_1x2&&p.resultat_1x2.confiance,p.resultat_1x2&&p.resultat_1x2.cote_estimee)+
-  cell('Over/Under',p.over_under&&p.over_under.valeur,p.over_under&&p.over_under.confiance,p.over_under&&p.over_under.cote_estimee)+
-  cell('BTTS',p.btts&&p.btts.valeur,p.btts&&p.btts.confiance,p.btts&&p.btts.cote_estimee)+
-  cell('Double Chance',p.double_chance&&p.double_chance.valeur,p.double_chance&&p.double_chance.confiance,p.double_chance&&p.double_chance.cote_estimee)+
-  cell('Handicap',p.handicap&&p.handicap.valeur,p.handicap&&p.handicap.confiance,p.handicap&&p.handicap.cote_estimee)+
-  cell('1er But',p.premier_but&&p.premier_but.valeur,p.premier_but&&p.premier_but.confiance,p.premier_but&&p.premier_but.cote_estimee)+
-  cell('MT/Fin',p.mi_temps_fin&&p.mi_temps_fin.valeur,p.mi_temps_fin&&p.mi_temps_fin.confiance,p.mi_temps_fin&&p.mi_temps_fin.cote_estimee)+
-  cell('Cage inviolée',p.cage_inviolee&&p.cage_inviolee.valeur,p.cage_inviolee&&p.cage_inviolee.confiance,p.cage_inviolee&&p.cage_inviolee.cote_estimee)+
-  cell('Score exact',p.score_exact&&p.score_exact.valeur,p.score_exact&&p.score_exact.confiance,p.score_exact&&p.score_exact.cote_estimee)+
-  '</div>';
-
-  h+='<div class="pg3"><div class="pc" style="border-top:1px solid #0F2030"><div class="pl">🏆 WINNER</div><div class="pv" style="color:#00FF87;font-size:13px">'+(p.winner&&p.winner.valeur||'')+'</div><div class="pf gh">'+(p.winner&&p.winner.confiance||0)+'%</div></div><div class="pc" style="border-top:1px solid #0F2030"><div class="pl">❌ PERDANT</div><div class="pv" style="color:#FF4560;font-size:13px">'+(p.perdant&&p.perdant.valeur||'')+'</div><div class="pf gl">'+(p.perdant&&p.perdant.confiance||0)+'%</div></div><div class="pc" style="border-top:1px solid #0F2030"><div class="pl">GLOBAL</div><div class="pv" style="color:'+fc+';font-size:15px">'+cg+'%</div></div></div>';
-
-  if(aa){
-    h+='<div class="aa"><div class="aat">🔍 Analyse approfondie</div><div class="ag">';
-
-    if(aa.forces_A){
-      h+='<div class="ai"><div class="ail">✅ FORCES A</div><div class="aiv">'+aa.forces_A+'</div></div>';
-    }
-
-    if(aa.faiblesses_A){
-      h+='<div class="ai"><div class="ail">⚠️ FAIBLESSES A</div><div class="aiv">'+aa.faiblesses_A+'</div></div>';
-    }
-
-    if(aa.forces_B){
-      h+='<div class="ai"><div class="ail">✅ FORCES B</div><div class="aiv">'+aa.forces_B+'</div></div>';
-    }
-
-    if(aa.faiblesses_B){
-      h+='<div class="ai"><div class="ail">⚠️ FAIBLESSES B</div><div class="aiv">'+aa.faiblesses_B+'</div></div>';
-    }
-
-    h+='</div>';
-
-    if(aa.facteur_cle){
-      h+='<div class="fk">🔑 '+aa.facteur_cle+'</div>';
-    }
-
-    h+='</div>';
-  }
-
-  const lb={
-    forme_domicile:['🏠','Domicile'],
-    forme_exterieur:['✈️','Extérieur'],
-    h2h:['⚔️','H2H'],
-    motivation:['🔥','Motivation'],
-    blessures:['🏥','Blessés']
-  };
-
-  const ar=Object.entries(a).map(function(e){
-    const k=e[0],v=e[1];
-    if(!v||!v.detail)return'';
-    const il=lb[k]||['•',k];
-    return '<div class="ar">'+il[0]+' <span style="flex:1;color:#3A6A8A;font-size:10px">'+il[1]+' — <span style="color:#A0C4E8">'+v.detail+'</span></span><div class="abar"><div class="af" style="width:'+(v.score||50)+'%"></div></div></div>';
-  }).join('');
-
-  h+='<div class="aa"><div class="aat">📡 Analyse combinée</div>'+ar+'</div>';
-
-  const sc=(d.buteurs_potentiels||[]).map(function(b){
-    return '<div class="chip">⚽ <strong>'+b.nom+'</strong> <span style="color:#3A6A8A;font-size:8px">('+b.equipe+')</span> <span class="sp">'+b.probabilite+'%</span>'+(b.cote_estimee?'<span class="sk"> ~'+b.cote_estimee+'</span>':'')+'</div>';
-  }).join('');
-
-  h+='<div class="sc"><div class="sct">⚽ Buteurs + cotes estimées</div>'+sc+'</div>';
-
-  const r1=p.resultat_1x2;
-
-  h+='<div class="vb"><div class="vg '+bc(r1&&r1.valeur)+'">'+((r1&&r1.label)||'ANALYSE').toUpperCase()+'</div><div style="flex:1;font-size:11px;color:#3A6A8A;line-height:1.5">'+d.verdict+'</div></div></div>';
-
-  return h;
-}
-
-async function go(q){
-  const t=(q||txt.value).trim();
-  if(!t||busy)return;
-
-  txt.value='';
-  txt.style.height='auto';
-  showTab(1);
-  msg('user',t);
-
-  busy=true;
-  btn.disabled=true;
-  showL();
-
-  try{
-    const r=await fetch('/api/chat',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({match:t})
-    });
-
-    const data=await r.json();
-
-    rmL();
-
-    if(data.error){
-      throw new Error(data.error);
-    }
-
-    const w=document.createElement('div');
-    w.className='msg';
-    w.innerHTML='<div class="av b">🤖</div><div style="flex:1;max-width:calc(100% - 38px)">'+card(data)+'</div>';
-
-    chat.appendChild(w);
-    chat.scrollTop=chat.scrollHeight;
-
-  }catch(e){
-    rmL();
-    msg('bot','❌ Erreur : '+e.message+'<br><br>Vérifie que ton API <strong>/api/chat</strong> est bien active sur Vercel.');
-  }
-
-  busy=false;
-  btn.disabled=false;
-}
-</script>
-
-</body>
-</html>
+  <main id="home" class="page active">
+
+    <section class="hero">
+      <div class="hero-top">
+        <div class="label">🏆 Coupe du Monde 2026</div>
+        <div class="badge">🏆 CDM 2026</div>
+      </div>
+
+      <div class="match-hero">
+        <div class="team">
+          <div class="flag">🇩🇪</div>
+          <strong>Allemagne</strong>
+          <small>Groupe E</small>
+        </div>
+
+        <div class="vs">VS</div>
+
+        <div class="team">
+          <div class="flag">🇨🇮</div>
+          <strong>Côte d'Ivoire</strong>
+          <small>Groupe E</small>
+        </div>
+      </div>
+
+      <div class="hero-meta">
+        <span>📅 Aujourd'hui</span>
+        <span>•</span>
+        <span>22:00</span>
+        <span>•</span>
+        <span>Analyse prudente</span>
+      </div>
+
+      <div class="confidence-box">
+        <div class="confidence-left">
+          <span>Confiance IA</span>
+          <strong>72%</strong>
+          <div class="progress"><i></i></div>
+        </div>
+        <button class="cta" type="button" onclick="quickAnalyze('Allemagne vs Côte d’Ivoire')">
+          Voir l'analyse →
+        </button>
+      </div>
+    </section>
+
+    <section class="stats-strip">
+      <div class="stat-mini">
+        <b>25</b>
+        <span>Bons pronos</span>
+      </div>
+      <div class="stat-mini">
+        <b>68%</b>
+        <span>Réussite IA</span>
+      </div>
+      <div class="stat-mini">
+        <b>12</b>
+        <span>Alertes live</span>
+      </div>
+      <div class="stat-mini">
+        <b>8</b>
+        <span>Dans 48h</span>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div class="section-title">Matchs du jour</div>
+        <div class="section-link">Voir tout ›</div>
+      </div>
+
+      <div class="match-list">
+        <div class="match-card">
+          <div class="match-time">
+            <b>19:00</b>
+            <span>Aujourd'hui</span>
+          </div>
+          <div class="match-teams">
+            <div>🇳🇱 Pays-Bas</div>
+            <div>🇸🇪 Suède</div>
+          </div>
+          <div class="match-odds">
+            <strong>1.95</strong>
+            <span>65%</span>
+          </div>
+        </div>
+
+        <div class="match-card">
+          <div class="match-time">
+            <b>22:00</b>
+            <span>Aujourd'hui</span>
+          </div>
+          <div class="match-teams">
+            <div>🇩🇪 Allemagne</div>
+            <div>🇨🇮 Côte d'Ivoire</div>
+          </div>
+          <div class="match-odds">
+    
