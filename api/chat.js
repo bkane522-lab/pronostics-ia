@@ -1,4 +1,4 @@
-const VERSION = "V7_1_STATS_CDM_STABLE";
+const VERSION = "V7_2_ANALYSE_PLUS_STABLE";
 
 const GROUPS = [
   { g:"Groupe A", teams:["Mexique","Corée du Sud","Tchéquie","Afrique du Sud"] },
@@ -170,13 +170,8 @@ function findCompleted(a,b){
   for(var i = 0; i < list.length; i++){
     var m = list[i];
 
-    var same =
-      clean(m.home) === clean(a) &&
-      clean(m.away) === clean(b);
-
-    var reverse =
-      clean(m.home) === clean(b) &&
-      clean(m.away) === clean(a);
+    var same = clean(m.home) === clean(a) && clean(m.away) === clean(b);
+    var reverse = clean(m.home) === clean(b) && clean(m.away) === clean(a);
 
     if(same || reverse){
       return m;
@@ -223,6 +218,10 @@ function stats(team){
     points:0,
     avgGF:0,
     avgGA:0,
+    cleanSheets:0,
+    btts:0,
+    over15:0,
+    over25:0,
     form:[]
   };
 
@@ -236,10 +235,16 @@ function stats(team){
     }
 
     var sc = scoreFor(m, team);
+    var totalGoals = m.hg + m.ag;
 
     s.played += 1;
     s.gf += sc.gf;
     s.ga += sc.ga;
+
+    if(sc.ga === 0){ s.cleanSheets += 1; }
+    if(m.hg > 0 && m.ag > 0){ s.btts += 1; }
+    if(totalGoals >= 2){ s.over15 += 1; }
+    if(totalGoals >= 3){ s.over25 += 1; }
 
     if(sc.gf > sc.ga){
       s.wins += 1;
@@ -265,20 +270,29 @@ function stats(team){
   return s;
 }
 
+function pct(value,total){
+  if(!total){ return 0; }
+  return Math.round((value / total) * 100);
+}
+
 function formatStats(s){
   if(!s || s.played === 0){
-    return s.team + " : aucune statistique disponible pour le moment.";
+    return s.team + " : aucune statistique CDM 2026 disponible pour le moment.";
   }
 
   return s.team + " : " +
     s.played + " match(s), " +
-    s.wins + " victoire(s), " +
-    s.draws + " nul(s), " +
-    s.losses + " défaite(s), " +
+    s.wins + "V, " +
+    s.draws + "N, " +
+    s.losses + "D, " +
     s.gf + " but(s) marqué(s), " +
     s.ga + " encaissé(s), " +
-    "différence " + (s.gd >= 0 ? "+" : "") + s.gd + ", " +
-    s.points + " point(s), forme " + s.form.join("-");
+    "diff " + (s.gd >= 0 ? "+" : "") + s.gd + ", " +
+    s.points + " pt(s), " +
+    "clean sheet " + pct(s.cleanSheets,s.played) + "%, " +
+    "BTTS " + pct(s.btts,s.played) + "%, " +
+    "Over 1.5 " + pct(s.over15,s.played) + "%, " +
+    "forme " + s.form.join("-");
 }
 
 function groupTable(groupName){
@@ -320,18 +334,38 @@ function tableText(groupName){
   }).join(" | ");
 }
 
-function prediction(a,b,sa,sb){
-  var total = sa.played + sb.played;
+function riskLevel(sa,sb,diff){
+  var totalGames = sa.played + sb.played;
 
-  if(total < 2){
+  if(totalGames < 2){
+    return "Risque élevé";
+  }
+
+  if(totalGames < 4){
+    return "Risque moyen/élevé";
+  }
+
+  if(Math.abs(diff) < 8){
+    return "Risque moyen";
+  }
+
+  return "Risque modéré";
+}
+
+function makePrediction(a,b,sa,sb){
+  var totalGames = sa.played + sb.played;
+
+  if(totalGames < 2){
     return {
       confidence:30,
       result:"À éviter",
-      doubleChance:"À éviter",
+      doubleChance:"Pas de choix clair",
       overUnder:"À éviter",
       btts:"À éviter",
       score:"À éviter",
       winner:"Données insuffisantes",
+      best:"Aucun pari fort conseillé",
+      risk:"Risque élevé",
       verdict:"Données encore trop limitées. Aucun pari fort conseillé."
     };
   }
@@ -342,25 +376,33 @@ function prediction(a,b,sa,sb){
 
   var winner = "Match serré";
   var result = "X";
-  var dc = "1X / X2";
+  var doubleChance = "Pas de choix clair";
   var confidence = 50;
 
   if(diff >= 12){
     winner = a;
     result = "1";
-    dc = "1X";
+    doubleChance = "1X";
     confidence = 62;
   }
 
   if(diff <= -12){
     winner = b;
     result = "2";
-    dc = "X2";
+    doubleChance = "X2";
     confidence = 62;
   }
 
   var totalGoalsAvg = sa.avgGF + sb.avgGF;
-  var overUnder = totalGoalsAvg >= 2.4 ? "Over 1.5 prudent" : "Under 3.5 prudent";
+  var overUnder = "À éviter";
+
+  if(totalGoalsAvg >= 2.4){
+    overUnder = "Over 1.5 prudent";
+  }else if(totalGoalsAvg <= 1.8){
+    overUnder = "Under 3.5 prudent";
+  }else{
+    overUnder = "Ligne buts à éviter";
+  }
 
   var btts = "À éviter";
 
@@ -371,15 +413,37 @@ function prediction(a,b,sa,sb){
   var scoreA = Math.max(0, Math.round((sa.avgGF + sb.avgGA) / 2));
   var scoreB = Math.max(0, Math.round((sb.avgGF + sa.avgGA) / 2));
 
+  var risk = riskLevel(sa,sb,diff);
+
+  var best = "Aucun pari fort conseillé";
+
+  if(overUnder === "Under 3.5 prudent"){
+    best = "Option prudente : Under 3.5";
+  }
+
+  if(overUnder === "Over 1.5 prudent"){
+    best = "Option prudente : Over 1.5";
+  }
+
+  if(doubleChance !== "Pas de choix clair" && confidence >= 60){
+    best = "Option prudente : Double chance " + doubleChance;
+  }
+
+  if(risk === "Risque élevé"){
+    best = "Aucun pari fort conseillé";
+  }
+
   return {
     confidence:confidence,
     result:result,
-    doubleChance:dc,
+    doubleChance:doubleChance,
     overUnder:overUnder,
     btts:btts,
     score:scoreA + "-" + scoreB,
     winner:winner,
-    verdict:"Analyse prudente basée seulement sur les résultats CDM enregistrés. À confirmer avec compositions, blessures et contexte."
+    best:best,
+    risk:risk,
+    verdict:best + ". " + risk + ". Analyse basée seulement sur les résultats CDM enregistrés. À confirmer avec compositions, blessures et contexte."
   };
 }
 
@@ -440,7 +504,7 @@ function upcomingResponse(a,b){
   var group = findGroup(a,b);
   var sa = stats(a);
   var sb = stats(b);
-  var p = prediction(a,b,sa,sb);
+  var p = makePrediction(a,b,sa,sb);
   var classement = tableText(group);
 
   return {
@@ -452,7 +516,7 @@ function upcomingResponse(a,b){
     niveau_confiance_global:p.confidence,
     pari_du_jour:{
       type:"Analyse prudente",
-      valeur:p.confidence < 50 ? "Aucun pari fort conseillé" : "Option prudente",
+      valeur:p.best,
       raison:p.verdict,
       cote_estimee:"N/D"
     },
@@ -478,10 +542,10 @@ function upcomingResponse(a,b){
     },
     analyse_approfondie:{
       forces_A:formatStats(sa),
-      faiblesses_A:sa.played > 0 ? "Moyenne encaissée : " + sa.avgGA + " but(s)/match." : "Données insuffisantes.",
+      faiblesses_A:"Moyenne encaissée : " + sa.avgGA + " but(s)/match. Tendance buts : Over 1.5 " + pct(sa.over15,sa.played) + "%, BTTS " + pct(sa.btts,sa.played) + "%.",
       forces_B:formatStats(sb),
-      faiblesses_B:sb.played > 0 ? "Moyenne encaissée : " + sb.avgGA + " but(s)/match." : "Données insuffisantes.",
-      facteur_cle:"Classement du groupe : " + classement + ". Analyse prudente, car les données CDM restent limitées."
+      faiblesses_B:"Moyenne encaissée : " + sb.avgGA + " but(s)/match. Tendance buts : Over 1.5 " + pct(sb.over15,sb.played) + "%, BTTS " + pct(sb.btts,sb.played) + "%.",
+      facteur_cle:"Niveau de risque : " + p.risk + ". Classement du groupe : " + classement + ". Meilleure lecture prudente : " + p.best + "."
     },
     analysis:{},
     buteurs_potentiels:[],
@@ -495,7 +559,7 @@ module.exports = async function handler(req,res){
       return res.status(200).json({
         ok:true,
         version:VERSION,
-        message:"API active V7.1 Stats Stable. Utilise POST avec { match: 'Espagne vs Arabie Saoudite' }."
+        message:"API active V7.2 Analyse Plus."
       });
     }
 
@@ -507,7 +571,7 @@ module.exports = async function handler(req,res){
 
     if(!parsed){
       return res.status(400).json({
-        error:"Écris un match complet, exemple : France vs Sénégal."
+        error:"Écris un match complet, exemple : Espagne vs Arabie Saoudite."
       });
     }
 
@@ -524,7 +588,7 @@ module.exports = async function handler(req,res){
   }catch(e){
     return res.status(200).json({
       match:"Erreur contrôlée",
-      competition:"Version stable V7.1",
+      competition:"Version stable V7.2",
       date_info:VERSION,
       is_world_cup:false,
       group:"",
