@@ -1,4 +1,4 @@
-const DATA_VERSION = "DATA_CDM_2026_2026_06_21";
+const DATA_VERSION = "DATA_CDM_2026_MAJ_2026_06_26";
 
 const GROUPS = [
   ["Groupe A",["Mexique","Corée du Sud","Tchéquie","Afrique du Sud"]],
@@ -52,15 +52,43 @@ const RESULTS = [
   ["2026-06-19","Groupe B","Canada","Qatar",6,0],
   ["2026-06-19","Groupe A","Mexique","Corée du Sud",1,0],
   ["2026-06-19","Groupe D","USA","Australie",2,0],
+  ["2026-06-19","Groupe C","Écosse","Maroc",0,1],
+  ["2026-06-19","Groupe C","Brésil","Haïti",3,0],
+  ["2026-06-19","Groupe D","Turquie","Paraguay",0,1],
 
-  ["2026-06-20","Groupe C","Écosse","Maroc",0,1],
-  ["2026-06-20","Groupe C","Brésil","Haïti",3,0],
-  ["2026-06-20","Groupe D","Turquie","Paraguay",0,1],
   ["2026-06-20","Groupe F","Pays-Bas","Suède",5,1],
   ["2026-06-20","Groupe E","Allemagne","Côte d’Ivoire",2,1],
+  ["2026-06-20","Groupe E","Équateur","Curaçao",0,0],
+  ["2026-06-20","Groupe F","Tunisie","Japon",0,4],
 
-  ["2026-06-21","Groupe E","Équateur","Curaçao",0,0],
-  ["2026-06-21","Groupe F","Tunisie","Japon",0,4]
+  ["2026-06-21","Groupe H","Espagne","Arabie Saoudite",4,0],
+  ["2026-06-21","Groupe G","Belgique","Iran",0,0],
+  ["2026-06-21","Groupe H","Uruguay","Cap-Vert",2,2],
+  ["2026-06-21","Groupe G","Nouvelle-Zélande","Égypte",1,3],
+
+  ["2026-06-22","Groupe J","Argentine","Autriche",2,0],
+  ["2026-06-22","Groupe I","France","Irak",3,0],
+  ["2026-06-22","Groupe I","Norvège","Sénégal",3,2],
+  ["2026-06-22","Groupe J","Jordanie","Algérie",1,2],
+
+  ["2026-06-23","Groupe K","Portugal","Ouzbékistan",5,0],
+  ["2026-06-23","Groupe L","Angleterre","Ghana",0,0],
+  ["2026-06-23","Groupe L","Panama","Croatie",0,1],
+  ["2026-06-23","Groupe K","Colombie","RD Congo",1,0],
+
+  ["2026-06-24","Groupe B","Suisse","Canada",2,1],
+  ["2026-06-24","Groupe B","Bosnie","Qatar",3,1],
+  ["2026-06-24","Groupe C","Écosse","Brésil",0,3],
+  ["2026-06-24","Groupe C","Maroc","Haïti",4,2],
+  ["2026-06-24","Groupe A","Tchéquie","Mexique",0,3],
+  ["2026-06-24","Groupe A","Afrique du Sud","Corée du Sud",1,0],
+
+  ["2026-06-25","Groupe E","Équateur","Allemagne",2,1],
+  ["2026-06-25","Groupe E","Curaçao","Côte d’Ivoire",0,2],
+  ["2026-06-25","Groupe F","Japon","Suède",1,1],
+  ["2026-06-25","Groupe F","Tunisie","Pays-Bas",1,3],
+  ["2026-06-25","Groupe D","Turquie","USA",3,2],
+  ["2026-06-25","Groupe D","Paraguay","Australie",0,0]
 ];
 
 module.exports = {
