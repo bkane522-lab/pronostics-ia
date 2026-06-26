@@ -1,58 +1,18 @@
-const VERSION = "V7_3_MINI_STABLE_BUTEURS";
+const VERSION = "V8_DATA_SEPAREES_STABLE";
 
-const GROUPS = [
-  ["Groupe A",["Mexique","Corée du Sud","Tchéquie","Afrique du Sud"]],
-  ["Groupe B",["Suisse","Canada","Qatar","Bosnie"]],
-  ["Groupe C",["Écosse","Maroc","Brésil","Haïti"]],
-  ["Groupe D",["USA","Australie","Turquie","Paraguay"]],
-  ["Groupe E",["Allemagne","Côte d’Ivoire","Équateur","Curaçao"]],
-  ["Groupe F",["Suède","Japon","Pays-Bas","Tunisie"]],
-  ["Groupe G",["Nouvelle-Zélande","Iran","Belgique","Égypte"]],
-  ["Groupe H",["Uruguay","Arabie Saoudite","Espagne","Cap-Vert"]],
-  ["Groupe I",["Norvège","France","Sénégal","Irak"]],
-  ["Groupe J",["Argentine","Autriche","Jordanie","Algérie"]],
-  ["Groupe K",["Portugal","RD Congo","Ouzbékistan","Colombie"]],
-  ["Groupe L",["Angleterre","Croatie","Ghana","Panama"]]
-];
+let DATA_VERSION = "DATA_NON_CHARGEE";
+let GROUPS = [];
+let RESULTS = [];
+let LOAD_ERROR = "";
 
-const RESULTS = [
-  ["2026-06-11","Groupe A","Mexique","Afrique du Sud",2,0],
-  ["2026-06-12","Groupe A","Corée du Sud","Tchéquie",2,1],
-  ["2026-06-12","Groupe B","Canada","Bosnie",1,1],
-  ["2026-06-13","Groupe D","USA","Paraguay",4,1],
-  ["2026-06-13","Groupe B","Qatar","Suisse",1,1],
-  ["2026-06-14","Groupe C","Brésil","Maroc",1,1],
-  ["2026-06-14","Groupe C","Haïti","Écosse",0,1],
-  ["2026-06-14","Groupe D","Australie","Turquie",2,0],
-  ["2026-06-14","Groupe E","Allemagne","Curaçao",7,1],
-  ["2026-06-14","Groupe F","Pays-Bas","Japon",2,2],
-  ["2026-06-15","Groupe E","Côte d’Ivoire","Équateur",1,0],
-  ["2026-06-15","Groupe F","Suède","Tunisie",5,1],
-  ["2026-06-15","Groupe H","Espagne","Cap-Vert",0,0],
-  ["2026-06-15","Groupe G","Belgique","Égypte",1,1],
-  ["2026-06-16","Groupe H","Arabie Saoudite","Uruguay",1,1],
-  ["2026-06-16","Groupe G","Iran","Nouvelle-Zélande",2,2],
-  ["2026-06-16","Groupe I","France","Sénégal",3,1],
-  ["2026-06-17","Groupe I","Irak","Norvège",1,4],
-  ["2026-06-17","Groupe J","Argentine","Algérie",3,0],
-  ["2026-06-17","Groupe J","Autriche","Jordanie",3,1],
-  ["2026-06-17","Groupe K","Portugal","RD Congo",1,1],
-  ["2026-06-17","Groupe L","Angleterre","Croatie",4,2],
-  ["2026-06-18","Groupe L","Ghana","Panama",1,0],
-  ["2026-06-18","Groupe K","Ouzbékistan","Colombie",1,3],
-  ["2026-06-18","Groupe A","Tchéquie","Afrique du Sud",1,1],
-  ["2026-06-18","Groupe B","Suisse","Bosnie",4,1],
-  ["2026-06-19","Groupe B","Canada","Qatar",6,0],
-  ["2026-06-19","Groupe A","Mexique","Corée du Sud",1,0],
-  ["2026-06-19","Groupe D","USA","Australie",2,0],
-  ["2026-06-20","Groupe C","Écosse","Maroc",0,1],
-  ["2026-06-20","Groupe C","Brésil","Haïti",3,0],
-  ["2026-06-20","Groupe D","Turquie","Paraguay",0,1],
-  ["2026-06-20","Groupe F","Pays-Bas","Suède",5,1],
-  ["2026-06-20","Groupe E","Allemagne","Côte d’Ivoire",2,1],
-  ["2026-06-21","Groupe E","Équateur","Curaçao",0,0],
-  ["2026-06-21","Groupe F","Tunisie","Japon",0,4]
-];
+try{
+  const data = require("./data");
+  DATA_VERSION = data.DATA_VERSION || "DATA_SANS_VERSION";
+  GROUPS = data.GROUPS || [];
+  RESULTS = data.RESULTS || [];
+}catch(e){
+  LOAD_ERROR = e.message || "Impossible de charger api/data.js";
+}
 
 function clean(v){
   return String(v || "")
@@ -70,7 +30,9 @@ function canon(name){
 
   for(const group of GROUPS){
     for(const team of group[1]){
-      if(clean(team) === x) return team;
+      if(clean(team) === x){
+        return team;
+      }
     }
   }
 
@@ -99,7 +61,10 @@ function canon(name){
 }
 
 function parseBody(req){
-  if(!req.body) return {};
+  if(!req.body){
+    return {};
+  }
+
   if(typeof req.body === "string"){
     try{
       return JSON.parse(req.body);
@@ -107,6 +72,7 @@ function parseBody(req){
       return {};
     }
   }
+
   return req.body;
 }
 
@@ -119,11 +85,17 @@ function parseMatch(input){
 
   let parts = null;
 
-  if(/\s+vs\s+/i.test(raw)) parts = raw.split(/\s+vs\s+/i);
-  else if(/\s+contre\s+/i.test(raw)) parts = raw.split(/\s+contre\s+/i);
-  else if(/\s+-\s+/i.test(raw)) parts = raw.split(/\s+-\s+/i);
+  if(/\s+vs\s+/i.test(raw)){
+    parts = raw.split(/\s+vs\s+/i);
+  }else if(/\s+contre\s+/i.test(raw)){
+    parts = raw.split(/\s+contre\s+/i);
+  }else if(/\s+-\s+/i.test(raw)){
+    parts = raw.split(/\s+-\s+/i);
+  }
 
-  if(!parts || parts.length < 2) return null;
+  if(!parts || parts.length < 2){
+    return null;
+  }
 
   return {
     a: canon(parts[0]),
@@ -133,43 +105,72 @@ function parseMatch(input){
 
 function findGroup(a,b){
   for(const g of GROUPS){
-    const hasA = g[1].some(t => clean(t) === clean(a));
-    const hasB = g[1].some(t => clean(t) === clean(b));
-    if(hasA && hasB) return g[0];
+    const hasA = g[1].some(function(t){
+      return clean(t) === clean(a);
+    });
+
+    const hasB = g[1].some(function(t){
+      return clean(t) === clean(b);
+    });
+
+    if(hasA && hasB){
+      return g[0];
+    }
   }
+
   return "";
 }
 
-function findCompleted(a,b){
-  for(const r of RESULTS){
-    const home = r[2];
-    const away = r[3];
+function makeMatch(row){
+  return {
+    date:row[0],
+    group:row[1],
+    home:row[2],
+    away:row[3],
+    hg:row[4],
+    ag:row[5]
+  };
+}
 
-    const same = clean(home) === clean(a) && clean(away) === clean(b);
-    const reverse = clean(home) === clean(b) && clean(away) === clean(a);
+function findCompleted(a,b){
+  for(const row of RESULTS){
+    const m = makeMatch(row);
+
+    const same =
+      clean(m.home) === clean(a) &&
+      clean(m.away) === clean(b);
+
+    const reverse =
+      clean(m.home) === clean(b) &&
+      clean(m.away) === clean(a);
 
     if(same || reverse){
-      return {
-        date:r[0],
-        group:r[1],
-        home:r[2],
-        away:r[3],
-        hg:r[4],
-        ag:r[5]
-      };
+      return m;
     }
   }
+
   return null;
 }
 
 function scoreFor(match, team){
   if(clean(match.home) === clean(team)){
-    return { gf:match.hg, ga:match.ag };
+    return {
+      gf:match.hg,
+      ga:match.ag
+    };
   }
+
   if(clean(match.away) === clean(team)){
-    return { gf:match.ag, ga:match.hg };
+    return {
+      gf:match.ag,
+      ga:match.hg
+    };
   }
-  return { gf:0, ga:0 };
+
+  return {
+    gf:0,
+    ga:0
+  };
 }
 
 function stats(team){
@@ -192,15 +193,8 @@ function stats(team){
     form:[]
   };
 
-  for(const r of RESULTS){
-    const m = {
-      date:r[0],
-      group:r[1],
-      home:r[2],
-      away:r[3],
-      hg:r[4],
-      ag:r[5]
-    };
+  for(const row of RESULTS){
+    const m = makeMatch(row);
 
     if(clean(m.home) !== clean(team) && clean(m.away) !== clean(team)){
       continue;
@@ -209,25 +203,36 @@ function stats(team){
     const sc = scoreFor(m, team);
     const totalGoals = m.hg + m.ag;
 
-    s.played++;
+    s.played += 1;
     s.gf += sc.gf;
     s.ga += sc.ga;
 
-    if(sc.ga === 0) s.cleanSheets++;
-    if(m.hg > 0 && m.ag > 0) s.btts++;
-    if(totalGoals >= 2) s.over15++;
-    if(totalGoals >= 3) s.over25++;
+    if(sc.ga === 0){
+      s.cleanSheets += 1;
+    }
+
+    if(m.hg > 0 && m.ag > 0){
+      s.btts += 1;
+    }
+
+    if(totalGoals >= 2){
+      s.over15 += 1;
+    }
+
+    if(totalGoals >= 3){
+      s.over25 += 1;
+    }
 
     if(sc.gf > sc.ga){
-      s.wins++;
+      s.wins += 1;
       s.points += 3;
       s.form.push("V");
     }else if(sc.gf === sc.ga){
-      s.draws++;
+      s.draws += 1;
       s.points += 1;
       s.form.push("N");
     }else{
-      s.losses++;
+      s.losses += 1;
       s.form.push("D");
     }
   }
@@ -243,7 +248,10 @@ function stats(team){
 }
 
 function pct(v,total){
-  if(!total) return 0;
+  if(!total){
+    return 0;
+  }
+
   return Math.round((v / total) * 100);
 }
 
@@ -268,20 +276,39 @@ function formatStats(s){
 }
 
 function tableText(groupName){
-  const group = GROUPS.find(g => g[0] === groupName);
-  if(!group) return "Classement indisponible.";
+  const group = GROUPS.find(function(g){
+    return g[0] === groupName;
+  });
 
-  const table = group[1].map(t => stats(t));
+  if(!group){
+    return "Classement indisponible.";
+  }
 
-  table.sort((a,b) => {
-    if(b.points !== a.points) return b.points - a.points;
-    if(b.gd !== a.gd) return b.gd - a.gd;
-    if(b.gf !== a.gf) return b.gf - a.gf;
+  const table = group[1].map(function(team){
+    return stats(team);
+  });
+
+  table.sort(function(a,b){
+    if(b.points !== a.points){
+      return b.points - a.points;
+    }
+
+    if(b.gd !== a.gd){
+      return b.gd - a.gd;
+    }
+
+    if(b.gf !== a.gf){
+      return b.gf - a.gf;
+    }
+
     return a.team.localeCompare(b.team);
   });
 
-  return table.map((t,i) => {
-    return (i + 1) + ". " + t.team + " " + t.points + " pts diff " + (t.gd >= 0 ? "+" : "") + t.gd;
+  return table.map(function(t,i){
+    return (i + 1) + ". " +
+      t.team + " " +
+      t.points + " pts diff " +
+      (t.gd >= 0 ? "+" : "") + t.gd;
   }).join(" | ");
 }
 
@@ -308,8 +335,20 @@ function makePrediction(a,b,sa,sb){
     };
   }
 
-  const powerA = sa.points * 8 + sa.gd * 3 + sa.gf * 2 + sa.wins * 5 - sa.ga;
-  const powerB = sb.points * 8 + sb.gd * 3 + sb.gf * 2 + sb.wins * 5 - sb.ga;
+  const powerA =
+    sa.points * 8 +
+    sa.gd * 3 +
+    sa.gf * 2 +
+    sa.wins * 5 -
+    sa.ga;
+
+  const powerB =
+    sb.points * 8 +
+    sb.gd * 3 +
+    sb.gf * 2 +
+    sb.wins * 5 -
+    sb.ga;
+
   const diff = powerA - powerB;
 
   let result = "X";
@@ -332,6 +371,7 @@ function makePrediction(a,b,sa,sb){
   }
 
   const avgGoals = sa.avgGF + sb.avgGF;
+
   let overUnder = "Ligne buts à éviter";
   let confOver = 35;
 
@@ -355,13 +395,21 @@ function makePrediction(a,b,sa,sb){
   const scoreB = Math.max(0, Math.round((sb.avgGF + sa.avgGA) / 2));
 
   let risk = "Risque moyen/élevé";
-  if(total >= 4 && Math.abs(diff) >= 8) risk = "Risque modéré";
-  if(total < 2) risk = "Risque élevé";
+
+  if(total >= 4 && Math.abs(diff) >= 8){
+    risk = "Risque modéré";
+  }
 
   let best = "Aucun pari fort conseillé";
 
-  if(overUnder === "Under 3.5 prudent") best = "Option prudente : Under 3.5";
-  if(overUnder === "Over 1.5 prudent") best = "Option prudente : Over 1.5";
+  if(overUnder === "Under 3.5 prudent"){
+    best = "Option prudente : Under 3.5";
+  }
+
+  if(overUnder === "Over 1.5 prudent"){
+    best = "Option prudente : Over 1.5";
+  }
+
   if(doubleChance !== "Pas de choix clair" && confidence >= 60){
     best = "Option prudente : Double chance " + doubleChance;
   }
@@ -447,11 +495,25 @@ function completedResponse(a,b,m){
       cote_estimee:"N/D"
     },
     stats_techniques:{
-      buts_marques_A:{ valeur:scA.gf, detail:a + " : " + scA.gf + " but(s) dans ce match. Total CDM : " + sa.gf },
-      buts_encaisses_A:{ valeur:scA.ga, detail:a + " : " + scA.ga + " but(s) encaissé(s). Total CDM : " + sa.ga },
-      buts_marques_B:{ valeur:scB.gf, detail:b + " : " + scB.gf + " but(s) dans ce match. Total CDM : " + sb.gf },
-      buts_encaisses_B:{ valeur:scB.ga, detail:b + " : " + scB.ga + " but(s) encaissé(s). Total CDM : " + sb.ga },
-      rapport_force:{ detail:"Résultat final : " + finalScore }
+      buts_marques_A:{
+        valeur:scA.gf,
+        detail:a + " : " + scA.gf + " but(s) dans ce match. Total CDM : " + sa.gf
+      },
+      buts_encaisses_A:{
+        valeur:scA.ga,
+        detail:a + " : " + scA.ga + " but(s) encaissé(s). Total CDM : " + sa.ga
+      },
+      buts_marques_B:{
+        valeur:scB.gf,
+        detail:b + " : " + scB.gf + " but(s) dans ce match. Total CDM : " + sb.gf
+      },
+      buts_encaisses_B:{
+        valeur:scB.ga,
+        detail:b + " : " + scB.ga + " but(s) encaissé(s). Total CDM : " + sb.ga
+      },
+      rapport_force:{
+        detail:"Résultat final : " + finalScore
+      }
     },
     pronostics:{
       resultat_1x2:{ valeur:"Terminé", label:"Match terminé", confiance:100, cote_estimee:"" },
@@ -500,11 +562,25 @@ function upcomingResponse(a,b){
       cote_estimee:"N/D"
     },
     stats_techniques:{
-      buts_marques_A:{ valeur:sa.avgGF, detail:a + " : " + sa.gf + " but(s) marqué(s) en " + sa.played + " match(s). Moyenne : " + sa.avgGF },
-      buts_encaisses_A:{ valeur:sa.avgGA, detail:a + " : " + sa.ga + " but(s) encaissé(s). Moyenne : " + sa.avgGA },
-      buts_marques_B:{ valeur:sb.avgGF, detail:b + " : " + sb.gf + " but(s) marqué(s) en " + sb.played + " match(s). Moyenne : " + sb.avgGF },
-      buts_encaisses_B:{ valeur:sb.avgGA, detail:b + " : " + sb.ga + " but(s) encaissé(s). Moyenne : " + sb.avgGA },
-      rapport_force:{ detail:"Classement " + group + " : " + classement }
+      buts_marques_A:{
+        valeur:sa.avgGF,
+        detail:a + " : " + sa.gf + " but(s) marqué(s) en " + sa.played + " match(s). Moyenne : " + sa.avgGF
+      },
+      buts_encaisses_A:{
+        valeur:sa.avgGA,
+        detail:a + " : " + sa.ga + " but(s) encaissé(s). Moyenne : " + sa.avgGA
+      },
+      buts_marques_B:{
+        valeur:sb.avgGF,
+        detail:b + " : " + sb.gf + " but(s) marqué(s) en " + sb.played + " match(s). Moyenne : " + sb.avgGF
+      },
+      buts_encaisses_B:{
+        valeur:sb.avgGA,
+        detail:b + " : " + sb.ga + " but(s) encaissé(s). Moyenne : " + sb.avgGA
+      },
+      rapport_force:{
+        detail:"Classement " + group + " : " + classement
+      }
     },
     pronostics:{
       resultat_1x2:{ valeur:p.result, label:p.winner, confiance:p.confResult, cote_estimee:"" },
@@ -581,12 +657,22 @@ module.exports = async function handler(req,res){
       return res.status(200).json({
         ok:true,
         version:VERSION,
-        message:"API active. Utilise POST avec { match: 'Espagne vs Arabie Saoudite' }."
+        data_version:DATA_VERSION,
+        data_loaded:LOAD_ERROR ? false : true,
+        load_error:LOAD_ERROR,
+        results_count:RESULTS.length,
+        message:"API active V8. Données séparées dans api/data.js."
       });
     }
 
+    if(LOAD_ERROR){
+      return res.status(200).json(errorResponse("Erreur api/data.js : " + LOAD_ERROR));
+    }
+
     if(req.method !== "POST"){
-      return res.status(405).json({ error:"Méthode non autorisée." });
+      return res.status(405).json({
+        error:"Méthode non autorisée."
+      });
     }
 
     const body = parseBody(req);
