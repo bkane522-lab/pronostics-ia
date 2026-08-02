@@ -1,10 +1,6 @@
 // Configuration des championnats disponibles pour Pronostics IA Pro V9.
 //
-// "cdm2026-demo" reste 100% local (fichier api/data.js, aucune clé API requise).
-// C'est le mode démo : il garantit que l'app fonctionne même si
-// API_FOOTBALL_KEY n'est pas encore configurée sur Vercel.
-//
-// Les autres championnats utilisent l'API-Football (https://www.api-football.com/)
+// Tous les championnats utilisent l'API-Football (https://www.api-football.com/)
 // et nécessitent la variable d'environnement API_FOOTBALL_KEY sur Vercel
 // (Project Settings > Environment Variables). Ne jamais mettre cette clé dans le code.
 //
@@ -15,7 +11,6 @@
 // 2026...) nécessite un plan payant API-Football.
 
 const LEAGUES = [
-  { slug: "cdm2026-demo", label: "Démo CDM 2026", live: false },
   { slug: "ligue1", label: "Ligue 1", live: true, apiId: 61, season: 2023 },
   { slug: "premier-league", label: "Premier League", live: true, apiId: 39, season: 2023 },
   { slug: "liga", label: "Liga", live: true, apiId: 140, season: 2023 },
@@ -24,7 +19,7 @@ const LEAGUES = [
   { slug: "champions-league", label: "Ligue des Champions", live: true, apiId: 2, season: 2023 }
 ];
 
-const DEFAULT_LEAGUE = "cdm2026-demo";
+const DEFAULT_LEAGUE = "ligue1";
 
 function findLeague(slug) {
   return LEAGUES.find(l => l.slug === slug) || LEAGUES.find(l => l.slug === DEFAULT_LEAGUE);
