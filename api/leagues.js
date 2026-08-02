@@ -1,27 +1,22 @@
 // Configuration des championnats disponibles pour Pronostics IA Pro V9.
 //
-// Tous les championnats utilisent l'API-Football (https://www.api-football.com/)
-// et nécessitent la variable d'environnement API_FOOTBALL_KEY sur Vercel
-// (Project Settings > Environment Variables). Ne jamais mettre cette clé dans le code.
+// Utilise l'API football-data.org (https://www.football-data.org/) au lieu
+// d'API-Football : son plan GRATUIT donne accès à la SAISON EN COURS (pas
+// de restriction 2022-2024 comme sur API-Football). Nécessite la variable
+// d'environnement FOOTBALL_DATA_KEY sur Vercel (Project Settings >
+// Environment Variables). Ne jamais mettre cette clé dans le code.
 //
-// IMPORTANT : le plan GRATUIT d'API-Football ne donne accès qu'aux saisons
-// 2022 à 2024 (confirmé par l'erreur "Free plans do not have access to this
-// season, try from 2022 to 2024."). season:2023 = saison 2023-2024, la plus
-// récente disponible gratuitement. Passer à une saison plus récente (2025,
-// 2026...) nécessite un plan payant API-Football.
-//
-// "ligue1-test-2025" est une entrée TEMPORAIRE pour vérifier si la saison
-// 2025 passe. Une fois le test fait, supprime cette ligne (et son entrée
-// correspondante dans LEAGUES_UI côté public/index.html).
+// "code" est le code de compétition football-data.org (PL, PD, BL1, SA,
+// FL1, CL...). Pas besoin de préciser de saison : l'API renvoie la saison
+// en cours par défaut.
 
 const LEAGUES = [
-  { slug: "ligue1", label: "Ligue 1", live: true, apiId: 61, season: 2023 },
-  { slug: "ligue1-test-2025", label: "Ligue 1 (test 2025)", live: true, apiId: 61, season: 2025 },
-  { slug: "premier-league", label: "Premier League", live: true, apiId: 39, season: 2023 },
-  { slug: "liga", label: "Liga", live: true, apiId: 140, season: 2023 },
-  { slug: "serie-a", label: "Serie A", live: true, apiId: 135, season: 2023 },
-  { slug: "bundesliga", label: "Bundesliga", live: true, apiId: 78, season: 2023 },
-  { slug: "champions-league", label: "Ligue des Champions", live: true, apiId: 2, season: 2023 }
+  { slug: "ligue1", label: "Ligue 1", live: true, code: "FL1" },
+  { slug: "premier-league", label: "Premier League", live: true, code: "PL" },
+  { slug: "liga", label: "Liga", live: true, code: "PD" },
+  { slug: "serie-a", label: "Serie A", live: true, code: "SA" },
+  { slug: "bundesliga", label: "Bundesliga", live: true, code: "BL1" },
+  { slug: "champions-league", label: "Ligue des Champions", live: true, code: "CL" }
 ];
 
 const DEFAULT_LEAGUE = "ligue1";
