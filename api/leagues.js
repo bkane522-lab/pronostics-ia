@@ -9,9 +9,14 @@
 // season, try from 2022 to 2024."). season:2023 = saison 2023-2024, la plus
 // récente disponible gratuitement. Passer à une saison plus récente (2025,
 // 2026...) nécessite un plan payant API-Football.
+//
+// "ligue1-test-2025" est une entrée TEMPORAIRE pour vérifier si la saison
+// 2025 passe. Une fois le test fait, supprime cette ligne (et son entrée
+// correspondante dans LEAGUES_UI côté public/index.html).
 
 const LEAGUES = [
   { slug: "ligue1", label: "Ligue 1", live: true, apiId: 61, season: 2023 },
+  { slug: "ligue1-test-2025", label: "Ligue 1 (test 2025)", live: true, apiId: 61, season: 2025 },
   { slug: "premier-league", label: "Premier League", live: true, apiId: 39, season: 2023 },
   { slug: "liga", label: "Liga", live: true, apiId: 140, season: 2023 },
   { slug: "serie-a", label: "Serie A", live: true, apiId: 135, season: 2023 },
