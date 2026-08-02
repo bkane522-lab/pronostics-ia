@@ -94,7 +94,9 @@ function scoreFor(match, team) {
 }
 
 // Calcule les stats (forme, BTTS, over/under, clean sheets) à partir de
-// l'échantillon de résultats chargé (ctx.RESULTS).
+// l'échantillon de résultats chargé (ctx.RESULTS). En mode démo, cet
+// échantillon est la totalité des matchs CDM. En mode live, c'est les
+// N derniers matchs du championnat récupérés via API-Football.
 function statsFromResults(team, ctx) {
   const s = { team, played: 0, wins: 0, draws: 0, losses: 0, gf: 0, ga: 0, gd: 0, points: 0, avgGF: 0, avgGA: 0, cleanSheets: 0, btts: 0, over15: 0, over25: 0, form: [] };
   for (const row of ctx.RESULTS) {
@@ -117,9 +119,9 @@ function statsFromResults(team, ctx) {
 }
 
 // Stats "officielles" : en mode live, on préfère les totaux du classement
-// (saison complète) aux totaux calculés sur l'échantillon de derniers
-// matchs (plus fiable pour points/GD/buts). La forme, BTTS et over/under
-// restent calculés sur l'échantillon récent (ctx.RESULTS).
+// API-Football (saison complète) aux totaux calculés sur l'échantillon de
+// derniers matchs (plus fiable pour points/GD/buts). La forme, BTTS et
+// over/under restent calculés sur l'échantillon récent (ctx.RESULTS).
 function stats(team, ctx) {
   const s = statsFromResults(team, ctx);
   const key = clean(team);
@@ -164,7 +166,7 @@ function tableText(groupName, ctx) {
 function makePrediction(a, b, sa, sb) {
   const total = sa.played + sb.played;
   if (total < 2) {
-    return { confidence: 35, result: "À éviter", doubleChance: "Pas de choix clair", overUnder: "À éviter", btts: "À éviter", score: "À éviter", winner: "Données insuffisantes", best: "Aucun pari fort conseillé", risk: "Risque élevé", confResult: 20, confDouble: 25, confOver: 25, confBtts: 20, confScore: 10, verdict: "Données trop limitées. Aucun pari fort conseillé." };
+    return { confidence: 35, result: "À éviter", doubleChance: "Pas de choix clair", overUnder: "À éviter", btts: "À éviter", score: "À éviter", winner: "Données insuffisantes", best: "Aucun pari fort conseillé", risk: "Risque élevé", confResult: 20, confDouble: 25, confOver: 25, confBtts: 20, confScore: 10, combine: "Pas assez de données", confCombine: 10, verdict: "Données trop limitées. Aucun pari fort conseillé." };
   }
   const powerA = sa.points * 8 + sa.gd * 3 + sa.gf * 2 + sa.wins * 5 - sa.ga;
   const powerB = sb.points * 8 + sb.gd * 3 + sb.gf * 2 + sb.wins * 5 - sb.ga;
@@ -182,11 +184,19 @@ function makePrediction(a, b, sa, sb) {
   const scoreB = Math.max(0, Math.round((sb.avgGF + sa.avgGA) / 2));
   let risk = "Risque moyen/élevé";
   if (total >= 4 && Math.abs(diff) >= 8) risk = "Risque modéré";
+  const confDoubleVal = doubleChance === "Pas de choix clair" ? 35 : Math.min(75, confidence + 10);
   let best = "Aucun pari fort conseillé";
   if (overUnder === "Under 3.5 prudent") best = "Option prudente : Under 3.5";
   if (overUnder === "Over 1.5 prudent") best = "Option prudente : Over 1.5";
   if (doubleChance !== "Pas de choix clair" && confidence >= 60) best = "Option prudente : Double chance " + doubleChance;
-  return { confidence, result, doubleChance, overUnder, btts, score: scoreA + "-" + scoreB, winner, best, risk, confResult: confidence, confDouble: doubleChance === "Pas de choix clair" ? 35 : Math.min(75, confidence + 10), confOver, confBtts, confScore: 18, verdict: best + ". " + risk + ". Analyse basée sur les données statistiques enregistrées." };
+  // Combiné prudent (contenu PRO) : associe la double chance et la ligne de
+  // buts uniquement quand les deux options sont elles-mêmes jugées "prudentes".
+  let combine = "Aucun combiné fiable", confCombine = 15;
+  if (doubleChance !== "Pas de choix clair" && overUnder.indexOf("prudent") !== -1) {
+    combine = "Double chance " + doubleChance + " + " + overUnder.replace(" prudent", "");
+    confCombine = Math.max(10, Math.round(((confDoubleVal + confOver) / 2) * 0.55));
+  }
+  return { confidence, result, doubleChance, overUnder, btts, score: scoreA + "-" + scoreB, winner, best, risk, confResult: confidence, confDouble: confDoubleVal, confOver, confBtts, confScore: 18, combine, confCombine, verdict: best + ". " + risk + ". Analyse basée sur les données statistiques enregistrées." };
 }
 
 function scorerTips(a, b, sa, sb) {
@@ -216,7 +226,7 @@ function completedResponse(a, b, m, ctx) {
       rapport_force: { detail: "Résultat final : " + finalScore }
     },
     pronostics: {
-      resultat_1x2: { valeur: "Terminé", label: "Match terminé", confiance: 100, cote_estimee: "" }, over_under: { valeur: "Non applicable", confiance: 100, cote_estimee: "" }, btts: { valeur: m.hg > 0 && m.ag > 0 ? "Oui" : "Non", confiance: 100, cote_estimee: "" }, double_chance: { valeur: "Non applicable", confiance: 100, cote_estimee: "" }, handicap: { valeur: "Non applicable", confiance: 100, cote_estimee: "" }, premier_but: { valeur: "Non disponible", confiance: 0, cote_estimee: "" }, mi_temps_fin: { valeur: "Non disponible", confiance: 0, cote_estimee: "" }, cage_inviolee: { valeur: m.hg === 0 || m.ag === 0 ? "Oui" : "Non", confiance: 100, cote_estimee: "" }, score_exact: { valeur: m.hg + "-" + m.ag, confiance: 100, cote_estimee: "" }, winner: { valeur: winner, confiance: 100 }, perdant: { valeur: loser, confiance: loser === "Aucun" ? 0 : 100 }
+      resultat_1x2: { valeur: "Terminé", label: "Match terminé", confiance: 100, cote_estimee: "" }, over_under: { valeur: "Non applicable", confiance: 100, cote_estimee: "" }, btts: { valeur: m.hg > 0 && m.ag > 0 ? "Oui" : "Non", confiance: 100, cote_estimee: "" }, double_chance: { valeur: "Non applicable", confiance: 100, cote_estimee: "" }, handicap: { valeur: "Non applicable", confiance: 100, cote_estimee: "" }, premier_but: { valeur: "Non disponible", confiance: 0, cote_estimee: "" }, mi_temps_fin: { valeur: "Non disponible", confiance: 0, cote_estimee: "" }, cage_inviolee: { valeur: m.hg === 0 || m.ag === 0 ? "Oui" : "Non", confiance: 100, cote_estimee: "" }, score_exact: { valeur: m.hg + "-" + m.ag, confiance: 100, cote_estimee: "" }, combine_prudent: { valeur: "Non applicable", confiance: 100, cote_estimee: "" }, winner: { valeur: winner, confiance: 100 }, perdant: { valeur: loser, confiance: loser === "Aucun" ? 0 : 100 }
     },
     analyse_approfondie: { forces_A: formatStats(sa), faiblesses_A: "Moyenne encaissée : " + sa.avgGA + " but(s)/match.", forces_B: formatStats(sb), faiblesses_B: "Moyenne encaissée : " + sb.avgGA + " but(s)/match.", facteur_cle: "Résultat final connu : " + finalScore + ". Aucun pari conseillé car le match est terminé." },
     analysis: {}, buteurs_potentiels: [], verdict: "Match terminé : " + finalScore + ". Aucun pari possible sur ce match."
@@ -236,7 +246,7 @@ function upcomingResponse(a, b, ctx) {
       rapport_force: { detail: "Classement " + group + " : " + classement }
     },
     pronostics: {
-      resultat_1x2: { valeur: p.result, label: p.winner, confiance: p.confResult, cote_estimee: "" }, over_under: { valeur: p.overUnder, confiance: p.confOver, cote_estimee: "" }, btts: { valeur: p.btts, confiance: p.confBtts, cote_estimee: "" }, double_chance: { valeur: p.doubleChance, confiance: p.confDouble, cote_estimee: "" }, handicap: { valeur: "À éviter", confiance: 30, cote_estimee: "" }, premier_but: { valeur: "À éviter", confiance: 25, cote_estimee: "" }, mi_temps_fin: { valeur: "À éviter", confiance: 25, cote_estimee: "" }, cage_inviolee: { valeur: "À éviter", confiance: 25, cote_estimee: "" }, score_exact: { valeur: p.score, confiance: p.confScore, cote_estimee: "" }, winner: { valeur: p.winner, confiance: p.confResult }, perdant: { valeur: "Données insuffisantes", confiance: 0 }
+      resultat_1x2: { valeur: p.result, label: p.winner, confiance: p.confResult, cote_estimee: "" }, over_under: { valeur: p.overUnder, confiance: p.confOver, cote_estimee: "" }, btts: { valeur: p.btts, confiance: p.confBtts, cote_estimee: "" }, double_chance: { valeur: p.doubleChance, confiance: p.confDouble, cote_estimee: "" }, handicap: { valeur: "À éviter", confiance: 30, cote_estimee: "" }, premier_but: { valeur: "À éviter", confiance: 25, cote_estimee: "" }, mi_temps_fin: { valeur: "À éviter", confiance: 25, cote_estimee: "" }, cage_inviolee: { valeur: "À éviter", confiance: 25, cote_estimee: "" }, score_exact: { valeur: p.score, confiance: p.confScore, cote_estimee: "" }, combine_prudent: { valeur: p.combine, confiance: p.confCombine, cote_estimee: "" }, winner: { valeur: p.winner, confiance: p.confResult }, perdant: { valeur: "Données insuffisantes", confiance: 0 }
     },
     analyse_approfondie: { forces_A: formatStats(sa), faiblesses_A: "Moyenne encaissée : " + sa.avgGA + " but(s)/match. Tendance : Over 1.5 " + pct(sa.over15, sa.played) + "%, BTTS " + pct(sa.btts, sa.played) + "%.", forces_B: formatStats(sb), faiblesses_B: "Moyenne encaissée : " + sb.avgGA + " but(s)/match. Tendance : Over 1.5 " + pct(sb.over15, sb.played) + "%, BTTS " + pct(sb.btts, sb.played) + "%.", facteur_cle: "Niveau de risque : " + p.risk + ". Classement : " + classement + ". Meilleure lecture prudente : " + p.best + "." },
     analysis: {}, buteurs_potentiels: scorerTips(a, b, sa, sb), verdict: p.verdict
@@ -259,7 +269,7 @@ function errorResponse(message, leagueSlug) {
     match: "Erreur contrôlée", competition: "Version stable " + VERSION, date_info: VERSION, is_world_cup: false, group: "", niveau_confiance_global: 0, league: leagueSlug || DEFAULT_LEAGUE,
     pari_du_jour: { type: "Erreur contrôlée", valeur: "API stable", raison: message || "Erreur inconnue", cote_estimee: "N/D" },
     stats_techniques: null,
-    pronostics: { resultat_1x2: { valeur: "Erreur", label: "Erreur contrôlée", confiance: 0, cote_estimee: "" }, over_under: { valeur: "Erreur", confiance: 0, cote_estimee: "" }, btts: { valeur: "Erreur", confiance: 0, cote_estimee: "" }, double_chance: { valeur: "Erreur", confiance: 0, cote_estimee: "" }, handicap: { valeur: "Erreur", confiance: 0, cote_estimee: "" }, premier_but: { valeur: "Erreur", confiance: 0, cote_estimee: "" }, mi_temps_fin: { valeur: "Erreur", confiance: 0, cote_estimee: "" }, cage_inviolee: { valeur: "Erreur", confiance: 0, cote_estimee: "" }, score_exact: { valeur: "Erreur", confiance: 0, cote_estimee: "" }, winner: { valeur: "Erreur", confiance: 0 }, perdant: { valeur: "Erreur", confiance: 0 } },
+    pronostics: { resultat_1x2: { valeur: "Erreur", label: "Erreur contrôlée", confiance: 0, cote_estimee: "" }, over_under: { valeur: "Erreur", confiance: 0, cote_estimee: "" }, btts: { valeur: "Erreur", confiance: 0, cote_estimee: "" }, double_chance: { valeur: "Erreur", confiance: 0, cote_estimee: "" }, handicap: { valeur: "Erreur", confiance: 0, cote_estimee: "" }, premier_but: { valeur: "Erreur", confiance: 0, cote_estimee: "" }, mi_temps_fin: { valeur: "Erreur", confiance: 0, cote_estimee: "" }, cage_inviolee: { valeur: "Erreur", confiance: 0, cote_estimee: "" }, score_exact: { valeur: "Erreur", confiance: 0, cote_estimee: "" }, combine_prudent: { valeur: "Erreur", confiance: 0, cote_estimee: "" }, winner: { valeur: "Erreur", confiance: 0 }, perdant: { valeur: "Erreur", confiance: 0 } },
     analyse_approfondie: { forces_A: "Erreur contrôlée.", faiblesses_A: "Le serveur n’a pas crashé.", forces_B: "Erreur contrôlée.", faiblesses_B: "Corrigeable sans casser l’app.", facteur_cle: "Message technique : " + (message || "Erreur inconnue") },
     analysis: {}, buteurs_potentiels: [], verdict: "Erreur contrôlée : le serveur répond quand même en JSON."
   };
