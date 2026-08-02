@@ -234,4 +234,112 @@ function upcomingResponse(a, b, ctx) {
       buts_encaisses_A: { valeur: sa.avgGA, detail: a + " : " + sa.ga + " but(s) encaissé(s). Moyenne : " + sa.avgGA },
       buts_marques_B: { valeur: sb.avgGF, detail: b + " : " + sb.gf + " but(s) marqué(s) en " + sb.played + " match(s). Moyenne : " + sb.avgGF },
       buts_encaisses_B: { valeur: sb.avgGA, detail: b + " : " + sb.ga + " but(s) encaissé(s). Moyenne : " + sb.avgGA },
-      rapport_force: { detail: "Classement " + group + " : " +
+      rapport_force: { detail: "Classement " + group + " : " + classement }
+    },
+    pronostics: {
+      resultat_1x2: { valeur: p.result, label: p.winner, confiance: p.confResult, cote_estimee: "" }, over_under: { valeur: p.overUnder, confiance: p.confOver, cote_estimee: "" }, btts: { valeur: p.btts, confiance: p.confBtts, cote_estimee: "" }, double_chance: { valeur: p.doubleChance, confiance: p.confDouble, cote_estimee: "" }, handicap: { valeur: "À éviter", confiance: 30, cote_estimee: "" }, premier_but: { valeur: "À éviter", confiance: 25, cote_estimee: "" }, mi_temps_fin: { valeur: "À éviter", confiance: 25, cote_estimee: "" }, cage_inviolee: { valeur: "À éviter", confiance: 25, cote_estimee: "" }, score_exact: { valeur: p.score, confiance: p.confScore, cote_estimee: "" }, winner: { valeur: p.winner, confiance: p.confResult }, perdant: { valeur: "Données insuffisantes", confiance: 0 }
+    },
+    analyse_approfondie: { forces_A: formatStats(sa), faiblesses_A: "Moyenne encaissée : " + sa.avgGA + " but(s)/match. Tendance : Over 1.5 " + pct(sa.over15, sa.played) + "%, BTTS " + pct(sa.btts, sa.played) + "%.", forces_B: formatStats(sb), faiblesses_B: "Moyenne encaissée : " + sb.avgGA + " but(s)/match. Tendance : Over 1.5 " + pct(sb.over15, sb.played) + "%, BTTS " + pct(sb.btts, sb.played) + "%.", facteur_cle: "Niveau de risque : " + p.risk + ". Classement : " + classement + ". Meilleure lecture prudente : " + p.best + "." },
+    analysis: {}, buteurs_potentiels: scorerTips(a, b, sa, sb), verdict: p.verdict
+  };
+}
+
+function dashboardResponse(ctx) {
+  return {
+    ok: true, version: VERSION, league: ctx.league.slug, league_label: ctx.league.label, data_version: ctx.dataVersion, data_loaded: ctx.loadError ? false : true, load_error: ctx.loadError,
+    results_count: ctx.RESULTS.length, upcoming_count: ctx.UPCOMING.length,
+    recent: ctx.RESULTS.slice(-10).reverse().map(makeMatch),
+    upcoming: ctx.UPCOMING.map(makeUpcoming),
+    standings: ctx.GROUPS.map(g => ({ group: g[0], teams: groupTable(g[0], ctx) })),
+    leagues: LEAGUES.map(l => ({ slug: l.slug, label: l.label, live: l.live }))
+  };
+}
+
+function errorResponse(message, leagueSlug) {
+  return {
+    match: "Erreur contrôlée", competition: "Version stable " + VERSION, date_info: VERSION, is_world_cup: false, group: "", niveau_confiance_global: 0, league: leagueSlug || DEFAULT_LEAGUE,
+    pari_du_jour: { type: "Erreur contrôlée", valeur: "API stable", raison: message || "Erreur inconnue", cote_estimee: "N/D" },
+    stats_techniques: null,
+    pronostics: { resultat_1x2: { valeur: "Erreur", label: "Erreur contrôlée", confiance: 0, cote_estimee: "" }, over_under: { valeur: "Erreur", confiance: 0, cote_estimee: "" }, btts: { valeur: "Erreur", confiance: 0, cote_estimee: "" }, double_chance: { valeur: "Erreur", confiance: 0, cote_estimee: "" }, handicap: { valeur: "Erreur", confiance: 0, cote_estimee: "" }, premier_but: { valeur: "Erreur", confiance: 0, cote_estimee: "" }, mi_temps_fin: { valeur: "Erreur", confiance: 0, cote_estimee: "" }, cage_inviolee: { valeur: "Erreur", confiance: 0, cote_estimee: "" }, score_exact: { valeur: "Erreur", confiance: 0, cote_estimee: "" }, winner: { valeur: "Erreur", confiance: 0 }, perdant: { valeur: "Erreur", confiance: 0 } },
+    analyse_approfondie: { forces_A: "Erreur contrôlée.", faiblesses_A: "Le serveur n’a pas crashé.", forces_B: "Erreur contrôlée.", faiblesses_B: "Corrigeable sans casser l’app.", facteur_cle: "Message technique : " + (message || "Erreur inconnue") },
+    analysis: {}, buteurs_potentiels: [], verdict: "Erreur contrôlée : le serveur répond quand même en JSON."
+  };
+}
+
+// Charge les données d'un championnat. Ne modifie AUCUNE variable globale :
+// tout est renvoyé dans un objet "ctx" propre à cette requête.
+async function loadContext(leagueSlug) {
+  const league = findLeague(leagueSlug);
+
+  if (!league.live) {
+    // Mode démo local (utilisé uniquement si un jour un championnat non-live est réajouté).
+    try {
+      const data = require("./data");
+      return {
+        league, loadError: "",
+        dataVersion: data.DATA_VERSION || "DATA_SANS_VERSION",
+        GROUPS: data.GROUPS || [], RESULTS: data.RESULTS || [], UPCOMING: data.UPCOMING || [],
+        STANDINGS_MAP: null
+      };
+    } catch (e) {
+      return { league, loadError: e.message || "Impossible de charger api/data.js", dataVersion: "DATA_NON_CHARGEE", GROUPS: [], RESULTS: [], UPCOMING: [], STANDINGS_MAP: null };
+    }
+  }
+
+  // Mode live : API-Football.
+  try {
+    const [standingsBlocks, recent, upcoming] = await Promise.all([
+      getStandings(league.apiId, league.season),
+      getRecentFixtures(league.apiId, league.season, 30),
+      getUpcomingFixtures(league.apiId, league.season, 15)
+    ]);
+    const GROUPS = standingsBlocks.map(b => [b.label, b.teams.map(t => t.team)]);
+    const STANDINGS_MAP = new Map();
+    standingsBlocks.forEach(b => b.teams.forEach(t => STANDINGS_MAP.set(clean(t.team), t)));
+    const RESULTS = recent.map(f => [f.date, f.round, f.home, f.away, f.hg, f.ag]);
+    const UPCOMING = upcoming.map(f => [f.date, f.round, f.home, f.away, statusToLabel(f.status)]);
+    return {
+      league, loadError: "",
+      dataVersion: league.slug + "_" + league.season + "_LIVE",
+      GROUPS, RESULTS, UPCOMING, STANDINGS_MAP
+    };
+  } catch (e) {
+    return { league, loadError: e.message || "Erreur API-Football", dataVersion: "DATA_NON_CHARGEE", GROUPS: [], RESULTS: [], UPCOMING: [], STANDINGS_MAP: null };
+  }
+}
+
+module.exports = async function handler(req, res) {
+  try {
+    res.setHeader("Content-Type", "application/json; charset=utf-8");
+    const url = new URL(req.url || "/api/chat", "https://pronostics-ia.local");
+
+    if (req.method === "GET") {
+      const leagueSlug = url.searchParams.get("league") || DEFAULT_LEAGUE;
+      if (url.searchParams.get("dashboard") === "1") {
+        const ctx = await loadContext(leagueSlug);
+        return res.status(200).json(dashboardResponse(ctx));
+      }
+      return res.status(200).json({
+        ok: true, version: VERSION, message: "API active V9. Dashboard: /api/chat?dashboard=1&league=<slug>",
+        leagues: LEAGUES.map(l => ({ slug: l.slug, label: l.label, live: l.live }))
+      });
+    }
+
+    if (req.method !== "POST") return res.status(405).json({ error: "Méthode non autorisée." });
+
+    const body = parseBody(req);
+    const leagueSlug = body.league || DEFAULT_LEAGUE;
+    const ctx = await loadContext(leagueSlug);
+    if (ctx.loadError) return res.status(200).json(errorResponse("Chargement des données impossible (" + ctx.league.label + ") : " + ctx.loadError, leagueSlug));
+
+    const parsed = parseMatch(body.match);
+    if (!parsed) return res.status(400).json({ error: "Écris un match complet, exemple : PSG vs Marseille." });
+    const a = canon(parsed.aRaw, ctx), b = canon(parsed.bRaw, ctx);
+
+    const completed = findCompleted(a, b, ctx);
+    if (completed) return res.status(200).json(completedResponse(a, b, completed, ctx));
+    return res.status(200).json(upcomingResponse(a, b, ctx));
+  } catch (e) {
+    return res.status(200).json(errorResponse(e.message));
+  }
+};
