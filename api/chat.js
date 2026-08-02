@@ -1,7 +1,7 @@
 const VERSION = "V9_MULTI_CHAMPIONNATS";
 
 const { LEAGUES, DEFAULT_LEAGUE, findLeague } = require("./leagues");
-const { getRecentFixtures, getUpcomingFixtures, getStandings, statusToLabel } = require("./api-football");
+const { getSeasonFixtures, filterRecentFixtures, filterUpcomingFixtures, getStandings, statusToLabel } = require("./api-football");
 
 // -----------------------------------------------------------------------
 // IMPORTANT (bug corrigé par rapport à la V8.1) :
@@ -117,10 +117,10 @@ function statsFromResults(team, ctx) {
   return s;
 }
 
-// Stats "officielles" : on préfère les totaux du classement API-Football
-// (saison complète) aux totaux calculés sur l'échantillon de derniers
-// matchs (plus fiable pour points/GD/buts). La forme, BTTS et over/under
-// restent calculés sur l'échantillon récent (ctx.RESULTS).
+// Stats "officielles" : en mode live, on préfère les totaux du classement
+// API-Football (saison complète) aux totaux calculés sur l'échantillon de
+// derniers matchs (plus fiable pour points/GD/buts). La forme, BTTS et
+// over/under restent calculés sur l'échantillon récent (ctx.RESULTS).
 function stats(team, ctx) {
   const s = statsFromResults(team, ctx);
   const key = clean(team);
@@ -288,11 +288,12 @@ async function loadContext(leagueSlug) {
 
   // Mode live : API-Football.
   try {
-    const [standingsBlocks, recent, upcoming] = await Promise.all([
+    const [standingsBlocks, seasonFixtures] = await Promise.all([
       getStandings(league.apiId, league.season),
-      getRecentFixtures(league.apiId, league.season, 30),
-      getUpcomingFixtures(league.apiId, league.season, 15)
+      getSeasonFixtures(league.apiId, league.season)
     ]);
+    const recent = filterRecentFixtures(seasonFixtures, 30);
+    const upcoming = filterUpcomingFixtures(seasonFixtures, 15);
     const GROUPS = standingsBlocks.map(b => [b.label, b.teams.map(t => t.team)]);
     const STANDINGS_MAP = new Map();
     standingsBlocks.forEach(b => b.teams.forEach(t => STANDINGS_MAP.set(clean(t.team), t)));
