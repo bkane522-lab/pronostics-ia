@@ -94,8 +94,7 @@ function scoreFor(match, team) {
 }
 
 // Calcule les stats (forme, BTTS, over/under, clean sheets) à partir de
-// l'échantillon de résultats chargé (ctx.RESULTS). En mode live, c'est les
-// N derniers matchs du championnat récupérés via API-Football.
+// l'échantillon de résultats chargé (ctx.RESULTS).
 function statsFromResults(team, ctx) {
   const s = { team, played: 0, wins: 0, draws: 0, losses: 0, gf: 0, ga: 0, gd: 0, points: 0, avgGF: 0, avgGA: 0, cleanSheets: 0, btts: 0, over15: 0, over25: 0, form: [] };
   for (const row of ctx.RESULTS) {
@@ -118,9 +117,9 @@ function statsFromResults(team, ctx) {
 }
 
 // Stats "officielles" : en mode live, on préfère les totaux du classement
-// API-Football (saison complète) aux totaux calculés sur l'échantillon de
-// derniers matchs (plus fiable pour points/GD/buts). La forme, BTTS et
-// over/under restent calculés sur l'échantillon récent (ctx.RESULTS).
+// (saison complète) aux totaux calculés sur l'échantillon de derniers
+// matchs (plus fiable pour points/GD/buts). La forme, BTTS et over/under
+// restent calculés sur l'échantillon récent (ctx.RESULTS).
 function stats(team, ctx) {
   const s = statsFromResults(team, ctx);
   const key = clean(team);
@@ -272,7 +271,7 @@ async function loadContext(leagueSlug) {
   const league = findLeague(leagueSlug);
 
   if (!league.live) {
-    // Mode démo local (utilisé uniquement si un jour un championnat non-live est réajouté).
+    // Mode démo : données locales CDM 2026, strictement identiques à la V8.1.
     try {
       const data = require("./data");
       return {
@@ -286,11 +285,11 @@ async function loadContext(leagueSlug) {
     }
   }
 
-  // Mode live : API-Football.
+  // Mode live : football-data.org.
   try {
     const [standingsBlocks, seasonFixtures] = await Promise.all([
-      getStandings(league.apiId, league.season),
-      getSeasonFixtures(league.apiId, league.season)
+      getStandings(league.code),
+      getSeasonFixtures(league.code)
     ]);
     const recent = filterRecentFixtures(seasonFixtures, 30);
     const upcoming = filterUpcomingFixtures(seasonFixtures, 15);
@@ -301,11 +300,11 @@ async function loadContext(leagueSlug) {
     const UPCOMING = upcoming.map(f => [f.date, f.round, f.home, f.away, statusToLabel(f.status)]);
     return {
       league, loadError: "",
-      dataVersion: league.slug + "_" + league.season + "_LIVE",
+      dataVersion: league.slug + "_SAISON_ACTUELLE_LIVE",
       GROUPS, RESULTS, UPCOMING, STANDINGS_MAP
     };
   } catch (e) {
-    return { league, loadError: e.message || "Erreur API-Football", dataVersion: "DATA_NON_CHARGEE", GROUPS: [], RESULTS: [], UPCOMING: [], STANDINGS_MAP: null };
+    return { league, loadError: e.message || "Erreur football-data.org", dataVersion: "DATA_NON_CHARGEE", GROUPS: [], RESULTS: [], UPCOMING: [], STANDINGS_MAP: null };
   }
 }
 
