@@ -1,12 +1,13 @@
-// Client pour l'API-Football (api-sports.io).
-// La clé n'est JAMAIS écrite ici : elle est lue depuis process.env.API_FOOTBALL_KEY
+// Client pour football-data.org (https://www.football-data.org/).
+// La clé n'est JAMAIS écrite ici : elle est lue depuis process.env.FOOTBALL_DATA_KEY
 // (variable d'environnement Vercel), donc jamais présente dans le code GitHub.
+//
+// (Le fichier s'appelle encore "api-football.js" pour éviter de renommer et
+// re-référencer un fichier sur GitHub, mais il parle bien à football-data.org.)
 
-const API_BASE = "https://v3.football.api-sports.io";
+const API_BASE = "https://api.football-data.org/v4";
 
 // Cache mémoire très simple : vit tant que l'instance serverless reste "chaude".
-// Objectif : éviter de retaper l'API-Football à chaque clic utilisateur et
-// économiser le quota (les plans gratuits sont limités en requêtes/jour).
 const CACHE = new Map();
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
@@ -20,76 +21,68 @@ function cacheSet(key, value) {
   CACHE.set(key, { value, time: Date.now() });
 }
 
-async function apiFootballFetch(path, params) {
-  const apiKey = process.env.API_FOOTBALL_KEY;
+async function footballDataFetch(path) {
+  const apiKey = process.env.FOOTBALL_DATA_KEY;
   if (!apiKey) {
-    const err = new Error("API_FOOTBALL_KEY absente. Ajoute-la dans Vercel > Settings > Environment Variables.");
+    const err = new Error("FOOTBALL_DATA_KEY absente. Ajoute-la dans Vercel > Settings > Environment Variables.");
     err.code = "NO_API_KEY";
     throw err;
   }
-  const url = new URL(API_BASE + path);
-  Object.keys(params || {}).forEach(k => {
-    if (params[k] !== undefined && params[k] !== null) url.searchParams.set(k, params[k]);
-  });
-  const cacheKey = url.toString();
-  const cached = cacheGet(cacheKey);
+  const url = API_BASE + path;
+  const cached = cacheGet(url);
   if (cached) return cached;
 
   let res;
   try {
-    res = await fetch(url.toString(), { headers: { "x-apisports-key": apiKey } });
+    res = await fetch(url, { headers: { "X-Auth-Token": apiKey } });
   } catch (e) {
-    const err = new Error("Impossible de joindre API-Football (réseau).");
+    const err = new Error("Impossible de joindre football-data.org (réseau).");
     err.code = "NETWORK_ERROR";
     throw err;
   }
   if (!res.ok) {
-    const err = new Error("Erreur API-Football (HTTP " + res.status + ")");
+    let detail = "";
+    try { const body = await res.json(); detail = body && body.message ? " : " + body.message : ""; } catch (e) {}
+    const err = new Error("Erreur football-data.org (HTTP " + res.status + ")" + detail);
     err.code = "HTTP_" + res.status;
     throw err;
   }
   const json = await res.json();
-  const hasErrors = json.errors && (Array.isArray(json.errors) ? json.errors.length : Object.keys(json.errors).length);
-  if (hasErrors) {
-    const err = new Error("API-Football a renvoyé une erreur : " + JSON.stringify(json.errors));
-    err.code = "API_ERROR";
-    throw err;
-  }
-  cacheSet(cacheKey, json);
+  cacheSet(url, json);
   return json;
 }
 
-function statusToLabel(short) {
-  if (short === "FT" || short === "AET" || short === "PEN") return "Terminé";
-  if (short === "NS" || short === "TBD") return "À venir";
-  if (["1H", "2H", "HT", "ET", "BT", "P", "LIVE"].indexOf(short) !== -1) return "En cours";
-  return short || "À venir";
+function statusToLabel(status) {
+  if (status === "FINISHED") return "Terminé";
+  if (status === "SCHEDULED" || status === "TIMED") return "À venir";
+  if (status === "IN_PLAY" || status === "PAUSED") return "En cours";
+  if (status === "POSTPONED") return "Reporté";
+  if (status === "SUSPENDED" || status === "CANCELLED") return "Annulé";
+  return status || "À venir";
 }
 
-function mapFixtureRow(fx) {
-  const date = (fx.fixture && fx.fixture.date) ? fx.fixture.date.slice(0, 10) : "";
-  const round = (fx.league && fx.league.round) ? fx.league.round : "";
-  const home = fx.teams && fx.teams.home ? fx.teams.home.name : "?";
-  const away = fx.teams && fx.teams.away ? fx.teams.away.name : "?";
-  const status = fx.fixture && fx.fixture.status ? fx.fixture.status.short : "";
-  const hg = fx.goals ? fx.goals.home : null;
-  const ag = fx.goals ? fx.goals.away : null;
-  const finished = status === "FT" || status === "AET" || status === "PEN";
+function mapFixtureRow(m) {
+  const date = m.utcDate ? m.utcDate.slice(0, 10) : "";
+  const round = m.matchday ? "Journée " + m.matchday : "";
+  const home = m.homeTeam && m.homeTeam.name ? m.homeTeam.name : "?";
+  const away = m.awayTeam && m.awayTeam.name ? m.awayTeam.name : "?";
+  const status = m.status || "";
+  const hg = m.score && m.score.fullTime ? m.score.fullTime.home : null;
+  const ag = m.score && m.score.fullTime ? m.score.fullTime.away : null;
+  const finished = status === "FINISHED";
   return { date, round, home, away, status, hg, ag, finished };
 }
 
-async function getSeasonFixtures(leagueId, season) {
-  // Le plan GRATUIT d'API-Football n'autorise pas les paramètres "last" et
-  // "next" sur /fixtures (erreur "Free plans do not have access to the Last
-  // parameter."). On récupère donc TOUS les matchs de la saison en un seul
-  // appel (mis en cache 5 min), et on trie/filtre nous-mêmes ci-dessous.
-  const json = await apiFootballFetch("/fixtures", { league: leagueId, season });
-  return (json.response || []).map(mapFixtureRow);
+async function getSeasonFixtures(leagueCode) {
+  // Pas de paramètre "season" : football-data.org renvoie la saison en
+  // cours par défaut sur cet endpoint, ce qui règle le blocage qu'on avait
+  // avec API-Football (accès saison en cours = payant chez eux).
+  const json = await footballDataFetch("/competitions/" + leagueCode + "/matches");
+  return (json.matches || []).map(mapFixtureRow);
 }
 
 // Fonctions pures (pas d'appel réseau) : on leur passe la liste déjà
-// récupérée par getSeasonFixtures, pour ne faire qu'UN SEUL appel API par
-// dashboard au lieu de deux appels identiques en parallèle.
+// récupérée par getSeasonFixtures.
 function filterRecentFixtures(allFixtures, count) {
   return allFixtures
     .filter(f => f.finished)
@@ -105,25 +98,25 @@ function filterUpcomingFixtures(allFixtures, count) {
     .slice(0, count || 15);
 }
 
-async function getStandings(leagueId, season) {
-  const json = await apiFootballFetch("/standings", { league: leagueId, season });
-  const blocks = (json.response && json.response[0] && json.response[0].league && json.response[0].league.standings) || [];
-  // blocks est un tableau de tableaux : plusieurs groupes pour la Ligue des
-  // Champions (phase de groupes), un seul groupe pour un championnat classique.
-  return blocks.map((group, idx) => ({
-    label: group[0] && group[0].group ? group[0].group : "Classement",
-    teams: group.map(row => ({
+async function getStandings(leagueCode) {
+  const json = await footballDataFetch("/competitions/" + leagueCode + "/standings");
+  const competitionName = json.competition && json.competition.name ? json.competition.name : "Classement";
+  const totalTable = (json.standings || []).find(s => s.type === "TOTAL");
+  if (!totalTable) return [];
+  return [{
+    label: competitionName,
+    teams: (totalTable.table || []).map(row => ({
       team: row.team.name,
-      played: row.all.played,
-      wins: row.all.win,
-      draws: row.all.draw,
-      losses: row.all.lose,
-      gf: row.all.goals.for,
-      ga: row.all.goals.against,
-      gd: row.goalsDiff,
+      played: row.playedGames,
+      wins: row.won,
+      draws: row.draw,
+      losses: row.lost,
+      gf: row.goalsFor,
+      ga: row.goalsAgainst,
+      gd: row.goalDifference,
       points: row.points
     }))
-  }));
+  }];
 }
 
 module.exports = { getSeasonFixtures, filterRecentFixtures, filterUpcomingFixtures, getStandings, statusToLabel };
