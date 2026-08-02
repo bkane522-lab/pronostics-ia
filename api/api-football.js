@@ -78,14 +78,31 @@ function mapFixtureRow(fx) {
   return { date, round, home, away, status, hg, ag, finished };
 }
 
-async function getRecentFixtures(leagueId, season, count) {
-  const json = await apiFootballFetch("/fixtures", { league: leagueId, season, last: count || 30 });
-  return (json.response || []).map(mapFixtureRow).filter(f => f.finished);
+async function getSeasonFixtures(leagueId, season) {
+  // Le plan GRATUIT d'API-Football n'autorise pas les paramètres "last" et
+  // "next" sur /fixtures (erreur "Free plans do not have access to the Last
+  // parameter."). On récupère donc TOUS les matchs de la saison en un seul
+  // appel (mis en cache 5 min), et on trie/filtre nous-mêmes ci-dessous.
+  const json = await apiFootballFetch("/fixtures", { league: leagueId, season });
+  return (json.response || []).map(mapFixtureRow);
 }
 
-async function getUpcomingFixtures(leagueId, season, count) {
-  const json = await apiFootballFetch("/fixtures", { league: leagueId, season, next: count || 15 });
-  return (json.response || []).map(mapFixtureRow);
+// Fonctions pures (pas d'appel réseau) : on leur passe la liste déjà
+// récupérée par getSeasonFixtures, pour ne faire qu'UN SEUL appel API par
+// dashboard au lieu de deux appels identiques en parallèle.
+function filterRecentFixtures(allFixtures, count) {
+  return allFixtures
+    .filter(f => f.finished)
+    .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
+    .slice(0, count || 30)
+    .reverse();
+}
+
+function filterUpcomingFixtures(allFixtures, count) {
+  return allFixtures
+    .filter(f => !f.finished)
+    .sort((a, b) => (a.date > b.date ? 1 : a.date < b.date ? -1 : 0))
+    .slice(0, count || 15);
 }
 
 async function getStandings(leagueId, season) {
@@ -109,4 +126,4 @@ async function getStandings(leagueId, season) {
   }));
 }
 
-module.exports = { getRecentFixtures, getUpcomingFixtures, getStandings, statusToLabel };
+module.exports = { getSeasonFixtures, filterRecentFixtures, filterUpcomingFixtures, getStandings, statusToLabel };
