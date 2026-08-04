@@ -2,10 +2,12 @@
   "version": 2,
   "builds": [
     { "src": "api/chat.js", "use": "@vercel/node" },
+    { "src": "api/verify-license.js", "use": "@vercel/node" },
     { "src": "public/**", "use": "@vercel/static" }
   ],
   "routes": [
     { "src": "/api/chat", "dest": "/api/chat.js" },
+    { "src": "/api/verify-license", "dest": "/api/verify-license.js" },
     { "src": "/(.*)", "dest": "/public/$1" }
   ]
 }
