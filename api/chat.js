@@ -1,4 +1,4 @@
-const VERSION = "V11_MATCH_INTELLIGENCE";
+const VERSION = "V12_AI_MATCH_LAB";
 
 const { LEAGUES, DEFAULT_LEAGUE, findLeague } = require("./leagues");
 const {
@@ -539,6 +539,34 @@ function scoreScenarios(favIsA, fav, dog, pA, pD, pB) {
   return candidates;
 }
 
+
+function dnaValueFromStrength(v) {
+  const n = strengthValue(v);
+  return Math.max(35, Math.min(95, Math.round(35 + (n - 2.5) * 28)));
+}
+
+function buildPredictionDNA(k) {
+  if (!k) return null;
+  const rank = parseGuideRank(k.guide_prediction);
+  let context = 58;
+  if (rank !== null) context = Math.max(40, Math.min(92, Math.round(95 - rank * 3.2)));
+
+  const profileText = clean((k.profile || []).join(" "));
+  let stability = 66;
+  if (profileText.includes("stabil")) stability += 12;
+  if (profileText.includes("transition")) stability -= 16;
+  if (profileText.includes("nouveau coach")) stability -= 10;
+  stability = Math.max(35, Math.min(92, stability));
+
+  return {
+    attaque: dnaValueFromStrength(k.strengths && k.strengths.attack),
+    defense: dnaValueFromStrength(k.strengths && k.strengths.defense),
+    coach: dnaValueFromStrength(k.strengths && k.strengths.coach),
+    contexte: context,
+    stabilite: stability
+  };
+}
+
 function contextualPrediction(a, b, ka, kb, ctx) {
   // Ce moteur n'est utilisé que lorsque les statistiques dynamiques sont
   // insuffisantes. Il exploite les données structurées du guide comme
@@ -730,6 +758,23 @@ function contextualPrediction(a, b, ka, kb, ctx) {
       challenger: dog,
       label: fav + " avantage contextuel",
       value: Math.min(20, Math.max(4, Math.round(Math.abs(pA - pB))))
+    },
+    match_pulse: {
+      home: pA,
+      draw: pD,
+      away: pB,
+      balance: Math.max(-100, Math.min(100, Math.round((pB - pA) * 2)))
+    },
+    prediction_dna: {
+      A: buildPredictionDNA(ka),
+      B: buildPredictionDNA(kb)
+    },
+    simulation_base: {
+      home: pA,
+      draw: pD,
+      away: pB,
+      teamA: a,
+      teamB: b
     },
     verdict: "Lecture contextuelle : avantage " + fav +
       ", mais confiance limitée car la saison 2026-2027 n'offre pas encore assez de données dynamiques."
@@ -1029,6 +1074,9 @@ function upcomingResponse(a, b, ctx) {
       scenario_tree: p.scenario_tree || [],
       model_limits: p.model_limits || [],
       edge: p.edge || null,
+      match_pulse: p.match_pulse || null,
+      prediction_dna: p.prediction_dna || null,
+      simulation_base: p.simulation_base || null,
       editorial_context_weight: "faible et plafonné",
       source_note: "Les objectifs, formations de référence, forces et projections de classement proviennent d’une source éditoriale secondaire et peuvent évoluer."
     },
