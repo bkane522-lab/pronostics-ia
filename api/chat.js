@@ -1,4 +1,4 @@
-const VERSION = "V9.8_KNOWLEDGE_L1";
+const VERSION = "V9.9_TDC_LENS_PSG";
 
 const { LEAGUES, DEFAULT_LEAGUE, findLeague } = require("./leagues");
 const {
@@ -253,7 +253,12 @@ function tableText(groupName, ctx) {
 function isLigue1(ctx) {
   const slug = clean(ctx && ctx.league && ctx.league.slug);
   const label = clean(ctx && ctx.league && ctx.league.label);
-  return slug === "ligue 1" || slug === "ligue1" || label.includes("ligue 1");
+  return slug === "ligue 1" ||
+    slug === "ligue1" ||
+    slug === "trophee des champions" ||
+    slug === "trophee-des-champions" ||
+    label.includes("ligue 1") ||
+    label.includes("trophee des champions");
 }
 
 function knowledgeForTeam(team, ctx) {
@@ -412,7 +417,9 @@ function makePrediction(a, b, sa, sb, ka, kb) {
       confScore: 10,
       combine: "Pas assez de données",
       confCombine: 10,
-      verdict: "Données dynamiques trop limitées. Le contexte de saison est disponible mais ne suffit pas à justifier un pari."
+      verdict: (ka || kb)
+        ? "Données dynamiques encore trop limitées. La base de saison Lens/PSG enrichit le contexte, mais l’app refuse de transformer ce seul contexte en pari supposé fiable."
+        : "Données dynamiques trop limitées. Le contexte disponible ne suffit pas à justifier un pari."
     };
   }
 
@@ -770,6 +777,57 @@ function errorResponse(message, leagueSlug) {
 
 async function loadContext(leagueSlug) {
   const league = findLeague(leagueSlug);
+
+  // Trophée des Champions 2026-2027 :
+  // match officiel Lens - PSG ajouté manuellement, tout en réutilisant
+  // les données Ligue 1 dynamiques comme contexte lorsqu'elles sont disponibles.
+  if (league.slug === "trophee-des-champions") {
+    const staticUpcoming = [
+      ["16/08/2026 · 20:45", "Finale · Stade Bollaert-Delelis", "RC Lens", "Paris Saint-Germain", "À venir"]
+    ];
+
+    try {
+      const [standingsBlocks, seasonFixtures] = await Promise.all([
+        getStandings("FL1"),
+        getSeasonFixtures("FL1")
+      ]);
+
+      const recent = filterRecentFixtures(seasonFixtures, 30);
+
+      const GROUPS = standingsBlocks.length
+        ? standingsBlocks.map(b => [b.label, b.teams.map(t => t.team)])
+        : [["Trophée des Champions", ["RC Lens", "Paris Saint-Germain"]]];
+
+      const STANDINGS_MAP = new Map();
+      standingsBlocks.forEach(b => {
+        b.teams.forEach(t => STANDINGS_MAP.set(clean(t.team), t));
+      });
+
+      const RESULTS = recent.map(f => [f.date, f.round, f.home, f.away, f.hg, f.ag]);
+
+      return {
+        league,
+        loadError: "",
+        dataVersion: "TDC_2026_LENS_PSG_PLUS_FL1_CONTEXT",
+        GROUPS,
+        RESULTS,
+        UPCOMING: staticUpcoming,
+        STANDINGS_MAP
+      };
+    } catch (e) {
+      // Même si football-data.org est temporairement limité (429), le match
+      // reste visible et analysable de manière prudente avec la base contextuelle.
+      return {
+        league,
+        loadError: "",
+        dataVersion: "TDC_2026_LENS_PSG_STATIC_CONTEXT",
+        GROUPS: [["Trophée des Champions", ["RC Lens", "Paris Saint-Germain"]]],
+        RESULTS: [],
+        UPCOMING: staticUpcoming,
+        STANDINGS_MAP: null
+      };
+    }
+  }
 
   if (!league.live) {
     try {
