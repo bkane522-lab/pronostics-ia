@@ -1,4 +1,4 @@
-const VERSION = "V12_AI_MATCH_LAB";
+const VERSION = "V13_AI_COMMAND_CENTER";
 
 const { LEAGUES, DEFAULT_LEAGUE, findLeague } = require("./leagues");
 const {
@@ -776,6 +776,30 @@ function contextualPrediction(a, b, ka, kb, ctx) {
       teamA: a,
       teamB: b
     },
+    confidence_matrix: {
+      data: 28,
+      tactical: 76,
+      context: 84,
+      lineup: 35,
+      recency: 22
+    },
+    ai_reasoning_cards: [
+      {
+        title: "Pourquoi " + fav + " ?",
+        value: fav,
+        detail: "Avantage contextuel issu de la projection de saison, de la structure tactique et de la qualité globale des lignes."
+      },
+      {
+        title: "Point de bascule",
+        value: "Premier but",
+        detail: "Dans une finale sur un match, le premier but modifie fortement le rythme, les espaces et la prise de risque."
+      },
+      {
+        title: "Signal de prudence",
+        value: "Données récentes faibles",
+        detail: "La fiabilité reste plafonnée tant que la forme 2026-2027 et les compositions officielles ne sont pas disponibles."
+      }
+    ],
     verdict: "Lecture contextuelle : avantage " + fav +
       ", mais confiance limitée car la saison 2026-2027 n'offre pas encore assez de données dynamiques."
   };
@@ -1077,6 +1101,8 @@ function upcomingResponse(a, b, ctx) {
       match_pulse: p.match_pulse || null,
       prediction_dna: p.prediction_dna || null,
       simulation_base: p.simulation_base || null,
+      confidence_matrix: p.confidence_matrix || null,
+      ai_reasoning_cards: p.ai_reasoning_cards || [],
       editorial_context_weight: "faible et plafonné",
       source_note: "Les objectifs, formations de référence, forces et projections de classement proviennent d’une source éditoriale secondaire et peuvent évoluer."
     },
