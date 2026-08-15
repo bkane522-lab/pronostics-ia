@@ -1,4 +1,4 @@
-const VERSION = "V13_AI_COMMAND_CENTER";
+const VERSION = "V14_AI_VALUE_LAB";
 
 const { LEAGUES, DEFAULT_LEAGUE, findLeague } = require("./leagues");
 const {
@@ -783,6 +783,16 @@ function contextualPrediction(a, b, ka, kb, ctx) {
       lineup: 35,
       recency: 22
     },
+    fair_odds: {
+      home: Number((100 / Math.max(1, pA)).toFixed(2)),
+      draw: Number((100 / Math.max(1, pD)).toFixed(2)),
+      away: Number((100 / Math.max(1, pB)).toFixed(2))
+    },
+    value_lab: {
+      enabled: true,
+      formula: "edge = probabilité IA × cote bookmaker - 1",
+      note: "Compare une cote bookmaker saisie par l’utilisateur à la cote théorique IA sans marge."
+    },
     ai_reasoning_cards: [
       {
         title: "Pourquoi " + fav + " ?",
@@ -1102,6 +1112,8 @@ function upcomingResponse(a, b, ctx) {
       prediction_dna: p.prediction_dna || null,
       simulation_base: p.simulation_base || null,
       confidence_matrix: p.confidence_matrix || null,
+      fair_odds: p.fair_odds || null,
+      value_lab: p.value_lab || null,
       ai_reasoning_cards: p.ai_reasoning_cards || [],
       editorial_context_weight: "faible et plafonné",
       source_note: "Les objectifs, formations de référence, forces et projections de classement proviennent d’une source éditoriale secondaire et peuvent évoluer."
