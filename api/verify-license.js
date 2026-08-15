@@ -8,7 +8,7 @@ module.exports = async function handler(req, res) {
     return res.status(200).json({
       ok: true,
       route: "/api/verify-license",
-      message: "Route de vérification Gumroad active."
+      message: "Route de vérification PRO active (Gumroad + mode propriétaire sécurisé)."
     });
   }
 
@@ -48,10 +48,35 @@ module.exports = async function handler(req, res) {
       ? body.license_key.trim()
       : "";
 
+  const email =
+    body && typeof body.email === "string"
+      ? body.email.trim().toLowerCase()
+      : "";
+
   if (!licenseKey) {
     return res.status(400).json({
       ok: false,
       error: "Clé de licence manquante."
+    });
+  }
+
+  // Mode propriétaire / test sécurisé.
+  // Les secrets restent exclusivement dans les variables Vercel.
+  const ownerEmail = String(process.env.OWNER_TEST_EMAIL || "").trim().toLowerCase();
+  const adminTestKey = String(process.env.ADMIN_TEST_KEY || "").trim();
+
+  if (
+    ownerEmail &&
+    adminTestKey &&
+    email === ownerEmail &&
+    licenseKey === adminTestKey
+  ) {
+    return res.status(200).json({
+      ok: true,
+      valid: true,
+      test_mode: true,
+      message: "Mode PRO propriétaire activé.",
+      email
     });
   }
 
