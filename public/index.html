@@ -49,6 +49,37 @@ button,input{font-family:inherit}button{cursor:pointer}.app{max-width:560px;marg
 .v10-team small{display:block;color:var(--muted);line-height:1.5}
 @media(max-width:520px){.v10-summary,.v10-team-grid{grid-template-columns:1fr}.v10-probs{grid-template-columns:repeat(3,1fr)}}
 
+
+.pro-lock{min-height:0!important}
+.pro-lock::after{display:none!important}
+.pro-lock .pro-lock-box{
+  position:absolute!important;
+  inset:auto 12px 12px 12px!important;
+  transform:none!important;
+  width:auto!important;
+  min-height:0!important;
+  padding:10px 12px!important;
+  border-radius:14px!important;
+  background:rgba(5,12,23,.94)!important;
+  border:1px solid rgba(245,197,66,.28)!important;
+  box-shadow:0 10px 30px rgba(0,0,0,.28)!important;
+}
+.pro-lock .pro-lock-box h4{
+  margin:0 0 3px!important;
+  font-size:13px!important;
+  line-height:1.25!important;
+}
+.pro-lock .pro-lock-box p{
+  margin:0!important;
+  font-size:11px!important;
+  line-height:1.35!important;
+}
+.pro-lock .pro-lock-box button{
+  margin-top:7px!important;
+  padding:8px 12px!important;
+  font-size:12px!important;
+}
+
 </style>
 </head>
 <body>
@@ -63,7 +94,7 @@ button,input{font-family:inherit}button{cursor:pointer}.app{max-width:560px;marg
 <main id="groups" class="page"><h2 class="section-title">Classements</h2><div id="groupsList"></div></main>
 </div>
 <nav class="bottom-nav"><button class="nav active" type="button" data-page="home"><i>🏠</i><span>Accueil</span></button><button class="nav" type="button" data-page="matchs"><i>⚽</i><span>Matchs</span></button><button class="nav" type="button" data-page="live"><i>📡</i><span>Live</span></button><button class="nav pro-nav" type="button" data-page="vip"><i>👑</i><span>PRO</span></button><button class="nav" type="button" data-page="groups"><i>🏆</i><span>Groupes</span></button></nav>
-<div id="proModal" class="modal" aria-hidden="true"><div class="modal-card"><div class="modal-icon">👑</div><h2>Activer Pronostics IA Pro</h2><p>Achète l’accès PRO sur Gumroad, puis saisis l’e-mail utilisé pour l’achat et ta clé de licence.</p><div class="buy-row"><button class="action gold" type="button" id="buyProBtn">Acheter PRO · 9,99 €</button><button class="action ghost" type="button" id="alreadyBoughtBtn">J’ai déjà acheté</button></div><div class="license-help" style="margin-top:8px;text-align:center">9,99 € · paiement unique · activation par licence Gumroad</div><div id="licenseForm" class="license-form"><label for="licenseEmail">E-mail d’achat</label><input id="licenseEmail" type="email" inputmode="email" autocomplete="email" placeholder="exemple@email.com"><label for="licenseKey">Clé de licence Gumroad</label><input id="licenseKey" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="XXXX-XXXX-XXXX-XXXX"><div class="license-help">La clé se trouve dans l’e-mail / reçu Gumroad envoyé après l’achat.</div><div id="licenseSpinner" class="license-spinner">Vérification sécurisée en cours…</div><div id="licenseError" class="license-error"></div><div id="licenseSuccess" class="license-success"></div><button class="action gold" type="button" id="verifyLicenseBtn">Vérifier et activer PRO</button></div><div class="modal-actions" style="margin-top:10px"><button class="action ghost" type="button" id="modalClose">Fermer</button></div></div></div>
+<div id="proModal" class="modal" aria-hidden="true"><div class="modal-card"><div class="modal-icon">👑</div><h2>Activer Pronostics IA Pro</h2><p>Achète l’accès PRO sur Gumroad, puis saisis l’e-mail utilisé pour l’achat et ta clé de licence.</p><div class="buy-row"><button class="action gold" type="button" id="buyProBtn">Acheter PRO · 9,99 €</button><button class="action ghost" type="button" id="alreadyBoughtBtn">J’ai déjà acheté</button></div><div class="license-help" style="margin-top:8px;text-align:center">9,99 € · paiement unique · activation par licence Gumroad</div><div id="licenseForm" class="license-form"><label for="licenseEmail">E-mail d’achat</label><input id="licenseEmail" type="email" inputmode="email" autocomplete="email" placeholder="exemple@email.com"><label for="licenseKey">Clé de licence Gumroad</label><input id="licenseKey" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="XXXX-XXXX-XXXX-XXXX"><div class="license-help">La clé se trouve dans l’e-mail / reçu Gumroad envoyé après l’achat.</div><div class="license-help" style="margin-top:6px">Mode propriétaire : ton e-mail + ta clé de test Vercel activent PRO sans achat.</div><div id="licenseSpinner" class="license-spinner">Vérification sécurisée en cours…</div><div id="licenseError" class="license-error"></div><div id="licenseSuccess" class="license-success"></div><button class="action gold" type="button" id="verifyLicenseBtn">Vérifier et activer PRO</button></div><div class="modal-actions" style="margin-top:10px"><button class="action ghost" type="button" id="modalClose">Fermer</button></div></div></div>
 <div id="infoModal" class="modal" aria-hidden="true"><div class="modal-card"><div id="infoModalIcon" class="modal-icon">🔔</div><h2 id="infoModalTitle">Information</h2><p id="infoModalText">Message.</p><div class="modal-actions"><button class="action gold" type="button" id="infoModalClose">Compris</button></div></div></div>
 <script>
 var dashboard=null;var currentLeague="ligue1";var FREE_LIMIT=3;var proVerified=false;var GUMROAD_FALLBACK_URL="https://kizombaatlas.gumroad.com/l/pronostics-ia-pro";var gumroadProductUrl=GUMROAD_FALLBACK_URL;var LEAGUES_UI=[{slug:"ligue1",label:"Ligue 1"},{slug:"premier-league",label:"Premier League"},{slug:"liga",label:"Liga"},{slug:"serie-a",label:"Serie A"},{slug:"bundesliga",label:"Bundesliga"},{slug:"champions-league",label:"C1"}];
@@ -136,7 +167,7 @@ html+='<div class="result-zone"><div class="zone-head"><div class="zone-title fr
 html+=pred("Résultat 1X2",getValue(pronos.resultat_1x2),getConfidence(pronos.resultat_1x2));
 html+=pred("Double chance",getValue(pronos.double_chance),getConfidence(pronos.double_chance));
 html+=pred("Over / Under",getValue(pronos.over_under),getConfidence(pronos.over_under));
-html+=pred("BTTS",getValue(pronos.btts),getConfidence(pronos.btts));
+html+=pred("Les 2 équipes marquent (BTTS)",getValue(pronos.btts),getConfidence(pronos.btts));
 html+=pred("Winner",getValue(pronos.winner),getConfidence(pronos.winner));
 html+='</div>';
 if(analysis.score_range){html+='<div class="v10-section"><h4>📊 Fourchette de score</h4><p>'+escapeHtml(analysis.score_range)+'</p></div>';}
