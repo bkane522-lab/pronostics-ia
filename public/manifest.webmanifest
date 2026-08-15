@@ -1,0 +1,77 @@
+{
+  "id": "/",
+  "name": "Pronostics IA Pro — AI Command Center",
+  "short_name": "Pronostics IA Pro",
+  "description": "AI Command Center pour l’analyse, la tactique et la simulation football.",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": [
+    "window-controls-overlay",
+    "standalone",
+    "minimal-ui"
+  ],
+  "orientation": "portrait-primary",
+  "background_color": "#030914",
+  "theme_color": "#071322",
+  "lang": "fr-FR",
+  "categories": [
+    "sports",
+    "utilities"
+  ],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Pronostics",
+      "short_name": "Pronostics",
+      "url": "/?page=home",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Matchs",
+      "short_name": "Matchs",
+      "url": "/?page=matchs",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "PRO",
+      "short_name": "PRO",
+      "url": "/?page=vip",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}
