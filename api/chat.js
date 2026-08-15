@@ -1,4 +1,4 @@
-const VERSION = "V10_HYBRID_CONTEXT";
+const VERSION = "V11_MATCH_INTELLIGENCE";
 
 const { LEAGUES, DEFAULT_LEAGUE, findLeague } = require("./leagues");
 const {
@@ -397,6 +397,148 @@ function offensiveCandidate(k) {
 // ------------------------------- Prédiction ---------------------------------
 
 
+
+function teamFaceName(k, key) {
+  return k && k.faces && k.faces[key] && k.faces[key].name
+    ? k.faces[key].name
+    : null;
+}
+
+function buildThreats(k, side) {
+  if (!k) return [];
+  const out = [];
+  const push = (name, role, level, reason) => {
+    if (!name) return;
+    if (out.some(x => clean(x.name) === clean(name))) return;
+    out.push({ name, role: role || "", level, reason });
+  };
+
+  if (k.faces) {
+    for (const key of ["star", "jeune", "cadre", "recrue", "prodige"]) {
+      const p = k.faces[key];
+      if (!p) continue;
+      const role = clean(p.role);
+      if (role.includes("attaquant") || role.includes("ailier") || role.includes("milieu offensif")) {
+        push(
+          p.name,
+          p.role,
+          key === "star" ? "élevé" : "moyen/élevé",
+          (key === "star" ? "Star offensive du profil de saison." : "Profil offensif identifié dans la base de saison.")
+        );
+      }
+    }
+  }
+
+  if (k.watch) {
+    const role = clean(k.watch.role);
+    if (role.includes("attaquant") || role.includes("ailier") || role.includes("milieu offensif")) {
+      push(k.watch.name, k.watch.role, "moyen", "Joueur à surveiller identifié dans la base de saison.");
+    }
+  }
+
+  return out.slice(0, 3).map((x, i) => ({
+    rank: i + 1,
+    side,
+    name: x.name,
+    role: x.role,
+    threat_level: x.level,
+    reason: x.reason,
+    lineup_status: "Titularisation à confirmer"
+  }));
+}
+
+function buildTeamIntel(k, teamName) {
+  if (!k) return null;
+  const positives = [];
+  const cautions = [];
+
+  const st = k.strengths || {};
+  if (strengthValue(st.attack) >= 4) positives.push("potentiel offensif élevé");
+  if (strengthValue(st.defense) >= 4) positives.push("base défensive solide");
+  if (strengthValue(st.coach) >= 4) positives.push("coach valorisé");
+  if (k.formation) positives.push("structure " + k.formation);
+  if ((k.profile || []).some(x => clean(x).includes("stabil"))) positives.push("stabilité du projet");
+  if ((k.profile || []).some(x => clean(x).includes("jeun"))) positives.push("jeunesse et marge de progression");
+  if ((k.profile || []).some(x => clean(x).includes("transition"))) cautions.push("effectif / projet en transition");
+  if ((k.profile || []).some(x => clean(x).includes("risque"))) cautions.push("niveau de risque élevé");
+  if ((k.profile || []).some(x => clean(x).includes("nouveau coach"))) cautions.push("nouveau cycle avec coach à intégrer");
+
+  return {
+    team: teamName,
+    formation: k.formation || null,
+    objective: k.objective || null,
+    guide_projection: k.guide_prediction || null,
+    coach: k.coach || null,
+    star: teamFaceName(k, "star"),
+    cadre: teamFaceName(k, "cadre"),
+    positives: positives.slice(0, 4),
+    cautions: cautions.slice(0, 3)
+  };
+}
+
+function scenarioIfScoresFirst(teamScoring, otherTeam, favoriteName, isFavorite) {
+  if (isFavorite) {
+    return {
+      trigger: teamScoring + " marque en premier",
+      effects: [
+        "contrôle territorial et gestion du tempo en hausse",
+        otherTeam + " devra prendre davantage de risques",
+        "espaces de transition plus nombreux",
+        "probabilité de victoire de " + teamScoring + " en hausse"
+      ]
+    };
+  }
+
+  return {
+    trigger: teamScoring + " marque en premier",
+    effects: [
+      "rapport de force immédiatement rééquilibré",
+      favoriteName + " devra accélérer et attaquer plus haut",
+      "probabilité de BTTS en hausse",
+      "variance du match nettement plus élevée"
+    ]
+  };
+}
+
+function buildTacticalZones(ka, kb, a, b) {
+  const fa = ka && ka.formation ? ka.formation : "N/D";
+  const fb = kb && kb.formation ? kb.formation : "N/D";
+
+  const zones = [];
+  if (fa.startsWith("3-") && fb.startsWith("4-3-3")) {
+    zones.push("couloirs : duel pistons contre latéraux");
+    zones.push("demi-espaces : risque entre piston et défenseur central");
+    zones.push("milieu : densité centrale déterminante");
+  } else if (fa === "4-2-3-1" && fb === "4-3-3") {
+    zones.push("zone du numéro 10 face au milieu à trois");
+    zones.push("couloirs offensifs");
+    zones.push("sortie de balle sous pression");
+  } else {
+    zones.push("milieu de terrain");
+    zones.push("transitions");
+    zones.push("coups de pied arrêtés");
+  }
+
+  return {
+    duel: a + " " + fa + " vs " + b + " " + fb,
+    zones
+  };
+}
+
+function scoreScenarios(favIsA, fav, dog, pA, pD, pB) {
+  const candidates = [];
+  if (Math.abs(pA - pB) < 8) {
+    candidates.push({ score: "1-1", label: "scénario central", weight: 28 });
+    candidates.push({ score: favIsA ? "2-1" : "1-2", label: "avantage favori", weight: 23 });
+    candidates.push({ score: "0-0", label: "match fermé", weight: 16 });
+  } else {
+    candidates.push({ score: favIsA ? "2-1" : "1-2", label: "scénario central", weight: 27 });
+    candidates.push({ score: favIsA ? "1-0" : "0-1", label: "victoire courte", weight: 21 });
+    candidates.push({ score: favIsA ? "2-0" : "0-2", label: "maîtrise du favori", weight: 18 });
+  }
+  return candidates;
+}
+
 function contextualPrediction(a, b, ka, kb, ctx) {
   // Ce moteur n'est utilisé que lorsque les statistiques dynamiques sont
   // insuffisantes. Il exploite les données structurées du guide comme
@@ -532,6 +674,27 @@ function contextualPrediction(a, b, ka, kb, ctx) {
   // Fiabilité séparée de la probabilité du résultat : c'est essentiel.
   const reliability = 52;
 
+  const teamIntelA = buildTeamIntel(ka, a);
+  const teamIntelB = buildTeamIntel(kb, b);
+  const tacticalIntel = buildTacticalZones(ka, kb, a, b);
+  const threats = [
+    ...buildThreats(ka, "A"),
+    ...buildThreats(kb, "B")
+  ];
+  const scores = scoreScenarios(favIsA, fav, dog, pA, pD, pB);
+
+  const scenarioTree = [
+    scenarioIfScoresFirst(a, b, fav, fav === a),
+    scenarioIfScoresFirst(b, a, fav, fav === b)
+  ];
+
+  const modelLimits = [
+    "saison 2026-2027 encore pauvre en données récentes",
+    "compositions officielles non confirmées",
+    "forme individuelle et blessures à actualiser",
+    "finale sur un match : variance plus élevée"
+  ];
+
   return {
     confidence: reliability,
     reliability,
@@ -556,6 +719,18 @@ function contextualPrediction(a, b, ka, kb, ctx) {
     scenario,
     tactical,
     keyFactors,
+    tactical_intel: tacticalIntel,
+    team_intel: { A: teamIntelA, B: teamIntelB },
+    threats,
+    score_scenarios: scores,
+    scenario_tree: scenarioTree,
+    model_limits: modelLimits,
+    edge: {
+      favorite: fav,
+      challenger: dog,
+      label: fav + " avantage contextuel",
+      value: Math.min(20, Math.max(4, Math.round(Math.abs(pA - pB))))
+    },
     verdict: "Lecture contextuelle : avantage " + fav +
       ", mais confiance limitée car la saison 2026-2027 n'offre pas encore assez de données dynamiques."
   };
@@ -847,6 +1022,13 @@ function upcomingResponse(a, b, ctx) {
       scenario: p.scenario || null,
       tactical: p.tactical || null,
       key_factors: p.keyFactors || [],
+      tactical_intel: p.tactical_intel || null,
+      team_intel: p.team_intel || null,
+      threats: p.threats || [],
+      score_scenarios: p.score_scenarios || [],
+      scenario_tree: p.scenario_tree || [],
+      model_limits: p.model_limits || [],
+      edge: p.edge || null,
       editorial_context_weight: "faible et plafonné",
       source_note: "Les objectifs, formations de référence, forces et projections de classement proviennent d’une source éditoriale secondaire et peuvent évoluer."
     },
