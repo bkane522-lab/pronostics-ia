@@ -50,35 +50,37 @@ button,input{font-family:inherit}button{cursor:pointer}.app{max-width:560px;marg
 @media(max-width:520px){.v10-summary,.v10-team-grid{grid-template-columns:1fr}.v10-probs{grid-template-columns:repeat(3,1fr)}}
 
 
-.pro-lock{min-height:0!important}
-.pro-lock::after{display:none!important}
-.pro-lock .pro-lock-box{
-  position:absolute!important;
-  inset:auto 12px 12px 12px!important;
-  transform:none!important;
-  width:auto!important;
-  min-height:0!important;
-  padding:10px 12px!important;
-  border-radius:14px!important;
-  background:rgba(5,12,23,.94)!important;
-  border:1px solid rgba(245,197,66,.28)!important;
-  box-shadow:0 10px 30px rgba(0,0,0,.28)!important;
-}
-.pro-lock .pro-lock-box h4{
-  margin:0 0 3px!important;
-  font-size:13px!important;
-  line-height:1.25!important;
-}
-.pro-lock .pro-lock-box p{
-  margin:0!important;
-  font-size:11px!important;
-  line-height:1.35!important;
-}
-.pro-lock .pro-lock-box button{
-  margin-top:7px!important;
-  padding:8px 12px!important;
-  font-size:12px!important;
-}
+.mi-shell{margin-top:14px}
+.mi-hero{padding:18px;border:1px solid rgba(24,245,166,.22);border-radius:22px;background:linear-gradient(145deg,rgba(24,245,166,.055),rgba(245,197,66,.035),rgba(9,18,29,.82))}
+.mi-title{font-size:13px;text-transform:uppercase;letter-spacing:1.4px;color:var(--gold);font-weight:900}
+.mi-edge{margin-top:8px;font-size:28px;line-height:1.15;font-weight:950;color:#fff}
+.mi-edge span{color:var(--green)}
+.mi-gauge{position:relative;height:12px;border-radius:999px;background:linear-gradient(90deg,rgba(24,245,166,.9),rgba(255,255,255,.15) 50%,rgba(245,197,66,.92));margin:18px 0 8px;overflow:hidden}
+.mi-marker{position:absolute;top:-4px;width:4px;height:20px;border-radius:8px;background:#fff;box-shadow:0 0 15px rgba(255,255,255,.8)}
+.mi-meta{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:12px}
+.mi-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.mi-panel{padding:14px;border-radius:18px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08)}
+.mi-panel h4{margin:0 0 9px;color:#fff;font-size:15px}
+.mi-list{display:grid;gap:7px}
+.mi-item{display:flex;gap:8px;align-items:flex-start;color:var(--muted);font-size:13px;line-height:1.45}
+.mi-item b{color:#fff}
+.mi-good{color:var(--green);font-weight:900}
+.mi-warn{color:var(--gold);font-weight:900}
+.mi-score-row{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:10px}
+.mi-score{padding:11px;border-radius:15px;text-align:center;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08)}
+.mi-score b{display:block;color:#fff;font-size:19px}
+.mi-score span{font-size:11px;color:var(--muted)}
+.mi-scenario{display:grid;gap:10px}
+.mi-scenario-card{padding:13px;border-radius:16px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07)}
+.mi-scenario-card h5{margin:0 0 7px;color:var(--green);font-size:14px}
+.mi-threath{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.mi-threat{padding:13px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid rgba(245,197,66,.18)}
+.mi-threat .rank{color:var(--gold);font-size:12px;font-weight:900}
+.mi-threat b{display:block;color:#fff;margin:5px 0}
+.mi-threat small{display:block;color:var(--muted);line-height:1.45}
+.mi-track{margin-top:12px;padding:14px;border-radius:18px;background:linear-gradient(145deg,rgba(24,245,166,.04),rgba(255,255,255,.02));border:1px solid rgba(24,245,166,.15)}
+.mi-track strong{color:#fff}
+@media(max-width:560px){.mi-grid,.mi-threath{grid-template-columns:1fr}.mi-score-row{grid-template-columns:1fr 1fr 1fr}}
 
 </style>
 </head>
@@ -90,11 +92,11 @@ button,input{font-family:inherit}button{cursor:pointer}.app{max-width:560px;marg
 <main id="home" class="page active"><div id="quotaBox" class="quota-card"><div class="quota-top"><div class="quota-title">🎯 Analyses gratuites avec IA</div><div id="quotaCount" class="quota-count">0/3</div></div><div class="quota-bar"><div id="quotaFill" class="quota-fill"></div></div><div id="quotaMessage" class="quota-message">Chargement du compteur...</div><div class="quota-actions"><button class="action gold" type="button" data-page="vip">Voir PRO →</button></div></div><section class="card"><div class="label" id="heroLeagueLabel">🏆 Chargement du championnat...</div><div class="hero-match"><div><div class="flag">⚽</div><div class="team-name" id="heroHome">Chargement</div><div class="group" id="heroGroupA">...</div></div><div class="vs">VS</div><div><div class="flag">⚽</div><div class="team-name" id="heroAway">...</div><div class="group" id="heroGroupB">...</div></div></div><div class="meta" id="heroMeta">Mise à jour des matchs...</div><div class="confidence"><div><small>Analyse IA</small><b>Variable</b></div><button class="action" type="button" id="heroBtn">Voir l'analyse →</button></div></section><section class="stats"><div class="stat"><b id="statData">DATA</b><span>Données</span></div><div class="stat"><b id="statResults">0</b><span>Terminés</span></div><div class="stat"><b id="statUpcoming">0</b><span>À venir</span></div><div class="stat"><b>IA</b><span>Dynamique</span></div></section><h2 class="section-title">Prochains matchs</h2><div class="match-list" id="homeUpcomingList"></div><h2 class="section-title">Derniers résultats</h2><div class="match-list" id="homeRecentList"></div><h2 class="section-title">Accès rapide</h2><div class="grid"><button class="tile" type="button" data-page="matchs"><div class="icon">⚽</div><h3>Matchs</h3><p>Voir les matchs à venir et terminés.</p></button><button class="tile" type="button" data-page="live"><div class="icon">📡</div><h3>Live</h3><p>Page de suivi en direct.</p></button><button class="tile pro-tile" type="button" data-page="vip"><div class="icon">👑</div><h3>PRO</h3><p>Analyses avancées, illimitées et contenu premium.</p></button><button class="tile" type="button" data-page="groups"><div class="icon">🏆</div><h3>Groupes</h3><p>Classements dynamiques.</p></button></div><section class="search"><div class="search-title">🤖 Assistant Pronostics IA</div><div class="input-row"><input id="matchInput" type="text" placeholder="Ex : PSG vs Marseille"><button id="sendBtn" type="button">➤</button></div><div class="samples" id="sampleList"></div><div id="loader" class="loader">Analyse IA en cours...</div><div id="errorBox" class="error"></div></section><section id="result" class="result"></section></main>
 <main id="matchs" class="page"><h2 class="section-title">Matchs à venir</h2><div class="match-list" id="matchUpcomingList"></div><h2 class="section-title">Derniers résultats</h2><div class="match-list" id="matchRecentList"></div></main>
 <main id="live" class="page"><section class="card"><div class="label">● Live · Analyse en temps réel</div><div class="info-box">Les données live seront activées au début réel des championnats. Pour l’instant, l’app utilise les résultats et les matchs à venir du championnat sélectionné.</div></section></main>
-<main id="vip" class="page"><section class="card pro-card pro-hero"><div class="label">👑 PRO</div><h1>Passe en Pronostics IA Pro</h1><p>Débloque les analyses avancées : buteurs, score exact, combiné prudent et analyses illimitées.</p><div class="pro-mini"><button class="pro-feature" type="button" data-scroll="proAnalyses"><b>∞</b><span>Analyses illimitées</span></button><button class="pro-feature" type="button" data-scroll="proButeurs"><b>⚽</b><span>Buteurs</span></button><button class="pro-feature" type="button" data-scroll="proLecture"><b>🧠</b><span>Lecture avancée</span></button></div><div class="plan-grid"><div class="plan"><h3>🎯 Gratuit avec IA</h3><ul><li>Assistant Pronostics IA inclus</li><li>3 analyses IA par jour</li><li>Résultat 1X2</li><li>Double chance</li><li>Over / Under</li><li>BTTS</li><li>Winner</li></ul></div><div class="plan pro"><h3>👑 PRO</h3><ul><li>Analyses IA illimitées</li><li>Buteurs potentiels</li><li>Tip doublé</li><li>Score exact</li><li>Combiné prudent</li><li>Tout le gratuit inclus</li></ul></div></div><button class="action gold" type="button" id="vipBtn">Activer PRO →</button><div class="payment-note">Paiement sécurisé via Gumroad · 9,99 €</div><div id="proStatusPill" class="pro-status-pill">🔒 PRO non activé</div><div id="proDetails" class="pro-details"><div id="proAnalyses" class="detail-card"><h3>∞ Analyses illimitées</h3><p>Le mode gratuit garde l’Assistant Pronostics IA, mais avec 3 analyses par jour. Le mode PRO débloquera l’usage illimité.</p></div><div id="proButeurs" class="detail-card"><h3>⚽ Buteurs & doublé</h3><p>Accès aux lectures avancées autour des buteurs potentiels et du tip doublé quand les données du match le permettent.</p></div><div id="proLecture" class="detail-card"><h3>🧠 Lecture avancée</h3><p>Score exact, combiné prudent et séparation claire entre analyse gratuite et analyse PRO.</p></div></div><div class="pro-note" style="margin-top:12px">Pensé pour mieux lire les matchs, pas pour promettre un résultat.</div><div class="info-box responsible">⚠️ Aucun pari garanti. Estimations informatives uniquement.</div></section></main>
+<main id="vip" class="page"><section class="card pro-card pro-hero"><div class="label">👑 PRO</div><h1>Pronostics IA Pro — Match Intelligence</h1><p>Entre dans le cockpit d’intelligence du match : rapport de force, scénarios, tactique, menaces offensives et suivi de performance.</p><div class="pro-mini"><button class="pro-feature" type="button" data-scroll="proAnalyses"><b>∞</b><span>Analyses illimitées</span></button><button class="pro-feature" type="button" data-scroll="proButeurs"><b>⚽</b><span>Buteurs</span></button><button class="pro-feature" type="button" data-scroll="proLecture"><b>🧠</b><span>Lecture avancée</span></button></div><div class="plan-grid"><div class="plan"><h3>🎯 Gratuit avec IA</h3><ul><li>Assistant Pronostics IA inclus</li><li>3 analyses IA par jour</li><li>Résultat 1X2</li><li>Double chance</li><li>Over / Under</li><li>BTTS</li><li>Winner</li></ul></div><div class="plan pro"><h3>👑 PRO</h3><ul><li>Analyses IA illimitées</li><li>Buteurs potentiels</li><li>Tip doublé</li><li>Score exact</li><li>Combiné prudent</li><li>Tout le gratuit inclus</li></ul></div></div><button class="action gold" type="button" id="vipBtn">Activer PRO →</button><div class="payment-note">Paiement sécurisé via Gumroad · 9,99 €</div><div id="proStatusPill" class="pro-status-pill">🔒 PRO non activé</div><div id="proDetails" class="pro-details"><div id="proAnalyses" class="detail-card"><h3>∞ Analyses illimitées</h3><p>Le mode gratuit garde l’Assistant Pronostics IA, mais avec 3 analyses par jour. Le mode PRO débloquera l’usage illimité.</p></div><div id="proButeurs" class="detail-card"><h3>⚽ Buteurs & doublé</h3><p>Accès aux lectures avancées autour des buteurs potentiels et du tip doublé quand les données du match le permettent.</p></div><div id="proLecture" class="detail-card"><h3>🧠 Lecture avancée</h3><p>Score exact, combiné prudent et séparation claire entre analyse gratuite et analyse PRO.</p></div></div><div class="pro-note" style="margin-top:12px">Pensé pour mieux lire les matchs, pas pour promettre un résultat.</div><div class="info-box responsible">⚠️ Aucun pari garanti. Estimations informatives uniquement.</div></section></main>
 <main id="groups" class="page"><h2 class="section-title">Classements</h2><div id="groupsList"></div></main>
 </div>
 <nav class="bottom-nav"><button class="nav active" type="button" data-page="home"><i>🏠</i><span>Accueil</span></button><button class="nav" type="button" data-page="matchs"><i>⚽</i><span>Matchs</span></button><button class="nav" type="button" data-page="live"><i>📡</i><span>Live</span></button><button class="nav pro-nav" type="button" data-page="vip"><i>👑</i><span>PRO</span></button><button class="nav" type="button" data-page="groups"><i>🏆</i><span>Groupes</span></button></nav>
-<div id="proModal" class="modal" aria-hidden="true"><div class="modal-card"><div class="modal-icon">👑</div><h2>Activer Pronostics IA Pro</h2><p>Achète l’accès PRO sur Gumroad, puis saisis l’e-mail utilisé pour l’achat et ta clé de licence.</p><div class="buy-row"><button class="action gold" type="button" id="buyProBtn">Acheter PRO · 9,99 €</button><button class="action ghost" type="button" id="alreadyBoughtBtn">J’ai déjà acheté</button></div><div class="license-help" style="margin-top:8px;text-align:center">9,99 € · paiement unique · activation par licence Gumroad</div><div id="licenseForm" class="license-form"><label for="licenseEmail">E-mail d’achat</label><input id="licenseEmail" type="email" inputmode="email" autocomplete="email" placeholder="exemple@email.com"><label for="licenseKey">Clé de licence Gumroad</label><input id="licenseKey" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="XXXX-XXXX-XXXX-XXXX"><div class="license-help">La clé se trouve dans l’e-mail / reçu Gumroad envoyé après l’achat.</div><div class="license-help" style="margin-top:6px">Mode propriétaire : ton e-mail + ta clé de test Vercel activent PRO sans achat.</div><div id="licenseSpinner" class="license-spinner">Vérification sécurisée en cours…</div><div id="licenseError" class="license-error"></div><div id="licenseSuccess" class="license-success"></div><button class="action gold" type="button" id="verifyLicenseBtn">Vérifier et activer PRO</button></div><div class="modal-actions" style="margin-top:10px"><button class="action ghost" type="button" id="modalClose">Fermer</button></div></div></div>
+<div id="proModal" class="modal" aria-hidden="true"><div class="modal-card"><div class="modal-icon">👑</div><h2>Activer Pronostics IA Pro</h2><p>Achète l’accès PRO sur Gumroad, puis saisis l’e-mail utilisé pour l’achat et ta clé de licence.</p><div class="buy-row"><button class="action gold" type="button" id="buyProBtn">Acheter PRO · 9,99 €</button><button class="action ghost" type="button" id="alreadyBoughtBtn">J’ai déjà acheté</button></div><div class="license-help" style="margin-top:8px;text-align:center">9,99 € · paiement unique · activation par licence Gumroad</div><div id="licenseForm" class="license-form"><label for="licenseEmail">E-mail d’achat</label><input id="licenseEmail" type="email" inputmode="email" autocomplete="email" placeholder="exemple@email.com"><label for="licenseKey">Clé de licence Gumroad</label><input id="licenseKey" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="XXXX-XXXX-XXXX-XXXX"><div class="license-help">La clé se trouve dans l’e-mail / reçu Gumroad envoyé après l’achat.</div><div id="licenseSpinner" class="license-spinner">Vérification sécurisée en cours…</div><div id="licenseError" class="license-error"></div><div id="licenseSuccess" class="license-success"></div><button class="action gold" type="button" id="verifyLicenseBtn">Vérifier et activer PRO</button></div><div class="modal-actions" style="margin-top:10px"><button class="action ghost" type="button" id="modalClose">Fermer</button></div></div></div>
 <div id="infoModal" class="modal" aria-hidden="true"><div class="modal-card"><div id="infoModalIcon" class="modal-icon">🔔</div><h2 id="infoModalTitle">Information</h2><p id="infoModalText">Message.</p><div class="modal-actions"><button class="action gold" type="button" id="infoModalClose">Compris</button></div></div></div>
 <script>
 var dashboard=null;var currentLeague="ligue1";var FREE_LIMIT=3;var proVerified=false;var GUMROAD_FALLBACK_URL="https://kizombaatlas.gumroad.com/l/pronostics-ia-pro";var gumroadProductUrl=GUMROAD_FALLBACK_URL;var LEAGUES_UI=[{slug:"ligue1",label:"Ligue 1"},{slug:"premier-league",label:"Premier League"},{slug:"liga",label:"Liga"},{slug:"serie-a",label:"Serie A"},{slug:"bundesliga",label:"Bundesliga"},{slug:"champions-league",label:"C1"}];
@@ -115,7 +117,7 @@ function clearLicense(){localStorage.removeItem("pia_license_email");localStorag
 function getSavedLicense(){return{email:localStorage.getItem("pia_license_email")||"",licenseKey:localStorage.getItem("pia_license_key")||""};}
 function loadProConfig(){return fetch("/api/pro-config",{cache:"no-store"}).then(function(r){return r.json();}).then(function(data){gumroadProductUrl=data&&data.productUrl?data.productUrl:GUMROAD_FALLBACK_URL;return data;}).catch(function(){gumroadProductUrl=GUMROAD_FALLBACK_URL;return{productUrl:GUMROAD_FALLBACK_URL};});}
 function buyPro(){var url=gumroadProductUrl||GUMROAD_FALLBACK_URL;if(!url){showInfoModal("⚠️","Paiement indisponible","Le paiement est temporairement indisponible.");return;}window.open(url,"_blank","noopener,noreferrer");}
-function verifyLicense(email,key,silent){email=String(email||"").trim().toLowerCase();key=String(key||"").trim();if(!email||!key){if(!silent){showLicenseError("Renseigne ton e-mail d’achat et ta clé de licence.");}return Promise.resolve(false);}setLicenseLoading(true);return fetch("/api/verify-license",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:email,licenseKey:key,license_key:key})}).then(function(r){return r.json().then(function(data){return{ok:r.ok,data:data};});}).then(function(res){if(res.ok&&res.data&&res.data.valid){saveLicense(email,key);setProState(true);if(!silent){showLicenseSuccess("Licence validée ✅ Le mode PRO est maintenant actif.");setTimeout(function(){closeProModal();setActivePage("vip");},900);}return true;}clearLicense();if(!silent){showLicenseError((res.data&&(res.data.message||res.data.error))||"Licence invalide ou achat introuvable.");}return false;}).catch(function(){if(!silent){showLicenseError("Impossible de vérifier la licence pour le moment. Réessaie dans quelques instants.");}return false;}).finally(function(){setLicenseLoading(false);});}
+function verifyLicense(email,key,silent){email=String(email||"").trim().toLowerCase();key=String(key||"").trim();if(!email||!key){if(!silent){showLicenseError("Renseigne ton e-mail d’achat et ta clé de licence.");}return Promise.resolve(false);}setLicenseLoading(true);return fetch("/api/verify-license",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:email,licenseKey:key})}).then(function(r){return r.json().then(function(data){return{ok:r.ok,data:data};});}).then(function(res){if(res.ok&&res.data&&res.data.valid){saveLicense(email,key);setProState(true);if(!silent){showLicenseSuccess("Licence validée ✅ Le mode PRO est maintenant actif.");setTimeout(function(){closeProModal();setActivePage("vip");},900);}return true;}clearLicense();if(!silent){showLicenseError((res.data&&res.data.message)||"Licence invalide ou achat introuvable.");}return false;}).catch(function(){if(!silent){showLicenseError("Impossible de vérifier la licence pour le moment. Réessaie dans quelques instants.");}return false;}).finally(function(){setLicenseLoading(false);});}
 function restoreProSession(){var saved=getSavedLicense();if(!saved.email||!saved.licenseKey){setProState(false);return Promise.resolve(false);}return verifyLicense(saved.email,saved.licenseKey,true);}
 function setLicenseLoading(active){var spin=document.getElementById("licenseSpinner"),btn=document.getElementById("verifyLicenseBtn");if(spin){spin.classList.toggle("show",!!active);}if(btn){btn.disabled=!!active;btn.textContent=active?"Vérification…":"Vérifier et activer PRO";}}
 function showLicenseError(message){var e=document.getElementById("licenseError"),suc=document.getElementById("licenseSuccess");if(suc){suc.classList.remove("show");}if(e){e.textContent=message;e.classList.add("show");}}
@@ -134,51 +136,109 @@ function getValue(obj){if(!obj){return "Non disponible";}if(typeof obj==="string
 function getCombined(data){return data.combine_prudent||data.combined_prudent||data.combiné_prudent||data.combine||data.combi_prudent||null;}function getDoubleTip(data){return data.doublé||data.double_tip||data.tip_double||data.tip_doublé||data.doublé_potentiel||null;}
 function renderScorersText(list){if(!list||!list.length){return "Buteurs potentiels disponibles en PRO selon les données du match.";}var html="";list.forEach(function(item){html+='<p><b style="color:var(--green)">'+escapeHtml(item.type||"Buteur")+'</b><br>'+escapeHtml(item.equipe||"")+" — "+escapeHtml(item.valeur||"")+" ("+escapeHtml(item.confiance||0)+"%)<br><small>"+escapeHtml(item.raison||"")+'</small></p>';});return html;}
 function proBlock(title,textHtml){var locked=!isPro(),html="";html+='<div class="pro-locked"><div class="pro-badge">👑 PRO</div><div class="lock-content '+(locked?"locked":"")+'"><h3>'+escapeHtml(title)+'</h3>'+textHtml+'</div>';if(locked){html+='<div class="lock-overlay"><div class="lock-box"><b>Analyse avancée réservée au mode PRO</b><small>Débloque cette lecture premium avec Pronostics IA Pro.</small><button type="button" data-page="vip">Débloquer PRO</button></div></div>';}html+='</div>';return html;}
+
+function miList(items,type){
+  if(!items||!items.length){return '<div class="mi-item"><span>•</span><span>Aucun élément structuré.</span></div>';}
+  return items.map(function(x){return '<div class="mi-item"><span class="'+(type==="good"?"mi-good":"mi-warn")+'">'+(type==="good"?"●":"▲")+'</span><span>'+escapeHtml(x)+'</span></div>';}).join("");
+}
+function miTeamCard(t){
+  if(!t){return '<div class="mi-panel"><h4>Équipe</h4><div class="mi-item">Contexte indisponible.</div></div>';}
+  return '<div class="mi-panel"><h4>'+escapeHtml(t.team||"Équipe")+'</h4>'+
+    '<div class="mi-item"><b>'+escapeHtml(t.formation||"N/D")+'</b>&nbsp;·&nbsp;'+escapeHtml(t.objective||"Objectif N/D")+'</div>'+
+    '<div class="mi-item">Projection guide : '+escapeHtml(t.guide_projection||"N/D")+'</div>'+
+    '<div class="mi-list" style="margin-top:8px">'+miList(t.positives||[],"good")+'</div>'+
+    ((t.cautions&&t.cautions.length)?'<div class="mi-list" style="margin-top:8px">'+miList(t.cautions,"warn")+'</div>':'')+
+    '</div>';
+}
+function miThreats(list){
+  if(!list||!list.length){return '<div class="mi-item">Aucune menace offensive structurée disponible.</div>';}
+  return '<div class="mi-threath">'+list.map(function(t){
+    return '<div class="mi-threat"><div class="rank">#'+escapeHtml(t.rank)+' · Équipe '+escapeHtml(t.side)+'</div>'+
+      '<b>'+escapeHtml(t.name)+'</b>'+
+      '<small>'+escapeHtml(t.role||"")+'</small>'+
+      '<small>Potentiel : '+escapeHtml(t.threat_level||"N/D")+'</small>'+
+      '<small>'+escapeHtml(t.lineup_status||"")+'</small>'+
+      '<small>'+escapeHtml(t.reason||"")+'</small></div>';
+  }).join("")+'</div>';
+}
+function miScenarioTree(tree){
+  if(!tree||!tree.length){return '<div class="mi-item">Scénarios non disponibles.</div>';}
+  return '<div class="mi-scenario">'+tree.map(function(s){
+    return '<div class="mi-scenario-card"><h5>'+escapeHtml(s.trigger||"Scénario")+'</h5>'+
+      (s.effects||[]).map(function(e){return '<div class="mi-item"><span class="mi-good">→</span><span>'+escapeHtml(e)+'</span></div>';}).join("")+
+      '</div>';
+  }).join("")+'</div>';
+}
+function miScoreScenarios(scores){
+  if(!scores||!scores.length){return "";}
+  return '<div class="mi-score-row">'+scores.map(function(s){
+    return '<div class="mi-score"><b>'+escapeHtml(s.score)+'</b><span>'+escapeHtml(s.label||"scénario")+'</span></div>';
+  }).join("")+'</div>';
+}
+function miMarkerPosition(probs){
+  if(!probs){return 50;}
+  var home=Number(probs.home||0),away=Number(probs.away||0);
+  var pos=50+(away-home)*0.7;
+  return Math.max(8,Math.min(92,pos));
+}
 function renderResult(data){
 var result=document.getElementById("result");if(!result){return;}
 var finished=isFinished(data),pick=data.pari_du_jour||{},pronos=data.pronostics||{},analyse=data.analyse_approfondie||{},analysis=data.analysis||{},contexts=data.contexte_clubs||{},combined=getCombined(data),doubleTip=getDoubleTip(data),html="";
 var probs=analysis.probabilities||null,reliability=Number(analysis.reliability||data.niveau_confiance_global||0),mode=analysis.mode||"dynamique";
-var teamA=contexts.equipe_A||null,teamB=contexts.equipe_B||null;
-html+='<div class="result-card"><div class="result-head"><div class="status '+(finished?"finished":"")+'">'+(finished?"⛔ Match terminé":"🤖 Analyse IA")+'</div><h2>'+escapeHtml(data.match||"Match")+'</h2><p>'+escapeHtml(data.competition||"")+'</p><p>'+escapeHtml(data.date_info||"")+'</p></div><div class="result-body">';
+var edge=analysis.edge||null,teamIntel=analysis.team_intel||{},tacticalIntel=analysis.tactical_intel||null,threats=analysis.threats||[],scoreScenarios=analysis.score_scenarios||[],scenarioTree=analysis.scenario_tree||[],limits=analysis.model_limits||[];
+var marker=miMarkerPosition(probs);
 
-html+='<div class="v10-summary"><div class="v10-card gold"><div class="v10-kicker">Mode d’analyse</div><div class="v10-big gold">'+escapeHtml(mode)+'</div><div class="v10-muted">Le mode contextuel est utilisé quand la saison ne fournit pas encore assez de données récentes.</div></div><div class="v10-card"><div class="v10-kicker">Fiabilité globale</div><div class="v10-big">'+escapeHtml(reliability)+' / 100</div><div class="v10-muted">Fiabilité de la lecture, différente de la probabilité d’un résultat.</div></div></div>';
+html+='<div class="result-card"><div class="result-head"><div class="status '+(finished?"finished":"")+'">'+(finished?"⛔ Match terminé":"🧠 MATCH INTELLIGENCE")+'</div><h2>'+escapeHtml(data.match||"Match")+'</h2><p>'+escapeHtml(data.competition||"")+'</p><p>'+escapeHtml(data.date_info||"")+'</p></div><div class="result-body">';
 
-if(probs){
-html+='<div class="v10-card"><div class="v10-kicker">Rapport de force estimé</div><div class="v10-probs"><div class="v10-prob"><b>'+escapeHtml(probs.home)+'%</b><span>1 · Domicile</span></div><div class="v10-prob"><b>'+escapeHtml(probs.draw)+'%</b><span>X · Nul</span></div><div class="v10-prob"><b>'+escapeHtml(probs.away)+'%</b><span>2 · Extérieur</span></div></div></div>';
+html+='<div class="mi-shell"><div class="mi-hero"><div class="mi-title">Lecture globale IA</div>'+
+'<div class="mi-edge">'+(edge?escapeHtml(edge.label):escapeHtml(pick.valeur||"Lecture prudente"))+'</div>'+
+'<div class="mi-gauge"><div class="mi-marker" style="left:'+escapeHtml(marker)+'%"></div></div>'+
+'<div class="mi-meta"><span>Mode : '+escapeHtml(mode)+'</span><span>Fiabilité : '+escapeHtml(reliability)+'/100</span></div>'+
+(probs?'<div class="v10-probs"><div class="v10-prob"><b>'+escapeHtml(probs.home)+'%</b><span>1</span></div><div class="v10-prob"><b>'+escapeHtml(probs.draw)+'%</b><span>X</span></div><div class="v10-prob"><b>'+escapeHtml(probs.away)+'%</b><span>2</span></div></div>':'')+
+'</div>';
+
+html+='<div class="mi-grid">'+miTeamCard(teamIntel.A)+miTeamCard(teamIntel.B)+'</div>';
+
+if(tacticalIntel){
+html+='<div class="v10-section"><h4>🧠 Duel tactique</h4><p><b style="color:#fff">'+escapeHtml(tacticalIntel.duel||"")+'</b></p>'+
+(tacticalIntel.zones||[]).map(function(z){return '<div class="mi-item" style="margin-top:6px"><span class="mi-good">●</span><span>'+escapeHtml(z)+'</span></div>';}).join("")+
+'</div>';
 }
 
-html+='<div class="pick"><small>'+escapeHtml(pick.type||"Verdict")+'</small><h3>'+escapeHtml(pick.valeur||"Aucun pari conseillé")+'</h3><p>'+escapeHtml(pick.raison||data.verdict||"")+'</p></div>';
+html+='<div class="v10-section"><h4>🎬 Simulateur de scénarios</h4>'+miScenarioTree(scenarioTree)+'</div>';
 
-if(analysis.scenario){html+='<div class="v10-section"><h4>🎬 Scénario probable du match</h4><p>'+escapeHtml(analysis.scenario)+'</p></div>';}
-if(analysis.tactical){html+='<div class="v10-section"><h4>🧠 Duel tactique</h4><p>'+escapeHtml(analysis.tactical)+'</p></div>';}
+html+='<div class="v10-section"><h4>📈 Scores plausibles</h4>'+miScoreScenarios(scoreScenarios)+
+(analysis.score_range?'<p style="margin-top:9px;color:var(--muted)">Zone probable : '+escapeHtml(analysis.score_range)+'</p>':'')+
+'</div>';
 
-if(teamA||teamB){
-html+='<div class="v10-section"><h4>📚 Contexte des équipes</h4><div class="v10-team-grid">';
-[teamA,teamB].forEach(function(t){if(t){var faces=t.visages||{},star=faces.star&&faces.star.name?faces.star.name:"N/D",cadre=faces.cadre&&faces.cadre.name?faces.cadre.name:"N/D";html+='<div class="v10-team"><b>'+escapeHtml(t.club||"Équipe")+'</b><small>'+escapeHtml(t.formation_reference||"Formation N/D")+' · '+escapeHtml(t.objectif||"Objectif N/D")+'</small><small>Projection guide : '+escapeHtml(t.pronostic_guide||"N/D")+'</small><small>Star : '+escapeHtml(star)+' · Cadre : '+escapeHtml(cadre)+'</small></div>';}});html+='</div></div>';
+html+='<div class="v10-section"><h4>⚡ Menaces offensives</h4>'+miThreats(threats)+'</div>';
+
+if(limits.length){
+html+='<div class="v10-section"><h4>⚠️ Pourquoi cette analyse peut être fausse</h4>'+
+limits.map(function(x){return '<div class="mi-item"><span class="mi-warn">▲</span><span>'+escapeHtml(x)+'</span></div>';}).join("")+
+'</div>';
 }
 
-if(analysis.key_factors&&analysis.key_factors.length){
-html+='<div class="v10-section"><h4>🔑 Facteurs clés</h4>';
-analysis.key_factors.forEach(function(f){html+='<div class="v10-factor"><span class="v10-dot">•</span><p>'+escapeHtml(f)+'</p></div>';});
-html+='</div>';
-}
-
-html+='<div class="result-zone"><div class="zone-head"><div class="zone-title free">Analyse gratuite avec IA</div><div class="zone-note">Visible pour tous</div></div><div class="pred-grid">';
+html+='<div class="result-zone"><div class="zone-head"><div class="zone-title free">Pronostics essentiels</div><div class="zone-note">Lecture synthétique</div></div><div class="pred-grid">';
 html+=pred("Résultat 1X2",getValue(pronos.resultat_1x2),getConfidence(pronos.resultat_1x2));
 html+=pred("Double chance",getValue(pronos.double_chance),getConfidence(pronos.double_chance));
 html+=pred("Over / Under",getValue(pronos.over_under),getConfidence(pronos.over_under));
 html+=pred("Les 2 équipes marquent (BTTS)",getValue(pronos.btts),getConfidence(pronos.btts));
 html+=pred("Winner",getValue(pronos.winner),getConfidence(pronos.winner));
-html+='</div>';
-if(analysis.score_range){html+='<div class="v10-section"><h4>📊 Fourchette de score</h4><p>'+escapeHtml(analysis.score_range)+'</p></div>';}
-html+=info("Lecture Lens / Équipe A",analyse.forces_A)+info("Lecture PSG / Équipe B",analyse.forces_B)+info("Facteur clé",analyse.facteur_cle)+'</div>';
+html+='</div></div>';
 
-html+='<div class="result-zone"><div class="zone-head"><div class="zone-title pro">Analyse PRO</div><div class="zone-note">Buteurs, score exact, combiné</div></div><div class="pro-grid">';
-html+=proBlock("Score exact",'<p><b style="color:var(--gold)">'+escapeHtml(getValue(pronos.score_exact))+'</b><br><small>Confiance : '+escapeHtml(getConfidence(pronos.score_exact))+'%</small></p>');
-html+=proBlock("Combiné prudent",'<p>'+escapeHtml(getValue(combined)||"Double chance + ligne de buts selon le contexte du match.")+'</p>');
-html+=proBlock("Buteurs potentiels",renderScorersText(data.buteurs_potentiels));
-html+=proBlock("Tip doublé",'<p>'+escapeHtml(getValue(doubleTip)||"Lecture avancée disponible en PRO selon les profils offensifs.")+'</p>');
-html+='</div></div><div class="info-box responsible">⚠️ Aucun pari garanti. Estimations informatives uniquement.</div></div></div>';
+html+='<div class="result-zone"><div class="zone-head"><div class="zone-title pro">PRO · Intelligence avancée</div><div class="zone-note">Scénarios, score, menaces, combiné</div></div><div class="pro-grid">';
+html+=proBlock("Score exact central",'<p><b style="color:var(--gold)">'+escapeHtml(getValue(pronos.score_exact))+'</b><br><small>Scénario parmi plusieurs · confiance '+escapeHtml(getConfidence(pronos.score_exact))+'%</small></p>');
+html+=proBlock("Combiné prudent",'<p>'+escapeHtml(getValue(combined)||"Non disponible")+'</p>');
+html+=proBlock("Menaces offensives",miThreats(threats));
+html+=proBlock("Tip doublé",'<p>'+escapeHtml(getValue(doubleTip)||"À éviter tant que les compositions officielles ne sont pas confirmées.")+'</p>');
+html+='</div>';
+
+html+='<div class="mi-track"><strong>📊 AI Track Record</strong><div class="v10-muted">Cette analyse peut être enregistrée avant le match puis comparée au résultat final : 1X2, double chance, BTTS, Over/Under, score et scénario. Le suivi historique détaillé arrivera dans la prochaine étape.</div></div>';
+html+='</div>';
+
+html+='<div class="v10-section"><h4>Résumé IA</h4><p>'+escapeHtml(data.verdict||pick.raison||"")+'</p></div>'+
+'<div class="info-box responsible">⚠️ Aucun pari garanti. Estimations informatives uniquement.</div></div></div>';
 result.innerHTML=html;result.classList.add("show");bindPageButtons();result.scrollIntoView({behavior:"smooth",block:"start"});
 }
 function matchButton(match,mode){var score="À venir";if(mode==="result"){var hg=match.hg===null||match.hg===undefined?"?":match.hg,ag=match.ag===null||match.ag===undefined?"?":match.ag;score=escapeHtml(hg+"-"+ag);}var label=mode==="result"?"Final":escapeHtml(match.group||match.round||"");return '<button class="match-btn" type="button" data-match="'+escapeHtml(match.home+" vs "+match.away)+'"><div class="match-time"><b>'+score+'</b><span>'+escapeHtml(match.date||"")+'</span></div><div class="match-teams"><div>'+escapeHtml(match.home)+'</div><div>'+escapeHtml(match.away)+'</div></div><div class="odd"><b>'+label+'</b><span>'+escapeHtml(match.group||match.round||"")+'</span></div></button>';}
