@@ -1,106 +1,141 @@
+// api/verify-license.js
+// Vérifie une clé de licence Gumroad côté serveur Vercel.
+// La variable GUMROAD_PRODUCT_ID doit être définie dans Vercel.
+
 module.exports = async function handler(req, res) {
-  res.setHeader("Cache-Control", "no-store");
+  // Autorise le test de la route directement dans le navigateur.
+  if (req.method === "GET") {
+    return res.status(200).json({
+      ok: true,
+      route: "/api/verify-license",
+      message: "Route de vérification Gumroad active."
+    });
+  }
 
   if (req.method !== "POST") {
-    res.setHeader("Allow", "POST");
-    return res.status(405).json({ valid: false, message: "Méthode non autorisée." });
+    res.setHeader("Allow", "GET, POST");
+    return res.status(405).json({
+      ok: false,
+      error: "Méthode non autorisée."
+    });
   }
 
   const productId = process.env.GUMROAD_PRODUCT_ID;
 
   if (!productId) {
-    return res.status(503).json({
-      valid: false,
-      message: "Activation PRO non configurée : GUMROAD_PRODUCT_ID absent dans Vercel."
+    return res.status(500).json({
+      ok: false,
+      error: "GUMROAD_PRODUCT_ID absente dans Vercel."
     });
   }
 
-  const body = req.body || {};
-  const email = String(body.email || "").trim().toLowerCase();
-  const licenseKey = String(body.licenseKey || "").trim();
+  let body = req.body;
 
-  if (!email || !licenseKey) {
-    return res.status(400).json({
-      valid: false,
-      message: "E-mail d’achat et clé de licence requis."
-    });
+  // Vercel peut parfois transmettre le corps sous forme de chaîne.
+  if (typeof body === "string") {
+    try {
+      body = JSON.parse(body);
+    } catch (error) {
+      return res.status(400).json({
+        ok: false,
+        error: "Corps JSON invalide."
+      });
+    }
   }
 
-  if (email.length > 254 || licenseKey.length > 200) {
+  const licenseKey =
+    body && typeof body.license_key === "string"
+      ? body.license_key.trim()
+      : "";
+
+  if (!licenseKey) {
     return res.status(400).json({
-      valid: false,
-      message: "Informations de licence invalides."
+      ok: false,
+      error: "Clé de licence manquante."
     });
   }
 
   try {
-    const form = new URLSearchParams();
-    form.set("product_id", productId);
-    form.set("license_key", licenseKey);
-    form.set("increment_uses_count", "false");
+    const gumroadBody = new URLSearchParams();
+    gumroadBody.set("product_id", productId);
+    gumroadBody.set("license_key", licenseKey);
+    gumroadBody.set("increment_uses_count", "false");
 
-    const response = await fetch("https://api.gumroad.com/v2/licenses/verify", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
-      },
-      body: form.toString()
-    });
+    const gumroadResponse = await fetch(
+      "https://api.gumroad.com/v2/licenses/verify",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: gumroadBody.toString()
+      }
+    );
 
-    let data = null;
+    const rawText = await gumroadResponse.text();
+
+    let gumroadData;
 
     try {
-      data = await response.json();
-    } catch (_) {
-      data = null;
-    }
-
-    if (!response.ok || !data || data.success !== true) {
-      return res.status(401).json({
-        valid: false,
-        message: data && data.message
-          ? String(data.message)
-          : "Clé de licence Gumroad invalide."
+      gumroadData = JSON.parse(rawText);
+    } catch (error) {
+      return res.status(502).json({
+        ok: false,
+        error: "Réponse Gumroad illisible.",
+        status: gumroadResponse.status
       });
     }
 
-    const purchase = data.purchase || {};
-    const purchaseEmail = String(purchase.email || "").trim().toLowerCase();
-
-    if (!purchaseEmail || purchaseEmail !== email) {
-      return res.status(401).json({
-        valid: false,
-        message: "Cette clé ne correspond pas à cet e-mail d’achat."
+    if (!gumroadResponse.ok) {
+      return res.status(502).json({
+        ok: false,
+        error:
+          gumroadData.message ||
+          gumroadData.error ||
+          "Erreur de communication avec Gumroad.",
+        status: gumroadResponse.status
       });
     }
 
-    if (purchase.refunded === true) {
-      return res.status(403).json({
-        valid: false,
-        message: "Cette commande a été remboursée."
+    if (gumroadData.success === true) {
+      const purchase = gumroadData.purchase || {};
+
+      // Refuse une licence remboursée, contestée ou annulée.
+      if (
+        purchase.refunded === true ||
+        purchase.disputed === true ||
+        purchase.chargeback_date
+      ) {
+        return res.status(403).json({
+          ok: false,
+          valid: false,
+          error: "Cette licence n'est plus active."
+        });
+      }
+
+      return res.status(200).json({
+        ok: true,
+        valid: true,
+        message: "Licence PRO valide.",
+        email: purchase.email || "",
+        product_name: purchase.product_name || "",
+        uses: purchase.uses || 0
       });
     }
 
-    if (purchase.chargebacked === true) {
-      return res.status(403).json({
-        valid: false,
-        message: "Cette commande n’est plus éligible à l’accès PRO."
-      });
-    }
-
-    return res.status(200).json({
-      valid: true,
-      productName: purchase.product_name || "Pronostics IA Pro",
-      email: purchaseEmail,
-      purchaseId: purchase.id || null,
-      orderNumber: purchase.order_number || null
+    return res.status(401).json({
+      ok: false,
+      valid: false,
+      error:
+        gumroadData.message ||
+        "Clé invalide ou ne correspondant pas à ce produit."
     });
   } catch (error) {
-    console.error("Gumroad license verification failed:", error && error.message ? error.message : error);
+    console.error("Gumroad verification error:", error);
 
-    return res.status(502).json({
-      valid: false,
-      message: "Impossible de joindre Gumroad pour le moment. Réessaie plus tard."
+    return res.status(500).json({
+      ok: false,
+      error: "Impossible de vérifier la licence pour le moment."
     });
   }
 };

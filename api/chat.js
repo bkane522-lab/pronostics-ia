@@ -1,4 +1,4 @@
-const VERSION = "V9.9_TDC_LENS_PSG";
+const VERSION = "V10_HYBRID_CONTEXT";
 
 const { LEAGUES, DEFAULT_LEAGUE, findLeague } = require("./leagues");
 const {
@@ -396,31 +396,176 @@ function offensiveCandidate(k) {
 
 // ------------------------------- Prédiction ---------------------------------
 
-function makePrediction(a, b, sa, sb, ka, kb) {
-  const total = sa.played + sb.played;
 
-  if (total < 2) {
+function contextualPrediction(a, b, ka, kb, ctx) {
+  // Ce moteur n'est utilisé que lorsque les statistiques dynamiques sont
+  // insuffisantes. Il exploite les données structurées du guide comme
+  // contexte secondaire et diminue volontairement la confiance.
+  if (!ka && !kb) {
     return {
-      confidence: 35,
+      confidence: 30,
+      reliability: 25,
+      mode: "données insuffisantes",
       result: "À éviter",
       doubleChance: "Pas de choix clair",
       overUnder: "À éviter",
       btts: "À éviter",
-      score: "À éviter",
+      score: "N/D",
+      scoreRange: "N/D",
       winner: "Données insuffisantes",
       best: "Aucun pari fort conseillé",
       risk: "Risque élevé",
       confResult: 20,
-      confDouble: 25,
-      confOver: 25,
+      confDouble: 20,
+      confOver: 20,
       confBtts: 20,
       confScore: 10,
-      combine: "Pas assez de données",
+      combine: "À éviter",
       confCombine: 10,
-      verdict: (ka || kb)
-        ? "Données dynamiques encore trop limitées. La base de saison Lens/PSG enrichit le contexte, mais l’app refuse de transformer ce seul contexte en pari supposé fiable."
-        : "Données dynamiques trop limitées. Le contexte disponible ne suffit pas à justifier un pari."
+      scenario: "Pas assez d'informations fiables pour établir un scénario.",
+      tactical: "Données tactiques insuffisantes.",
+      keyFactors: [],
+      verdict: "Données insuffisantes : aucune lecture exploitable."
     };
+  }
+
+  const aPower = editorialPower(ka);
+  const bPower = editorialPower(kb);
+
+  // Petit bonus terrain pour l'équipe A, sauf terrain neutre. Pour le Trophée
+  // des Champions Lens-PSG à Bollaert, Lens est bien l'équipe hôte.
+  const venueBonus = 1.0;
+  const rawDiff = (aPower + venueBonus) - bPower;
+
+  // Convertit l'écart éditorial en probabilités modérées.
+  // On évite volontairement les très hautes probabilités sans données récentes.
+  let pA = 34 + rawDiff * 2.5;
+  let pB = 34 - rawDiff * 2.5;
+  let pD = 32;
+
+  pA = Math.max(18, Math.min(58, pA));
+  pB = Math.max(18, Math.min(58, pB));
+  const total = pA + pB + pD;
+  pA = Math.round((pA / total) * 100);
+  pB = Math.round((pB / total) * 100);
+  pD = 100 - pA - pB;
+
+  let result = "X";
+  let winner = "Match serré";
+  let doubleChance = "1X";
+  let confResult = Math.max(pA, pB, pD);
+
+  if (pA >= pB && pA >= pD) {
+    result = "1";
+    winner = a;
+    doubleChance = "1X";
+  } else if (pB >= pA && pB >= pD) {
+    result = "2";
+    winner = b;
+    doubleChance = "X2";
+  } else {
+    result = "X";
+    winner = "Match nul";
+    doubleChance = pA >= pB ? "1X" : "X2";
+  }
+
+  const attackA = ka && ka.strengths ? strengthValue(ka.strengths.attack) : 3;
+  const attackB = kb && kb.strengths ? strengthValue(kb.strengths.attack) : 3;
+  const defenseA = ka && ka.strengths ? strengthValue(ka.strengths.defense) : 3;
+  const defenseB = kb && kb.strengths ? strengthValue(kb.strengths.defense) : 3;
+
+  const attackMean = (attackA + attackB) / 2;
+  const defenseMean = (defenseA + defenseB) / 2;
+
+  let overUnder = "Under 4.5";
+  let confOver = 51;
+  if (attackMean >= 4.3) {
+    overUnder = "Over 1.5";
+    confOver = 56;
+  } else if (defenseMean >= 4.2) {
+    overUnder = "Under 3.5";
+    confOver = 54;
+  }
+
+  let btts = "À éviter";
+  let confBtts = 42;
+  if (attackA >= 4 && attackB >= 4) {
+    btts = "Oui possible";
+    confBtts = 49;
+  } else if (defenseA >= 4.4 || defenseB >= 4.4) {
+    btts = "Non possible";
+    confBtts = 47;
+  }
+
+  const favIsA = pA >= pB;
+  const fav = favIsA ? a : b;
+  const dog = favIsA ? b : a;
+
+  let score = favIsA ? "2-1" : "1-2";
+  let scoreRange = fav + " 1–3 buts · " + dog + " 0–2 buts";
+  if (Math.abs(pA - pB) < 8) {
+    score = "1-1";
+    scoreRange = "Match serré · 1 à 3 buts au total";
+  }
+
+  const keyFactors = [];
+  if (ka) {
+    keyFactors.push(a + " : " + (ka.formation || "formation N/D") + ", objectif " + (ka.objective || "N/D") + ".");
+  }
+  if (kb) {
+    keyFactors.push(b + " : " + (kb.formation || "formation N/D") + ", objectif " + (kb.objective || "N/D") + ".");
+  }
+  if (ctx && ctx.league && ctx.league.slug === "trophee-des-champions") {
+    keyFactors.push("Finale sur un match : variance plus élevée qu'en championnat.");
+    keyFactors.push("Lens joue à Bollaert : avantage terrain intégré mais limité.");
+  }
+
+  const tactical = (ka && kb)
+    ? (a + " en " + (ka.formation || "système non renseigné") +
+       " face à " + b + " en " + (kb.formation || "système non renseigné") +
+       ". La projection compare surtout structure, objectifs de saison et qualité éditoriale des lignes.")
+    : "Lecture tactique partielle : une seule équipe possède un profil structuré.";
+
+  const scenario = fav + " part avec un avantage contextuel, mais la confiance reste modérée faute de forme récente 2026-2027. " +
+    dog + " conserve une vraie capacité à faire basculer le match, surtout sur phases de transition et coups de pied arrêtés.";
+
+  // Fiabilité séparée de la probabilité du résultat : c'est essentiel.
+  const reliability = 52;
+
+  return {
+    confidence: reliability,
+    reliability,
+    mode: "contextuel / pré-saison",
+    probabilities: { home: pA, draw: pD, away: pB },
+    result,
+    doubleChance,
+    overUnder,
+    btts,
+    score,
+    scoreRange,
+    winner,
+    best: "Double chance " + doubleChance,
+    risk: "Risque élevé à modéré",
+    confResult: Math.min(58, confResult),
+    confDouble: Math.min(66, Math.max(pA + pD, pB + pD)),
+    confOver,
+    confBtts,
+    confScore: 22,
+    combine: "Double chance " + doubleChance + " + " + overUnder,
+    confCombine: 34,
+    scenario,
+    tactical,
+    keyFactors,
+    verdict: "Lecture contextuelle : avantage " + fav +
+      ", mais confiance limitée car la saison 2026-2027 n'offre pas encore assez de données dynamiques."
+  };
+}
+
+function makePrediction(a, b, sa, sb, ka, kb, ctx) {
+  const total = sa.played + sb.played;
+
+  if (total < 2) {
+    return contextualPrediction(a, b, ka, kb, ctx);
   }
 
   // Statistiques dynamiques = base principale.
@@ -624,7 +769,7 @@ function upcomingResponse(a, b, ctx) {
   const sb = stats(b, ctx);
   const ka = knowledgeForTeam(a, ctx);
   const kb = knowledgeForTeam(b, ctx);
-  const p = makePrediction(a, b, sa, sb, ka, kb);
+  const p = makePrediction(a, b, sa, sb, ka, kb, ctx);
   const classement = tableText(group, ctx);
 
   const editorialContext = ka || kb
@@ -692,7 +837,16 @@ function upcomingResponse(a, b, ctx) {
     },
 
     analysis: {
-      methodology: "Statistiques dynamiques prioritaires + contexte Ligue 1 2026-2027 en complément.",
+      methodology: p.mode === "contextuel / pré-saison"
+        ? "Mode contextuel : base Ligue 1 2026-2027 + comparaison tactique, sans inventer de forme récente."
+        : "Statistiques dynamiques prioritaires + contexte Ligue 1 2026-2027 en complément.",
+      mode: p.mode || "dynamique",
+      reliability: p.reliability || p.confidence,
+      probabilities: p.probabilities || null,
+      score_range: p.scoreRange || null,
+      scenario: p.scenario || null,
+      tactical: p.tactical || null,
+      key_factors: p.keyFactors || [],
       editorial_context_weight: "faible et plafonné",
       source_note: "Les objectifs, formations de référence, forces et projections de classement proviennent d’une source éditoriale secondaire et peuvent évoluer."
     },
