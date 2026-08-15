@@ -20,15 +20,6 @@ module.exports = async function handler(req, res) {
     });
   }
 
-  const productId = process.env.GUMROAD_PRODUCT_ID;
-
-  if (!productId) {
-    return res.status(500).json({
-      ok: false,
-      error: "GUMROAD_PRODUCT_ID absente dans Vercel."
-    });
-  }
-
   let body = req.body;
 
   // Vercel peut parfois transmettre le corps sous forme de chaîne.
@@ -46,7 +37,9 @@ module.exports = async function handler(req, res) {
   const licenseKey =
     body && typeof body.license_key === "string"
       ? body.license_key.trim()
-      : "";
+      : body && typeof body.licenseKey === "string"
+        ? body.licenseKey.trim()
+        : "";
 
   const email =
     body && typeof body.email === "string"
@@ -77,6 +70,16 @@ module.exports = async function handler(req, res) {
       test_mode: true,
       message: "Mode PRO propriétaire activé.",
       email
+    });
+  }
+
+  // Pour les licences clients Gumroad seulement.
+  const productId = process.env.GUMROAD_PRODUCT_ID;
+
+  if (!productId) {
+    return res.status(500).json({
+      ok: false,
+      error: "GUMROAD_PRODUCT_ID absente dans Vercel."
     });
   }
 
