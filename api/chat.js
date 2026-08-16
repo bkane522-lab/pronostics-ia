@@ -1,4 +1,4 @@
-const VERSION = "V14_AI_VALUE_LAB";
+const VERSION = "V15_TWIN_LINEUP_TRACK";
 
 const { LEAGUES, DEFAULT_LEAGUE, findLeague } = require("./leagues");
 const {
@@ -793,6 +793,18 @@ function contextualPrediction(a, b, ka, kb, ctx) {
       formula: "edge = probabilité IA × cote bookmaker - 1",
       note: "Compare une cote bookmaker saisie par l’utilisateur à la cote théorique IA sans marge."
     },
+    lineup_impact: {
+      A: {
+        star: teamFaceName(ka, "star"),
+        cadre: teamFaceName(ka, "cadre"),
+        watch: ka && ka.watch ? ka.watch.name : null
+      },
+      B: {
+        star: teamFaceName(kb, "star"),
+        cadre: teamFaceName(kb, "cadre"),
+        watch: kb && kb.watch ? kb.watch.name : null
+      }
+    },
     ai_reasoning_cards: [
       {
         title: "Pourquoi " + fav + " ?",
@@ -1114,6 +1126,7 @@ function upcomingResponse(a, b, ctx) {
       confidence_matrix: p.confidence_matrix || null,
       fair_odds: p.fair_odds || null,
       value_lab: p.value_lab || null,
+      lineup_impact: p.lineup_impact || null,
       ai_reasoning_cards: p.ai_reasoning_cards || [],
       editorial_context_weight: "faible et plafonné",
       source_note: "Les objectifs, formations de référence, forces et projections de classement proviennent d’une source éditoriale secondaire et peuvent évoluer."
