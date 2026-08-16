@@ -1,5 +1,5 @@
-const CACHE_NAME="pronostics-ia-v15-2";
-const APP_SHELL=["/","/index.html","/manifest.webmanifest","/logo-pronostics-ia-pro.png","/icons/icon-192.png","/icons/icon-512.png","/icons/maskable-512.png"];
+const CACHE_NAME="pronostics-ia-v16";
+const APP_SHELL=["/","/index.html","/manifest.webmanifest","/logo-pronostics-ia-pro.png","/logo-mark.png","/logo-pronostics-ia-pro.png","/icons/icon-192.png","/icons/icon-512.png","/icons/maskable-512.png"];
 self.addEventListener("install",e=>{e.waitUntil(caches.open(CACHE_NAME).then(c=>Promise.all(APP_SHELL.map(u=>c.add(u).catch(()=>null)))).then(()=>self.skipWaiting()))});
 self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE_NAME).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 self.addEventListener("fetch",e=>{

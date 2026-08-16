@@ -2,7 +2,7 @@
   "id": "/",
   "name": "Pronostics IA Pro",
   "short_name": "Pronostics IA Pro",
-  "description": "AI Match Intelligence — Pulse, Value Lab, Digital Twin et Track Record.",
+  "description": "AI Match Intelligence — analyses, tactique, value, simulation et suivi football.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -12,8 +12,8 @@
     "minimal-ui"
   ],
   "orientation": "portrait-primary",
-  "background_color": "#030914",
-  "theme_color": "#071322",
+  "background_color": "#003114",
+  "theme_color": "#003114",
   "lang": "fr-FR",
   "categories": [
     "sports",

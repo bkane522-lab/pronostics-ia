@@ -267,14 +267,223 @@ background-size:20% 10%,20% 10%,100% 100%;border:1px solid rgba(24,245,166,.18);
 .ux-proline b{font-size:9px;color:var(--gold)}.ux-proline button{border:0;background:none;color:#fff;font-size:9px;font-weight:900;text-decoration:underline}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 
+
+/* ===== V16 PREMIUM HOME ===== */
+body{background:
+radial-gradient(circle at 50% -10%,rgba(24,245,166,.18),transparent 34%),
+linear-gradient(180deg,#03140d 0%,#06170f 22%,#04121a 62%,#030914 100%)}
+
+.age-strip{
+  position:sticky;top:0;z-index:80;margin:-18px -14px 12px;padding:8px 12px;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  background:rgba(2,8,12,.96);border-bottom:1px solid rgba(255,255,255,.08);
+  color:#e6ebf2;font-size:10px;font-weight:800;letter-spacing:.2px;text-align:center
+}
+.age-strip .age-badge{display:inline-grid;place-items:center;min-width:25px;height:25px;border-radius:999px;border:1px solid rgba(255,255,255,.45);font-size:9px}
+.header.v16-header{padding:7px 0 4px;margin-bottom:10px}
+.v16-brand{display:flex;align-items:center;gap:10px;min-width:0}
+.v16-mark{width:58px;height:58px;border-radius:50%;object-fit:cover;border:1px solid rgba(24,245,166,.35);box-shadow:0 0 26px rgba(24,245,166,.16)}
+.v16-wordmark{line-height:1.02;min-width:0}
+.v16-wordmark strong{display:block;font-size:18px;letter-spacing:2.2px;white-space:nowrap}
+.v16-wordmark span{display:block;color:var(--green);font-size:17px;font-weight:950;letter-spacing:2.2px}
+.v16-main-tabs{margin:8px 0 12px}
+.v16-main-tabs .tab{padding:10px 14px;border-radius:18px;background:rgba(255,255,255,.035)}
+.v16-main-tabs .tab.active{box-shadow:0 0 20px rgba(24,245,166,.12)}
+#leagueTabs.v16-leagues{padding-bottom:4px;margin-bottom:12px!important}
+#leagueTabs.v16-leagues .tab{border-radius:18px;background:rgba(255,255,255,.035)}
+#leagueTabs.v16-leagues .tab.active{background:linear-gradient(135deg,var(--green),var(--green2));color:#04120d}
+
+.v16-pro-strip{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:11px 13px;margin-bottom:12px;border-radius:18px;
+  background:linear-gradient(135deg,rgba(24,245,166,.075),rgba(245,197,66,.045));
+  border:1px solid rgba(24,245,166,.18)
+}
+.v16-pro-strip-left{display:flex;align-items:center;gap:9px}
+.v16-pro-icon{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:rgba(245,197,66,.09);border:1px solid rgba(245,197,66,.14)}
+.v16-pro-strip b{display:block;font-size:11px;color:#fff}
+.v16-pro-strip span{display:block;font-size:9px;color:var(--muted);margin-top:1px}
+.v16-pro-pill{padding:7px 10px;border-radius:999px;font-size:9px;font-weight:950;color:var(--green);border:1px solid rgba(24,245,166,.24);background:rgba(24,245,166,.07)}
+
+.v16-hero{
+  position:relative;overflow:hidden;margin-bottom:13px;padding:15px;border-radius:25px;
+  border:1px solid rgba(24,245,166,.24);
+  background:
+    radial-gradient(circle at 85% 8%,rgba(245,197,66,.10),transparent 28%),
+    radial-gradient(circle at 10% 92%,rgba(24,245,166,.10),transparent 30%),
+    linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.022));
+  box-shadow:0 20px 48px rgba(0,0,0,.28)
+}
+.v16-hero:after{content:"";position:absolute;inset:auto 8% 0;height:1px;background:linear-gradient(90deg,transparent,var(--green),transparent);box-shadow:0 0 18px rgba(24,245,166,.6)}
+.v16-hero-title{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+.v16-hero-title .label{margin:0}
+.v16-final-pill{padding:6px 9px;border-radius:10px;border:1px solid rgba(24,245,166,.28);color:var(--green);font-size:9px;font-weight:900}
+.v16-teams{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;text-align:center}
+.v16-team-badge{
+  width:72px;height:72px;margin:0 auto 7px;border-radius:50%;
+  display:grid;place-items:center;font-weight:950;font-size:20px;letter-spacing:-.5px;
+  color:#fff;background:radial-gradient(circle,rgba(255,255,255,.10),rgba(255,255,255,.035));
+  border:1px solid rgba(255,255,255,.12);box-shadow:inset 0 0 22px rgba(255,255,255,.03)
+}
+.v16-team-badge.away{border-color:rgba(245,197,66,.20)}
+.v16-team-name{font-size:14px;font-weight:950;letter-spacing:1px;text-transform:uppercase;line-height:1.1}
+.v16-vs{width:58px;height:58px;border-radius:17px;display:grid;place-items:center;color:var(--green);font-size:24px;font-weight:950;border:1px solid rgba(24,245,166,.30);background:rgba(24,245,166,.06)}
+.v16-meta-row{
+  margin-top:14px;padding:10px 11px;border-radius:14px;display:flex;justify-content:center;gap:8px;flex-wrap:wrap;
+  background:rgba(0,0,0,.17);border:1px solid rgba(255,255,255,.06);color:var(--muted);font-size:10px;font-weight:700
+}
+.v16-analysis-row{
+  margin-top:10px;padding:11px 12px;border-radius:16px;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;
+  border:1px solid rgba(24,245,166,.20);background:rgba(2,10,12,.34)
+}
+.v16-analysis-row small{display:block;color:var(--muted);font-weight:900;letter-spacing:1px;text-transform:uppercase;font-size:9px}
+.v16-analysis-row b{display:block;color:var(--green);font-size:21px;margin-top:1px}
+.v16-analysis-row .action{padding:11px 13px}
+
+.v16-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:12px}
+.v16-kpi{padding:10px 5px;border-radius:15px;text-align:center;background:rgba(255,255,255,.028);border:1px solid rgba(255,255,255,.065)}
+.v16-kpi b{display:block;font-size:16px;color:#fff}
+.v16-kpi span{display:block;font-size:8px;color:var(--muted);margin-top:2px}
+.v16-kpi.signal b{color:var(--green)}
+
+.v16-section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0 8px}
+.v16-section-head h2{margin:0;font-size:17px;letter-spacing:1.5px;text-transform:uppercase}
+.v16-section-head button{border:0;background:none;color:var(--muted);font-size:10px}
+.v16-horizontal{display:flex;gap:9px;overflow-x:auto;padding-bottom:5px;scrollbar-width:none}
+.v16-horizontal::-webkit-scrollbar{display:none}
+.v16-horizontal .match{min-width:78%;margin-bottom:0}
+.v16-horizontal .match:last-child{margin-right:2px}
+
+.v16-search{margin-top:13px}
+.v16-search .search-title{font-size:13px}
+.v16-search .input-row input{background:rgba(255,255,255,.035)}
+
+.v16-age-note{
+  margin:12px 0 2px;text-align:center;color:#6f7d8e;font-size:9px;line-height:1.45
+}
+
+/* Splash / 18+ */
+#v16Splash{
+  position:fixed;inset:0;z-index:20000;display:flex;align-items:center;justify-content:center;padding:22px;
+  background:
+    radial-gradient(circle at 50% 25%,rgba(24,245,166,.16),transparent 30%),
+    linear-gradient(155deg,#002e16 0%,#00491d 34%,#003114 70%,#01140a 100%);
+  transition:opacity .35s ease,visibility .35s ease
+}
+#v16Splash.hide{opacity:0;visibility:hidden;pointer-events:none}
+.v16-splash-card{width:min(420px,100%);text-align:center}
+.v16-splash-warning{margin-bottom:24px;padding:9px 12px;border-radius:14px;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.10);font-size:10px;color:#eef2f6;line-height:1.45}
+.v16-splash-logo{width:min(330px,84vw);height:auto;display:block;margin:0 auto 26px;filter:drop-shadow(0 12px 32px rgba(0,0,0,.34))}
+.v16-splash-18{font-size:12px;font-weight:900;letter-spacing:1px;color:#fff}
+.v16-splash-copy{margin:6px auto 16px;max-width:330px;color:rgba(255,255,255,.76);font-size:10px;line-height:1.5}
+.v16-splash-btn{display:none;border:0;border-radius:14px;padding:11px 15px;background:#fff;color:#062010;font-weight:950}
+.v16-splash-btn.show{display:inline-block}
+.v16-splash-loader{width:32px;height:4px;margin:14px auto 0;border-radius:99px;background:rgba(255,255,255,.15);overflow:hidden}
+.v16-splash-loader:after{content:"";display:block;width:55%;height:100%;border-radius:99px;background:var(--green);animation:v16load 1.2s infinite ease-in-out}
+@keyframes v16load{0%{transform:translateX(-100%)}100%{transform:translateX(190%)}}
+
+@media(max-width:420px){
+  .v16-mark{width:52px;height:52px}
+  .v16-wordmark strong{font-size:16px}
+  .v16-wordmark span{font-size:15px}
+  .v16-team-badge{width:64px;height:64px;font-size:18px}
+  .v16-horizontal .match{min-width:84%}
+}
+
 </style>
 </head>
 <body>
+
+<div id="v16Splash" aria-label="Écran de démarrage Pronostics IA Pro">
+  <div class="v16-splash-card">
+    <div class="v16-splash-warning"><strong>18+ · INTERDIT AUX MOINS DE 18 ANS</strong><br>Les jeux d’argent comportent des risques. Pronostics IA Pro fournit des estimations et ne prend pas de paris.</div>
+    <img class="v16-splash-logo" src="/logo-pronostics-ia-pro.png" alt="Pronostics IA Pro">
+    <div class="v16-splash-18">PRONOSTICS IA PRO</div>
+    <div class="v16-splash-copy">Analyse football assistée par IA · données · scénarios · value · suivi.</div>
+    <button id="v16AgeBtn" class="v16-splash-btn" type="button">J’ai 18 ans ou plus</button>
+    <div class="v16-splash-loader" id="v16SplashLoader"></div>
+  </div>
+</div>
+
 <div class="app">
-<header class="header"><button class="btn-icon" type="button" data-page="home">☰</button><div class="logo-box"><div class="logo">⚽</div><div class="title"><strong>PRONOSTICS</strong><span>IA PRO</span></div></div><button class="btn-icon" type="button" id="notifyBtn" aria-label="Notifications">🔔</button></header><div id="pwaInstall" class="pwa-install" role="region" aria-label="Installer l’application"><div class="pwa-install-copy"><b>📲 Installer Pronostics IA Pro</b><span>Accès plein écran depuis ton téléphone.</span></div><button id="pwaInstallBtn" class="pwa-install-btn" type="button">Installer</button></div><div id="pwaStatus" class="pwa-status"></div>
-<div class="tabs"><button class="tab active" type="button" data-page="home">🎯 Pronostics</button><button class="tab" type="button" data-page="matchs">⚽ Matchs</button><button class="tab" type="button" data-page="live">📡 Live</button><button class="tab pro-tab" type="button" data-page="vip">👑 PRO</button></div>
-<div class="tabs" id="leagueTabs" style="margin-bottom:10px"></div>
-<main id="home" class="page active"><div id="quotaBox" class="quota-card"><div class="quota-top"><div class="quota-title">🎯 Analyses gratuites avec IA</div><div id="quotaCount" class="quota-count">0/3</div></div><div class="quota-bar"><div id="quotaFill" class="quota-fill"></div></div><div id="quotaMessage" class="quota-message">Chargement du compteur...</div><div class="quota-actions"><button class="action gold" type="button" data-page="vip">Voir PRO →</button></div></div><section class="card"><div class="label" id="heroLeagueLabel">🏆 Chargement du championnat...</div><div class="hero-match"><div><div class="flag">⚽</div><div class="team-name" id="heroHome">Chargement</div><div class="group" id="heroGroupA">...</div></div><div class="vs">VS</div><div><div class="flag">⚽</div><div class="team-name" id="heroAway">...</div><div class="group" id="heroGroupB">...</div></div></div><div class="meta" id="heroMeta">Mise à jour des matchs...</div><div class="confidence"><div><small>Analyse IA</small><b>Variable</b></div><button class="action" type="button" id="heroBtn">Voir l'analyse →</button></div></section><section class="stats"><div class="stat"><b id="statData">DATA</b><span>Données</span></div><div class="stat"><b id="statResults">0</b><span>Terminés</span></div><div class="stat"><b id="statUpcoming">0</b><span>À venir</span></div><div class="stat"><b>IA</b><span>Dynamique</span></div></section><h2 class="section-title">Prochains matchs</h2><div class="match-list" id="homeUpcomingList"></div><h2 class="section-title">Derniers résultats</h2><div class="match-list" id="homeRecentList"></div><h2 class="section-title">Accès rapide</h2><div class="grid"><button class="tile" type="button" data-page="matchs"><div class="icon">⚽</div><h3>Matchs</h3><p>Voir les matchs à venir et terminés.</p></button><button class="tile" type="button" data-page="live"><div class="icon">📡</div><h3>Live</h3><p>Page de suivi en direct.</p></button><button class="tile pro-tile" type="button" data-page="vip"><div class="icon">👑</div><h3>PRO</h3><p>Analyses avancées, illimitées et contenu premium.</p></button><button class="tile" type="button" data-page="groups"><div class="icon">🏆</div><h3>Groupes</h3><p>Classements dynamiques.</p></button></div><section class="search"><div class="search-title">🤖 Assistant Pronostics IA</div><div class="input-row"><input id="matchInput" type="text" placeholder="Ex : PSG vs Marseille"><button id="sendBtn" type="button">➤</button></div><div class="samples" id="sampleList"></div><div id="loader" class="loader">Analyse IA en cours...</div><div id="errorBox" class="error"></div></section><section id="result" class="result"></section></main>
+<div class="age-strip"><span class="age-badge">18+</span><span>Interdit aux moins de 18 ans · Les jeux d’argent comportent des risques</span></div>
+<header class="header v16-header">
+  <button class="btn-icon" type="button" data-page="home" aria-label="Menu">☰</button>
+  <div class="v16-brand">
+    <img class="v16-mark" src="/logo-mark.png" alt="Logo Pronostics IA Pro">
+    <div class="v16-wordmark"><strong>PRONOSTICS</strong><span>IA PRO</span></div>
+  </div>
+  <button class="btn-icon" type="button" id="notifyBtn" aria-label="Notifications">🔔</button>
+</header>
+<div id="pwaInstall" class="pwa-install" role="region" aria-label="Installer l’application"><div class="pwa-install-copy"><b>📲 Installer Pronostics IA Pro</b><span>Accès plein écran depuis ton téléphone.</span></div><button id="pwaInstallBtn" class="pwa-install-btn" type="button">Installer</button></div><div id="pwaStatus" class="pwa-status"></div>
+<div class="tabs v16-main-tabs"><button class="tab active" type="button" data-page="home">🎯 Pronostics</button><button class="tab" type="button" data-page="matchs">⚽ Matchs</button><button class="tab" type="button" data-page="live">📡 Live</button><button class="tab pro-tab" type="button" data-page="vip">👑 PRO</button></div>
+<div class="tabs v16-leagues" id="leagueTabs"></div>
+<main id="home" class="page active">
+  <div class="v16-pro-strip" id="v16ProStrip">
+    <div class="v16-pro-strip-left">
+      <div class="v16-pro-icon">👑</div>
+      <div><b id="v16ProTitle">Mode gratuit</b><span id="v16ProText">3 analyses IA par jour</span></div>
+    </div>
+    <div class="v16-pro-pill" id="v16ProPill">FREE</div>
+  </div>
+
+  <div id="quotaBox" class="quota-card" style="display:none">
+    <div class="quota-top"><div class="quota-title">🎯 Analyses gratuites avec IA</div><div id="quotaCount" class="quota-count">0/3</div></div>
+    <div class="quota-bar"><div id="quotaFill" class="quota-fill"></div></div>
+    <div id="quotaMessage" class="quota-message">Chargement du compteur...</div>
+    <div class="quota-actions"><button class="action gold" type="button" data-page="vip">Voir PRO →</button></div>
+  </div>
+
+  <section class="v16-hero">
+    <div class="v16-hero-title">
+      <div class="label" id="heroLeagueLabel">🏆 Chargement...</div>
+      <div class="v16-final-pill">MATCH IA</div>
+    </div>
+    <div class="v16-teams">
+      <div>
+        <div class="v16-team-badge" id="v16HomeBadge">RCL</div>
+        <div class="v16-team-name" id="heroHome">Chargement</div>
+        <div class="group" id="heroGroupA">...</div>
+      </div>
+      <div class="v16-vs">VS</div>
+      <div>
+        <div class="v16-team-badge away" id="v16AwayBadge">PSG</div>
+        <div class="v16-team-name" id="heroAway">...</div>
+        <div class="group" id="heroGroupB">...</div>
+      </div>
+    </div>
+    <div class="v16-meta-row" id="heroMeta">Mise à jour des matchs...</div>
+    <div class="v16-analysis-row">
+      <div><small>Analyse IA</small><b>Variable</b></div>
+      <button class="action" type="button" id="heroBtn">Voir l’analyse →</button>
+    </div>
+  </section>
+
+  <section class="v16-kpis">
+    <div class="v16-kpi signal"><b id="statData">DATA</b><span>Qualité data</span></div>
+    <div class="v16-kpi"><b id="statResults">0</b><span>Terminés</span></div>
+    <div class="v16-kpi"><b id="statUpcoming">0</b><span>À venir</span></div>
+    <div class="v16-kpi signal"><b>IA</b><span>Active</span></div>
+  </section>
+
+  <div class="v16-section-head"><h2>Prochains matchs</h2><button type="button" data-page="matchs">Voir tout →</button></div>
+  <div class="match-list v16-horizontal" id="homeUpcomingList"></div>
+
+  <div class="v16-section-head"><h2>Derniers résultats</h2><button type="button" data-page="matchs">Voir tout →</button></div>
+  <div class="match-list v16-horizontal" id="homeRecentList"></div>
+
+  <section class="search v16-search">
+    <div class="search-title">🤖 Assistant Pronostics IA</div>
+    <div class="input-row"><input id="matchInput" type="text" placeholder="Ex : PSG vs Marseille"><button id="sendBtn" type="button">➤</button></div>
+    <div class="samples" id="sampleList"></div>
+    <div id="loader" class="loader">Analyse IA en cours...</div>
+    <div id="errorBox" class="error"></div>
+  </section>
+
+  <section id="result" class="result"></section>
+
+  <div class="v16-age-note">18+ · Interdit aux moins de 18 ans · Les analyses sont probabilistes et informatives.</div>
+</main>
 <main id="matchs" class="page"><h2 class="section-title">Matchs à venir</h2><div class="match-list" id="matchUpcomingList"></div><h2 class="section-title">Derniers résultats</h2><div class="match-list" id="matchRecentList"></div></main>
 <main id="live" class="page"><section class="card"><div class="label">● Live · Analyse en temps réel</div><div class="info-box">Les données live seront activées au début réel des championnats. Pour l’instant, l’app utilise les résultats et les matchs à venir du championnat sélectionné.</div></section></main>
 <main id="vip" class="page"><section class="card pro-card pro-hero"><div class="label">👑 PRO</div><h1>Pronostics IA Pro — Match Intelligence</h1><p>Entre dans le cockpit d’intelligence du match : rapport de force, scénarios, tactique, menaces offensives et suivi de performance.</p><div class="pro-mini"><button class="pro-feature" type="button" data-scroll="proAnalyses"><b>∞</b><span>Analyses illimitées</span></button><button class="pro-feature" type="button" data-scroll="proButeurs"><b>⚽</b><span>Buteurs</span></button><button class="pro-feature" type="button" data-scroll="proLecture"><b>🧠</b><span>Lecture avancée</span></button></div><div class="plan-grid"><div class="plan"><h3>🎯 Gratuit avec IA</h3><ul><li>Assistant Pronostics IA inclus</li><li>3 analyses IA par jour</li><li>Résultat 1X2</li><li>Double chance</li><li>Over / Under</li><li>BTTS</li><li>Winner</li></ul></div><div class="plan pro"><h3>👑 PRO</h3><ul><li>Analyses IA illimitées</li><li>Buteurs potentiels</li><li>Tip doublé</li><li>Score exact</li><li>Combiné prudent</li><li>Tout le gratuit inclus</li></ul></div></div><button class="action gold" type="button" id="vipBtn">Activer PRO →</button><div class="payment-note">Paiement sécurisé via Gumroad · 9,99 €</div><div id="proStatusPill" class="pro-status-pill">🔒 PRO non activé</div><div id="proDetails" class="pro-details"><div id="proAnalyses" class="detail-card"><h3>∞ Analyses illimitées</h3><p>Le mode gratuit garde l’Assistant Pronostics IA, mais avec 3 analyses par jour. Le mode PRO débloquera l’usage illimité.</p></div><div id="proButeurs" class="detail-card"><h3>⚽ Buteurs & doublé</h3><p>Accès aux lectures avancées autour des buteurs potentiels et du tip doublé quand les données du match le permettent.</p></div><div id="proLecture" class="detail-card"><h3>🧠 Lecture avancée</h3><p>Score exact, combiné prudent et séparation claire entre analyse gratuite et analyse PRO.</p></div></div><div class="pro-note" style="margin-top:12px">Pensé pour mieux lire les matchs, pas pour promettre un résultat.</div><div class="info-box responsible">⚠️ Aucun pari garanti. Estimations informatives uniquement.</div></section></main>
@@ -284,6 +493,72 @@ background-size:20% 10%,20% 10%,100% 100%;border:1px solid rgba(24,245,166,.18);
 <div id="proModal" class="modal" aria-hidden="true"><div class="modal-card"><div class="modal-icon">👑</div><h2>Activer Pronostics IA Pro</h2><p>Achète l’accès PRO sur Gumroad, puis saisis l’e-mail utilisé pour l’achat et ta clé de licence.</p><div class="buy-row"><button class="action gold" type="button" id="buyProBtn">Acheter PRO · 9,99 €</button><button class="action ghost" type="button" id="alreadyBoughtBtn">J’ai déjà acheté</button></div><div class="license-help" style="margin-top:8px;text-align:center">9,99 € · paiement unique · activation par licence Gumroad</div><div id="licenseForm" class="license-form"><label for="licenseEmail">E-mail d’achat</label><input id="licenseEmail" type="email" inputmode="email" autocomplete="email" placeholder="exemple@email.com"><label for="licenseKey">Clé de licence Gumroad</label><input id="licenseKey" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="XXXX-XXXX-XXXX-XXXX"><div class="license-help">La clé se trouve dans l’e-mail / reçu Gumroad envoyé après l’achat.</div><div id="licenseSpinner" class="license-spinner">Vérification sécurisée en cours…</div><div id="licenseError" class="license-error"></div><div id="licenseSuccess" class="license-success"></div><button class="action gold" type="button" id="verifyLicenseBtn">Vérifier et activer PRO</button></div><div class="modal-actions" style="margin-top:10px"><button class="action ghost" type="button" id="modalClose">Fermer</button></div></div></div>
 <div id="infoModal" class="modal" aria-hidden="true"><div class="modal-card"><div id="infoModalIcon" class="modal-icon">🔔</div><h2 id="infoModalTitle">Information</h2><p id="infoModalText">Message.</p><div class="modal-actions"><button class="action gold" type="button" id="infoModalClose">Compris</button></div></div></div>
 <script>
+
+var V16_VERSION="V16_PREMIUM_HOME";
+
+function v16Initials(name){
+  var n=String(name||"").replace(/\bFC\b/gi,"").replace(/\bParis Saint-Germain\b/gi,"PSG").trim();
+  if(!n)return "—";
+  if(n.toUpperCase().indexOf("PSG")>=0)return "PSG";
+  if(n.toLowerCase().indexOf("lens")>=0)return "RCL";
+  var parts=n.split(/\s+/).filter(Boolean);
+  return parts.slice(0,3).map(function(x){return x.charAt(0).toUpperCase()}).join("");
+}
+
+function v16SyncHeroBadges(){
+  var h=document.getElementById("heroHome"),a=document.getElementById("heroAway");
+  var hb=document.getElementById("v16HomeBadge"),ab=document.getElementById("v16AwayBadge");
+  if(hb&&h)hb.textContent=v16Initials(h.textContent);
+  if(ab&&a)ab.textContent=v16Initials(a.textContent);
+}
+
+function v16SyncProStrip(){
+  var isPro = localStorage.getItem("pia_pro")==="1";
+  var title=document.getElementById("v16ProTitle"),text=document.getElementById("v16ProText"),pill=document.getElementById("v16ProPill");
+  if(!title||!text||!pill)return;
+  if(isPro){
+    title.textContent="Mode PRO actif";
+    text.textContent="Analyses IA illimitées";
+    pill.textContent="PRO";
+  }else{
+    title.textContent="Mode gratuit";
+    text.textContent="3 analyses IA par jour";
+    pill.textContent="FREE";
+  }
+}
+
+function v16InitSplash(){
+  var splash=document.getElementById("v16Splash"),btn=document.getElementById("v16AgeBtn"),loader=document.getElementById("v16SplashLoader");
+  if(!splash)return;
+  var accepted=localStorage.getItem("pia_age18_v16")==="1";
+  function closeSplash(){splash.classList.add("hide");setTimeout(function(){if(splash&&splash.parentNode)splash.parentNode.removeChild(splash)},420);}
+  if(accepted){
+    if(btn)btn.classList.remove("show");
+    setTimeout(closeSplash,1150);
+  }else{
+    if(loader)loader.style.display="none";
+    if(btn)btn.classList.add("show");
+    btn&&btn.addEventListener("click",function(){
+      localStorage.setItem("pia_age18_v16","1");
+      closeSplash();
+    });
+  }
+}
+
+function v16ObserveHero(){
+  var h=document.getElementById("heroHome"),a=document.getElementById("heroAway");
+  if(!window.MutationObserver)return;
+  var obs=new MutationObserver(function(){v16SyncHeroBadges();});
+  [h,a].forEach(function(el){if(el)obs.observe(el,{childList:true,characterData:true,subtree:true})});
+}
+
+document.addEventListener("DOMContentLoaded",function(){
+  v16InitSplash();
+  v16SyncProStrip();
+  v16SyncHeroBadges();
+  v16ObserveHero();
+});
+
 var dashboard=null;var currentLeague="ligue1";var FREE_LIMIT=3;var proVerified=false;var GUMROAD_FALLBACK_URL="https://kizombaatlas.gumroad.com/l/pronostics-ia-pro";var gumroadProductUrl=GUMROAD_FALLBACK_URL;var LEAGUES_UI=[{slug:"ligue1",label:"Ligue 1"},{slug:"premier-league",label:"Premier League"},{slug:"liga",label:"Liga"},{slug:"serie-a",label:"Serie A"},{slug:"bundesliga",label:"Bundesliga"},{slug:"champions-league",label:"C1"}];
 function escapeHtml(v){v=String(v===undefined||v===null?"":v);return v.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");}
 function dashboardCacheKey(){return "pia_dashboard_cache_"+currentLeague;}
