@@ -1,9 +1,9 @@
 {
   "id": "/",
-  "name": "Pronostics IA Pro — Digital Twin 2.0",
+  "name": "Pronostics IA Pro",
   "short_name": "Pronostics IA Pro",
   "description": "AI Match Intelligence avec Digital Twin, Lineup Impact, Value Lab et Track Record.",
-  "start_url": "/?source=pwa",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "display_override": [
