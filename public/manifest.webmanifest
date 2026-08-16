@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "Pronostics IA Pro — AI Command Center",
+  "name": "Pronostics IA Pro — Digital Twin 2.0",
   "short_name": "Pronostics IA Pro",
-  "description": "AI Command Center pour l’analyse, la tactique et la simulation football.",
+  "description": "AI Match Intelligence avec Digital Twin, Lineup Impact, Value Lab et Track Record.",
   "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
