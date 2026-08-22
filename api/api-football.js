@@ -64,8 +64,8 @@ function statusToLabel(status) {
 function mapFixtureRow(m) {
   const date = m.utcDate ? m.utcDate.slice(0, 10) : "";
   const round = m.matchday ? "Journée " + m.matchday : "";
-  const home = m.homeTeam && m.homeTeam.name ? m.homeTeam.name : "?";
-  const away = m.awayTeam && m.awayTeam.name ? m.awayTeam.name : "?";
+  const home = m.homeTeam && (m.homeTeam.shortName || m.homeTeam.name) ? (m.homeTeam.shortName || m.homeTeam.name) : "?";
+  const away = m.awayTeam && (m.awayTeam.shortName || m.awayTeam.name) ? (m.awayTeam.shortName || m.awayTeam.name) : "?";
   const status = m.status || "";
   const hg = m.score && m.score.fullTime ? m.score.fullTime.home : null;
   const ag = m.score && m.score.fullTime ? m.score.fullTime.away : null;
