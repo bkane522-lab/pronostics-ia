@@ -66,11 +66,13 @@ function mapFixtureRow(m) {
   const round = m.matchday ? "Journée " + m.matchday : "";
   const home = m.homeTeam && (m.homeTeam.shortName || m.homeTeam.name) ? (m.homeTeam.shortName || m.homeTeam.name) : "?";
   const away = m.awayTeam && (m.awayTeam.shortName || m.awayTeam.name) ? (m.awayTeam.shortName || m.awayTeam.name) : "?";
+  const homeCrest = m.homeTeam && m.homeTeam.crest ? m.homeTeam.crest : "";
+  const awayCrest = m.awayTeam && m.awayTeam.crest ? m.awayTeam.crest : "";
   const status = m.status || "";
   const hg = m.score && m.score.fullTime ? m.score.fullTime.home : null;
   const ag = m.score && m.score.fullTime ? m.score.fullTime.away : null;
   const finished = status === "FINISHED";
-  return { date, round, home, away, status, hg, ag, finished };
+  return { date, round, home, away, homeCrest, awayCrest, status, hg, ag, finished };
 }
 
 async function getSeasonFixtures(leagueCode) {
@@ -106,7 +108,8 @@ async function getStandings(leagueCode) {
   return [{
     label: competitionName,
     teams: (totalTable.table || []).map(row => ({
-      team: row.team.name,
+      team: row.team.shortName || row.team.name,
+      crest: row.team.crest || "",
       played: row.playedGames,
       wins: row.won,
       draws: row.draw,
