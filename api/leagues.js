@@ -5,7 +5,7 @@ const LEAGUES = [
   { slug: "serie-a", label: "Serie A", live: true, code: "SA" },
   { slug: "bundesliga", label: "Bundesliga", live: true, code: "BL1" },
   { slug: "champions-league", label: "Ligue des Champions", live: true, code: "CL" },
-  { slug: "championship", label: "Championship (Angleterre)", live: true, code: "ELC" },
+  { slug: "championship", label: "Championship", live: true, code: "ELC" },
   { slug: "eredivisie", label: "Eredivisie", live: true, code: "DED" },
   { slug: "primeira-liga", label: "Primeira Liga", live: true, code: "PPL" },
   { slug: "brasileirao", label: "Brasileirão", live: true, code: "BSA" }
